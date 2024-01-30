@@ -1,1 +1,1 @@
-from docx_parser import DocxParser
+from .docx_parser import DocxParser
