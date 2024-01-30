@@ -4,15 +4,15 @@ import pathlib
 from tqdm import tqdm
 
 
-def get_local_dir(dir_name: str):
-    path = f"{get_parent_folder(__file__)}/{dir_name}"
+def get_local_dir(path: str, dir_name: str):
+    path = f"{get_dir(path)}/{dir_name}"
 
     if not os.path.exists(path):
         os.makedirs(path)
     return path
 
 
-def get_parent_folder(path: str):
+def get_dir(path: str):
     return pathlib.Path(path).parent.resolve()
 
 
