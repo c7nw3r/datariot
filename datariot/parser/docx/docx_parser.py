@@ -3,7 +3,7 @@ import io
 
 from datariot.__spi__.error import DataRiotImportException, DataRiotException
 from datariot.__spi__.type import ParsedDocument, Parser
-from datariot.util.io_util import get_filename
+from datariot.util.io_util import get_filename, get_files
 
 
 class DocxParser(Parser):
@@ -56,3 +56,7 @@ class DocxParser(Parser):
                 elements.append(docx_model.DocxTableBox(rows))
 
         return ParsedDocument(get_filename(path), elements)
+
+    @staticmethod
+    def parse_folder(path: str):
+        return [DocxParser().parse(e) for e in get_files(path, ".docx")]
