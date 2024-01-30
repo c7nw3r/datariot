@@ -1,4 +1,5 @@
 import logging
+from typing import Iterator
 
 from datariot.__spi__.error import DataRiotImportException, DataRiotException
 from datariot.__spi__.type import Parser, ParsedDocument
@@ -25,15 +26,9 @@ class PdfParser(Parser, PageMixin):
         return ParsedDocument(get_filename(path), bboxes)
 
     @staticmethod
-    def parse_folder(path: str):
-        parsed = []
-        parser = PdfParser()
-
+    def parse_folder(path: str) -> Iterator[ParsedDocument]:
         for file in get_files(path, ".pdf"):
             try:
-                parsed.append(parser.parse(file))
+                yield PdfParser().parse(file)
             except DataRiotException as ex:
                 logging.error(ex)
-                continue
-
-        return parsed
