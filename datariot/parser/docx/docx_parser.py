@@ -65,7 +65,7 @@ class DocxParser(Parser):
         for file in get_files(path, ".docx"):
             try:
                 parsed.append(parser.parse(file))
-            except ValueError:
+            except DataRiotException:
                 continue
 
         return parsed
