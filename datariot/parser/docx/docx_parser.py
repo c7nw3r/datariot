@@ -59,4 +59,13 @@ class DocxParser(Parser):
 
     @staticmethod
     def parse_folder(path: str):
-        return [DocxParser().parse(e) for e in get_files(path, ".docx")]
+        parsed = []
+        parser = DocxParser()
+
+        for file in get_files(path, ".docx"):
+            try:
+                parsed.append(parser.parse(file))
+            except ValueError:
+                continue
+
+        return parsed
