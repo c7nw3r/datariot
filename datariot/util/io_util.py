@@ -5,9 +5,7 @@ from tqdm import tqdm
 
 
 def get_local_dir(dir_name: str):
-    # FIXME
-    root = pathlib.Path(__file__).parent.parent.parent.resolve()
-    path = f"{root}/{dir_name}"
+    path = f"{get_parent_folder(__file__)}/{dir_name}"
 
     if not os.path.exists(path):
         os.makedirs(path)
