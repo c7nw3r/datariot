@@ -11,7 +11,7 @@ class PdfTextBox(TextBox):
     x2: float
     y2: float
     text: str
-    font_size: float
+    font_size: int
     font_name: str
 
     @property

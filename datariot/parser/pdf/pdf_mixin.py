@@ -15,7 +15,7 @@ class PageMixin:
 
         def to_bounding_box(row: dict) -> PdfTextBox:
             return PdfTextBox(x1=row["x0"], x2=row["x1"], y1=row["top"], y2=row["bottom"], text=row["text"],
-                              font_size=row["size"], font_name=row["fontname"])
+                              font_size=row["size"] or -1, font_name=row["fontname"] or "unknown")
 
         return [to_bounding_box(word) for word in words]
 
