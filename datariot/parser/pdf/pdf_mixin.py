@@ -13,11 +13,7 @@ class PageMixin:
         if len(words) == 0:
             return []
 
-        def to_bounding_box(row: dict) -> PdfTextBox:
-            return PdfTextBox(x1=row["x0"], x2=row["x1"], y1=row["top"], y2=row["bottom"], text=row["text"],
-                              font_size=row["size"] or -1, font_name=row["fontname"] or "unknown")
-
-        return [to_bounding_box(word) for word in words]
+        return [PdfTextBox(word) for word in words]
 
     def take_screenshot(self, page: Page, bboxes: List[PdfTextBox]):
         image = page.to_image()
