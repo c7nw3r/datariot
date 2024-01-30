@@ -1,5 +1,6 @@
 import csv
 import io
+import logging
 
 from datariot.__spi__.error import DataRiotImportException, DataRiotException
 from datariot.__spi__.type import ParsedDocument, Parser
@@ -65,7 +66,8 @@ class DocxParser(Parser):
         for file in get_files(path, ".docx"):
             try:
                 parsed.append(parser.parse(file))
-            except DataRiotException:
+            except DataRiotException as ex:
+                logging.error(ex)
                 continue
 
         return parsed

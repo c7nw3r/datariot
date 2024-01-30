@@ -1,4 +1,6 @@
-from datariot.__spi__.error import DataRiotImportException
+import logging
+
+from datariot.__spi__.error import DataRiotImportException, DataRiotException
 from datariot.__spi__.type import Parser, ParsedDocument
 from datariot.parser.pdf.pdf_mixin import PageMixin
 from datariot.util.io_util import get_filename, get_files
@@ -30,7 +32,8 @@ class PdfParser(Parser, PageMixin):
         for file in get_files(path, ".pdf"):
             try:
                 parsed.append(parser.parse(file))
-            except PdfParser:
+            except DataRiotException as ex:
+                logging.error(ex)
                 continue
 
         return parsed
