@@ -11,8 +11,8 @@ class PdfTextBox(TextBox):
     x2: float
     y2: float
     text: str
-    font_size: Optional[float]
-    font_name: Optional[str]
+    font_size: float
+    font_name: str
 
     @property
     def font_weight(self) -> Optional[FontWeight]:
