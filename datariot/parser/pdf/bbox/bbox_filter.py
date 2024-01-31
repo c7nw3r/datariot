@@ -38,9 +38,12 @@ class PDFOutlinesBoundingBoxFilter:
         titles = [e for _, e, _, _, _ in self.outlines]
 
         def _filter(box: PdfTextBox):
-            for title in titles:
-                if title in box.text and ".........." in box.text:
-                    return False
+            # FIXME
+            if box.text.lower() == "inhaltsverzeichnis":
+                return False
+
+            if box.text[0].isdigit() and "....." in box.text:
+                return False
             return True
 
         return list(filter(_filter, bboxes))
