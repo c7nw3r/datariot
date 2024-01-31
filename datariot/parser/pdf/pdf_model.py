@@ -2,12 +2,12 @@ from typing import Optional
 
 from pdfplumber.page import Page
 
-from datariot.__spi__.type import TextBox, FontWeight, ImageBox
+from datariot.__spi__.type import FontWeight, Box
 
 DEFAULT_IMAGE_RESOLUTION = 72
 IMAGE_RESOLUTION = 400
 
-class PdfTextBox(TextBox):
+class PdfTextBox(Box):
 
     def __init__(self, x1: int, y1: int, x2: int, y2: int, text: str, size: int, font_name: str):
         self.x1 = x1
@@ -55,7 +55,7 @@ class PdfTextBox(TextBox):
         return self.text
 
 
-class PDFOcrBox(TextBox):
+class PDFOcrBox(Box):
 
     def __init__(self, x1: int, y1: int, x2: int, y2: int, text: str):
         self.x1 = x1
@@ -96,7 +96,7 @@ class PDFOcrBox(TextBox):
         return self.text
 
 
-class PDFImageBox(ImageBox):
+class PDFImageBox(Box):
 
     def __init__(self, page: Page, data: dict):
         self.x1 = int(data["x0"])

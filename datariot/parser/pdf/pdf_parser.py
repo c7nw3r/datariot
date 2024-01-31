@@ -3,9 +3,9 @@ from dataclasses import dataclass
 from typing import Iterator
 
 from datariot.__spi__.error import DataRiotImportException, DataRiotException
-from datariot.__spi__.type import Parser, ParsedDocument
+from datariot.__spi__.type import Parser, Parsed
 from datariot.parser.pdf.pdf_mixin import PageMixin
-from datariot.util.io_util import get_filename, get_files
+from datariot.util.io_util import get_files
 
 
 @dataclass
@@ -43,10 +43,10 @@ class PdfParser(Parser, PageMixin):
         if len(bboxes) == 0 and self.config.ocr:
             pass
 
-        return ParsedDocument(path, get_filename(path), bboxes)
+        return Parsed(path, bboxes)
 
     @staticmethod
-    def parse_folder(path: str, config: Config = Config()) -> Iterator[ParsedDocument]:
+    def parse_folder(path: str, config: Config = Config()) -> Iterator[Parsed]:
         for file in get_files(path, ".pdf"):
             try:
                 yield PdfParser(config).parse(file)

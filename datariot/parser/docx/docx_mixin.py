@@ -1,28 +1,78 @@
-from typing import List
+import base64
+import csv
+import io
+import xml.etree.ElementTree as ET
+from xml.etree import ElementTree
 
-from docx.text.run import Run
+from docx.document import Document as DocxDocument
+from docx.oxml.table import CT_Tbl
+from docx.oxml.text.paragraph import CT_P
+from docx.section import _Header
+from docx.table import _Cell, Table
+from docx.text.paragraph import Paragraph, Run
+
+from datariot.__spi__.error import DataRiotException
+from datariot.parser.docx.docx_model import DocxTextBox, DocxTableBox, DocxImageBox
+from datariot.util.image_util import from_base64
 
 
-class DocxStyleMixin:
-    def get_max_font_size(self, runs: List[Run]) -> int:
-        max_size = -1
-        for run in runs:
-            font_size = int(run.font.size.pt) if run.font.size is not None else -1
-            if font_size > max_size:
-                max_size = run.font.size.pt
+class DocxDocumentMixin:
 
-            if max_size == -1:
-                array = run.element.xpath("./w:rPr/w:szCs/@w:val")
-                if len(array) > 0:
-                    max_size = int(array[0]) / 2
+    def iter_block_items(self, parent):
+        if isinstance(parent, DocxDocument):
+            parent_elm = parent.element.body
+        elif isinstance(parent, _Cell):
+            parent_elm = parent._tc
+        elif isinstance(parent, _Header):
+            for e in parent.iter_inner_content():
+                yield e
+            return
+        else:
+            raise DataRiotException("error while parsing docx block")
 
-        return max_size
+        for child in parent_elm.iterchildren():
+            if isinstance(child, CT_P):
+                yield Paragraph(child, parent)
+            elif isinstance(child, CT_Tbl):
+                yield Table(child, parent)
 
-    def get_default_font_size(self, doc):
-        try:
-            styles_element = doc.styles.element
+    def parse_elements(self, document, root):
+        elements = []
+        for block in self.iter_block_items(root):
+            if isinstance(block, Paragraph):
+                if len(block.text.strip()) > 0:
+                    elements.append(DocxTextBox(block))
+                    for run in block.runs:
+                        elements.extend(self.parse_images(document, run))
 
-            r_pr_default = styles_element.xpath('w:docDefaults/w:rPrDefault/w:rPr/w:sz')[0]
-            return r_pr_default.val.pt
-        except:
-            return -1
+            elif isinstance(block, Table):
+                vf = io.StringIO()
+                writer = csv.writer(vf)
+                for row in block.rows:
+                    writer.writerow(cell.text for cell in row.cells)
+                vf.seek(0)
+
+                rows = list(csv.reader(vf, delimiter=','))
+                elements.append(DocxTableBox(rows))
+
+        return elements
+
+    def parse_images(self, document, run: Run):
+        xmlstr = str(run.element.xml)
+        my_namespaces = dict([node for _, node in ElementTree.iterparse(io.StringIO(xmlstr), events=['start-ns'])])
+        root = ET.fromstring(xmlstr)
+        if 'pic:pic' in xmlstr:
+            for pic in root.findall('.//pic:pic', my_namespaces):
+                cNvPr_elem = pic.find("pic:nvPicPr/pic:cNvPr", my_namespaces)
+                name_attr = cNvPr_elem.get("name")
+                blip_elem = pic.find("pic:blipFill/a:blip", my_namespaces)
+                embed_attr = blip_elem.get("{http://schemas.openxmlformats.org/officeDocument/2006/relationships}embed")
+                document_part = document.part
+                image_part = document_part.related_parts[embed_attr]
+                image_base64 = base64.b64encode(image_part._blob)
+                image_base64 = image_base64.decode()
+                image = from_base64(image_base64)
+
+                return [DocxImageBox(name_attr, image)]
+
+        return []

@@ -1,4 +1,6 @@
-from datariot.__spi__ import Formatter, TextBox
+from datariot.__spi__ import Formatter
+from datariot.__spi__.type import Box
+from datariot.parser.docx.docx_model import DocxTextBox
 
 
 class HeuristicDocxFormatter(Formatter):
@@ -6,24 +8,25 @@ class HeuristicDocxFormatter(Formatter):
     def __init__(self, document):
         self.document = document
 
-    def format_text(self, text: TextBox) -> str:
-        if text.style_name == "Title":
-            return f"# {text.text}"
+    def __call__(self, box: Box) -> str:
+        if isinstance(box, DocxTextBox):
+            if box.style_name == "Title":
+                return f"# {box.text}"
 
-        if text.style_name == "Heading 1":
-            return f"## {text.text}"
-        if text.style_name == "Heading 2":
-            return f"### {text.text}"
-        if text.style_name == "Heading 3":
-            return f"### {text.text}"
-        if text.style_name == "List Paragraph":
-            return f" * {text.text}"
+            if box.style_name == "Heading 1":
+                return f"## {box.text}"
+            if box.style_name == "Heading 2":
+                return f"### {box.text}"
+            if box.style_name == "Heading 3":
+                return f"### {box.text}"
+            if box.style_name == "List Paragraph":
+                return f" * {box.text}"
 
-        if text.style_name == "Title":
-            return f"# {text.text}"
+            # FIXME
+            if box.font_size == 16:
+                if box.text[0].isdigit():
+                    return f"## {box.text}"
+                return f"# {box.text}"
+            return box.text
 
-        if text.font_size == 16:
-            if text.text[0].isdigit():
-                return f"## {text.text}"
-            return f"# {text.text}"
-        return text.text
+        return box.render(self)

@@ -1,16 +1,15 @@
 from dataclasses import dataclass
-from typing import List, Union
+from typing import List
 
-from docx.text.paragraph import Paragraph
+from docx.text.paragraph import Paragraph, Run
 
-from datariot.__spi__.type import TextBox, Formatter, TableBox
-from datariot.parser.docx.docx_mixin import DocxStyleMixin
+from datariot.__spi__.type import Formatter, Box
 
 
 @dataclass
-class DocxTextBox(TextBox, DocxStyleMixin):
+class DocxTextBox(Box):
     """
-    TextBox implementation for the docx document type.
+    Box implementation for the plain text docx elements.
     """
 
     def __init__(self, paragraph: Paragraph):
@@ -37,17 +36,37 @@ class DocxTextBox(TextBox, DocxStyleMixin):
             return self.style.font.size.pt
         return self.get_default_font_size(self.p.__doc__)
 
+    def get_max_font_size(self, runs: List[Run]) -> int:
+        max_size = -1
+        for run in runs:
+            font_size = int(run.font.size.pt) if run.font.size is not None else -1
+            if font_size > max_size:
+                max_size = run.font.size.pt
+
+            if max_size == -1:
+                array = run.element.xpath("./w:rPr/w:szCs/@w:val")
+                if len(array) > 0:
+                    max_size = int(array[0]) / 2
+
+        return max_size
+
+    def get_default_font_size(self, doc):
+        try:
+            return doc.styles.element.xpath('w:docDefaults/w:rPrDefault/w:rPr/w:sz')[0].val.pt
+        except:
+            return -1
+
     def __repr__(self):
         return self.text
 
 
-@dataclass
-class DocxTableBox(TableBox):
+class DocxTableBox(Box):
     """
-    TableBox implementation for the docx document type.
+    Box implementation for the table docx elements.
     """
 
-    rows: list
+    def __init__(self, rows: list):
+        self.rows = rows
 
     def render(self, evaluator: Formatter):
         lenghts = []
@@ -63,3 +82,16 @@ class DocxTableBox(TableBox):
             buffer.append(" | ".join([e.replace("\n", " ").strip() for e in row]))
 
         return "\n" + "\n".join(buffer) + "\n"
+
+
+class DocxImageBox(Box):
+    """
+    Box implementation for the image docx elements.
+    """
+
+    def __init__(self, name: str, image):
+        self.name = name
+        self.image = image
+
+    def render(self, formatter: Formatter):
+        return f"[image:{self.name}]"
