@@ -105,8 +105,10 @@ class PDFImageBox(ImageBox):
         self.y2 = int(data["bottom"])
         self.page_number = page.page_number
 
-        self.data = page.crop((self.x1, int(page.height - self.y2), self.x2, int(page.height - self.y1))) \
-            .to_image(resolution=IMAGE_RESOLUTION)
+        self.data = page.crop((self.x1,
+                               max(0, int(page.height - self.y2)),
+                               self.x2,
+                               max(0, int(page.height - self.y1)))).to_image(resolution=IMAGE_RESOLUTION)
 
     @property
     def width(self):
