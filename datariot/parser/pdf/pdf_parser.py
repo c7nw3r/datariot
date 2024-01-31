@@ -28,7 +28,7 @@ class PdfParser(Parser, PageMixin):
                 # TODO: reuse bboxes
                 self.take_screenshot(page, self.get_text_boxes(reader.doc, page))
 
-        return ParsedDocument(get_dir(path), get_filename(path), bboxes)
+        return ParsedDocument(path, get_filename(path), bboxes)
 
     @staticmethod
     def parse_folder(path: str) -> Iterator[ParsedDocument]:

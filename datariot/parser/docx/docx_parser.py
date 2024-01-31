@@ -57,7 +57,7 @@ class DocxParser(Parser):
                 rows = list(csv.reader(vf, delimiter=','))
                 elements.append(docx_model.DocxTableBox(rows))
 
-        return ParsedDocument(get_dir(path), get_filename(path), elements)
+        return ParsedDocument(path, get_filename(path), elements)
 
     @staticmethod
     def parse_folder(path: str) -> Iterator[ParsedDocument]:

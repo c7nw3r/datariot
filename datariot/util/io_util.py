@@ -13,7 +13,7 @@ def get_local_dir(path: str, dir_name: str):
 
 
 def get_dir(path: str):
-    return pathlib.Path(path).parent.resolve()
+    return str(pathlib.Path(path).parent.resolve())
 
 
 def get_files(path: str, ext: str):
