@@ -7,6 +7,7 @@ from datariot.parser.pdf.pdf_model import PdfTextBox
 
 class CoordinatesBoundingBoxMerger:
 
+    # TODO: take PDF document outlines into account
     def __init__(self, x_tolerance: int = 10, y_tolerance: int = 10):
         self.x_tolerance = x_tolerance
         self.y_tolerance = y_tolerance

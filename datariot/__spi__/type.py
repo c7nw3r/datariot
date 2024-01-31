@@ -40,6 +40,7 @@ class TableBox(Box):
 
 @dataclass
 class ParsedDocument:
+    path: str
     name: str
     bboxes: List[Box]
 
