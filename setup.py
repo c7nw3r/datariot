@@ -39,7 +39,7 @@ setup(
         'pdf': [
             "pdfplumber==0.10.3"
         ],
-        'orc': [
+        'ocr': [
             "pytesseract==0.3.10"
         ]
     }
