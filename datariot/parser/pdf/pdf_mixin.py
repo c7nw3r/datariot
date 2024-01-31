@@ -4,6 +4,7 @@ from pdfplumber.page import Page
 
 from datariot.parser.pdf.bbox.bbox_filter import CoordinatesBoundingBoxFilter
 from datariot.parser.pdf.bbox.bbox_merger import CoordinatesBoundingBoxMerger
+from datariot.parser.pdf.bbox.bbox_sorter import CoordinatesBoundingBoxSorter
 from datariot.parser.pdf.pdf_model import PdfTextBox
 
 
@@ -12,11 +13,13 @@ class PageMixin:
     def get_text_boxes(self, page: Page) -> List[PdfTextBox]:
         bbox_merger = CoordinatesBoundingBoxMerger()
         bbox_filter = CoordinatesBoundingBoxFilter(50, 710)
+        bbox_sorter = CoordinatesBoundingBoxSorter()
 
         bboxes = page.extract_words(extra_attrs=["fontname", "size"])
         bboxes = [PdfTextBox(word) for word in bboxes]
         bboxes = bbox_merger(page, bboxes)
         bboxes = bbox_filter(page, bboxes)
+        bboxes = bbox_sorter(page, bboxes)
 
         return bboxes
 
