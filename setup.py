@@ -34,10 +34,13 @@ setup(
     ],
     extras_require={
         'docx': [
-            "python-docx"
+            "python-docx==1.1.0"
         ],
         'pdf': [
-            "pdfplumber"
+            "pdfplumber==0.10.3"
+        ],
+        'orc': [
+            "pytesseract==0.3.10"
         ]
     }
 )

@@ -1,44 +1,123 @@
 from typing import Optional
 
-from datariot.__spi__.type import TextBox, FontWeight
+from pdfplumber.page import Page
 
+from datariot.__spi__.type import TextBox, FontWeight, ImageBox
+
+DEFAULT_IMAGE_RESOLUTION = 72
+IMAGE_RESOLUTION = 400
 
 class PdfTextBox(TextBox):
 
-    def __init__(self, data: dict):
-        self.x1 = data["x0"]
-        self.y1 = data["top"]
-        self.x2 = data["x1"]
-        self.y2 = data["bottom"]
-        self.font_name = data["fontname"]
-        self.data = data
+    def __init__(self, x1: int, y1: int, x2: int, y2: int, text: str, size: int, font_name: str):
+        self.x1 = x1
+        self.y1 = y1
+        self.x2 = x2
+        self.y2 = y2
+        self._text = text
+        self._size = size
+        self._font_name = font_name
+
+    @staticmethod
+    def from_dict(data: dict):
+        x1 = data["x0"]
+        y1 = data["top"]
+        x2 = data["x1"]
+        y2 = data["bottom"]
+        text = data["text"]
+        font_name = data["fontname"]
+        font_size = data["size"]
+        return PdfTextBox(x1, y1, x2, y2, text, font_size, font_name)
+
+    def with_text(self, text: str):
+        return PdfTextBox(self.x1, self.y1, self.x2, self.y2, text, self._size, self._font_name)
 
     @property
     def text(self) -> str:
-        return self.data["text"]
+        return self._text
 
     @property
     def font_size(self) -> int:
-        return self.data["size"]
+        return self._size
 
     @property
     def font_weight(self) -> Optional[FontWeight]:
-        if self.font_name is None:
+        if self._font_name is None:
             return None
-        if "bold" in self.font_name.lower():
+        if "bold" in self._font_name.lower():
             return "bold"
         return "regular"
 
     def copy(self):
-        return PdfTextBox({
-            "x0": self.x1,
-            "x1": self.x2,
-            "top": self.y1,
-            "bottom": self.y2,
-            "text": self.text,
-            "size": self.font_size,
-            "fontname": self.font_name
-        })
+        return PdfTextBox(self.x1, self.y1, self.x2, self.y2, self.text, self.font_size, self._font_name)
 
     def __repr__(self):
         return self.text
+
+
+class PDFOcrBox(TextBox):
+
+    def __init__(self, x1: int, y1: int, x2: int, y2: int, text: str):
+        self.x1 = x1
+        self.y1 = y1
+        self.x2 = x2
+        self.y2 = y2
+        self._text = text
+
+    @staticmethod
+    def from_ocr(data):
+        ratio = IMAGE_RESOLUTION / DEFAULT_IMAGE_RESOLUTION
+
+        x1 = int(data[0] / ratio)
+        y1 = int(data[1] / ratio)
+        x2 = int((data[0] + data[2]) / ratio)
+        y2 = int((data[1] + data[3]) / ratio)
+        return PDFOcrBox(x1, y1, x2, y2, data[4])
+
+    def with_text(self, text: str):
+        return PDFOcrBox(self.x1, self.y1, self.x2, self.y2, text)
+
+    @property
+    def text(self) -> str:
+        return self._text
+
+    @property
+    def font_size(self) -> int:
+        return -1
+
+    @property
+    def font_weight(self) -> Optional[FontWeight]:
+        return "regular"
+
+    def copy(self):
+        return PDFOcrBox(self.x1, self.y1, self.x2, self.y2, self.text)
+
+    def __repr__(self):
+        return self.text
+
+
+class PDFImageBox(ImageBox):
+
+    def __init__(self, page: Page, data: dict):
+        self.x1 = int(data["x0"])
+        self.y1 = int(data["top"])
+        self.x2 = int(data["x1"])
+        self.y2 = int(data["bottom"])
+        self.page_number = page.page_number
+
+        self.data = page.crop((self.x1, int(page.height - self.y2), self.x2, int(page.height - self.y1))) \
+            .to_image(resolution=IMAGE_RESOLUTION)
+
+    @property
+    def width(self):
+        return self.x2 - self.x1
+
+    @property
+    def height(self):
+        return self.y2 - self.y1
+
+    def save(self):
+        return self.data.save(f"./image_{self.page_number}_{self.x1}_{self.y1}_{self.x2}_{self.y2}.png")
+
+    def __repr__(self):
+        return f"x1:{self.x1}, y1:{self.y1}, x2:{self.x2}, y2:{self.y2}"

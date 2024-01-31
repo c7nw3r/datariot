@@ -5,7 +5,7 @@ from typing import Iterator
 
 from datariot.__spi__.error import DataRiotImportException, DataRiotException
 from datariot.__spi__.type import ParsedDocument, Parser
-from datariot.util.io_util import get_filename, get_files, get_dir
+from datariot.util.io_util import get_filename, get_files
 
 
 class DocxParser(Parser):
@@ -65,4 +65,4 @@ class DocxParser(Parser):
             try:
                 yield DocxParser().parse(file)
             except DataRiotException as ex:
-                logging.error(ex)
+                logging.warning(ex)

@@ -9,8 +9,16 @@ class Formatter(ABC):
     def format_text(self, text: 'TextBox'):
         pass
 
+    @abstractmethod
+    def format_image(self, image: 'ImageBox'):
+        pass
+
 
 class Box(ABC):
+    x1: int
+    x2: int
+    y1: int
+    y2: int
 
     @abstractmethod
     def render(self, formatter: Formatter):
@@ -33,15 +41,19 @@ class TextBox(Box):
         return formatter.format_text(self)
 
 
-
 class TableBox(Box):
     pass
+
+
+class ImageBox(Box):
+    def render(self, formatter: Formatter):
+        return formatter.format_image(self)
 
 
 @dataclass
 class ParsedDocument:
     path: str
-    name: str
+    name: str  # TODO: remove
     bboxes: List[Box]
 
     def render(self, evaluator):
@@ -53,5 +65,6 @@ class Parser(ABC):
     @abstractmethod
     def parse(self, path: str):
         pass
+
 
 FontWeight = Literal["regular", "bold"]

@@ -3,8 +3,9 @@ from typing import List
 from pdfminer.pdfdocument import PDFDocument, PDFNoOutlines
 from pdfplumber.page import Page
 
+from datariot.__spi__.type import Box
 from datariot.parser.pdf.pdf_model import PdfTextBox
-import pdfplumber
+
 
 class CoordinatesBoundingBoxFilter:
     def __init__(self, min_y: float, max_y: float):
@@ -35,15 +36,51 @@ class PDFOutlinesBoundingBoxFilter:
             self.outlines = []
 
     def __call__(self, page: Page, bboxes: List[PdfTextBox]) -> List[PdfTextBox]:
-        titles = [e for _, e, _, _, _ in self.outlines]
-
         def _filter(box: PdfTextBox):
-            # FIXME
-            if box.text.lower() == "inhaltsverzeichnis":
-                return False
+            # if box.text.lower() == "inhaltsverzeichnis":
+            #     return False
 
             if box.text[0].isdigit() and "....." in box.text:
                 return False
             return True
 
         return list(filter(_filter, bboxes))
+
+from typing import List, TypeVar
+T = TypeVar('T')
+
+class BoxOverlapsBoundingBoxFilter:
+
+    def __call__(self, page: Page, bboxes: List[T]) -> List[T]:
+        if len(bboxes) == 0:
+            return []
+
+        def by_size(_box: Box):
+            w = _box.x2 - _box.x1
+            h = _box.y2 - _box.y1
+            return w * h
+
+        bboxes = list(reversed(sorted(bboxes, key=by_size)))
+        result = []
+
+        for i in range(len(bboxes)):
+            box1 = bboxes[i]
+            exclude = False
+            for j in range(len(bboxes)):
+                if i == j:
+                    continue
+
+                box2 = bboxes[j]
+
+                expr1 = box2.x1 <= box1.x1
+                expr2 = box2.y1 <= box1.y1
+                expr3 = box2.x2 >= box1.x2
+                expr4 = box2.y2 >= box1.y2
+
+                if all([expr1, expr2, expr3, expr4]):
+                    exclude = True
+
+            if not exclude:
+                result.append(box1)
+
+        return result
