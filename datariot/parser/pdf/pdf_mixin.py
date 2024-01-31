@@ -43,6 +43,8 @@ class PageMixin:
         box_filter = BoxOverlapsBoundingBoxFilter()
 
         boxes = page.images
+        boxes = [e for e in boxes if abs(int(e["x0"]) - int("x1")) > 0]
+        boxes = [e for e in boxes if abs(int(e["top"]) - int("bottom")) > 0]
         boxes = [PDFImageBox(page, e) for e in boxes]
         boxes = [box for box in boxes if box.width >= 300]
         boxes = [box for box in boxes if box.height >= 300]
