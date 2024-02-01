@@ -6,6 +6,7 @@ from PIL.Image import Image
 
 from datariot.util import write_file
 from datariot.util.io_util import without_ext, save_image
+from datariot.util.text_util import create_uuid_from_string
 
 
 class Formatter(ABC):
@@ -68,7 +69,8 @@ class Parsed:
 
         for box in self.bboxes:
             if isinstance(box, MediaAware):
-                name, file = box.get_file()
+                _, file = box.get_file()
+                name = create_uuid_from_string(box.to_hash())
                 save_image(f"{without_ext(path)}/{name}.webp", file, image_quality)
 
 

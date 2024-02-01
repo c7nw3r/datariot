@@ -45,8 +45,8 @@ def get_filename(path: str):
 
 
 def save_image(path: str, image: Image, image_quality: int = 10):
-    if not os.path.exists(path):
-        os.makedirs(path)
+    # if not os.path.exists(path):
+    #     os.makedirs(path)
 
     try:
         image.save(path, 'webp', optimize=True, quality=image_quality)
