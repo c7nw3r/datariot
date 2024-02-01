@@ -116,4 +116,4 @@ class PDFTableBox(Box):
         return "\n".join([to_col(row) for row in self.rows])
 
     def render(self, formatter: Formatter):
-        self.__repr__()
+        return self.__repr__()
