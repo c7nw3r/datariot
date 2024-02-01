@@ -3,17 +3,20 @@ from typing import Iterator
 
 from datariot.__spi__.error import DataRiotImportException, DataRiotException
 from datariot.__spi__.type import Parsed, Parser
-from datariot.parser.docx.docx_mixin import DocxDocumentMixin
+from datariot.parser.docx.docx_mixin import DocumentMixin
 from datariot.util.io_util import get_files
 
 
-class DocxParser(Parser, DocxDocumentMixin):
+class DocxParser(Parser, DocumentMixin):
 
-    def parse(self, path: str):
+    def __init__(self):
         try:
             from docx import Document
         except ImportError:
             raise DataRiotImportException("docx")
+
+    def parse(self, path: str):
+        from docx import Document
 
         try:
             document = Document(path)

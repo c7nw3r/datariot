@@ -17,7 +17,7 @@ from datariot.parser.docx.docx_model import DocxTextBox, DocxTableBox, DocxImage
 from datariot.util.image_util import from_base64
 
 
-class DocxDocumentMixin:
+class DocumentMixin:
 
     def iter_block_items(self, parent):
         if isinstance(parent, DocxDocument):

@@ -3,7 +3,6 @@ from typing import Optional, Tuple, List
 from pdfplumber.page import Page
 from pdfplumber.table import Table
 
-from datariot.__spi__ import Formatter
 from datariot.__spi__.type import FontWeight, Box
 
 DEFAULT_IMAGE_RESOLUTION = 72
@@ -99,9 +98,6 @@ class PDFImageBox(Box):
     def __repr__(self):
         return f"x1:{self.x1}, y1:{self.y1}, x2:{self.x2}, y2:{self.y2}"
 
-    def render(self, formatter: Formatter):
-        return f"[image]"
-
 
 class PDFTableBox(Box):
 
@@ -115,5 +111,5 @@ class PDFTableBox(Box):
 
         return "\n".join([to_col(row) for row in self.rows])
 
-    def render(self, formatter: Formatter):
-        return self.__repr__()
+    #def render(self, formatter: Formatter):
+    #    return self.__repr__()

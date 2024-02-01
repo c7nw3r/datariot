@@ -28,10 +28,10 @@ class Parsed:
     path: str
     bboxes: List[Box]
 
-    def render(self, evaluator, delimiter: str = "\n"):
+    def render(self, evaluator, delimiter: str = "\n\n"):
         return delimiter.join([e.render(evaluator) for e in self.bboxes])
 
-    def save(self, path: str, formatter: Formatter, delimiter: str = "\n"):
+    def save(self, path: str, formatter: Formatter, delimiter: str = "\n\n"):
         write_file(path, self.render(formatter, delimiter))
 
 

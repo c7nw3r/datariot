@@ -1,6 +1,8 @@
+from typing import List
+
 from datariot.__spi__ import Formatter, Parsed
 from datariot.__spi__.type import Box
-from datariot.parser.pdf import PDFTextBox
+from datariot.parser.pdf import PDFTextBox, PDFTableBox, PDFImageBox
 
 
 class HeuristicPDFFormatter(Formatter):
@@ -21,6 +23,10 @@ class HeuristicPDFFormatter(Formatter):
     def __call__(self, box: Box) -> str:
         if isinstance(box, PDFTextBox):
             return self._format_text(box)
+        if isinstance(box, PDFTableBox):
+            return self._format_table(box)
+        if isinstance(box, PDFImageBox):
+            return self._format_image(box)
 
         return box.render(self)
 
@@ -30,3 +36,24 @@ class HeuristicPDFFormatter(Formatter):
             return ("#" * (order + 1)) + " " + box.text
 
         return box.text
+
+    def _format_table(self, box: PDFTableBox):
+        if len(box.rows) <= 5:
+            return box.__repr__()
+
+        # convert the rows to json lines
+        header = [e for e in box.rows[0] if e is not None and len(e) > 0]
+
+        def to_dict(row: List[str]):
+            row = [e for e in row if e is not None and len(e) > 0]
+            return {header[i]: self._format_table_cell(e) for i, e in enumerate(row)}
+
+        import json
+        rows = [to_dict(e) for e in box.rows[1:]]
+        return "\n".join([json.dumps(e) for e in rows])
+
+    def _format_table_cell(self, text: str):
+        return text
+
+    def _format_image(self, box: PDFImageBox):
+        return "[image]"

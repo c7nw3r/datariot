@@ -19,16 +19,17 @@ class PDFParser(Parser, PageMixin):
     def __init__(self, config: Config = Config()):
         self.config = config
         try:
+            import pdfplumber
+        except ImportError:
+            raise DataRiotImportException("pdf")
+        try:
             if config.ocr:
                 import pytesseract
         except ImportError:
             raise DataRiotImportException("ocr")
 
     def parse(self, path: str):
-        try:
-            import pdfplumber
-        except ImportError:
-            raise DataRiotImportException("pdf")
+        import pdfplumber
 
         bboxes = []
         reader = pdfplumber.open(path)
@@ -39,9 +40,6 @@ class PDFParser(Parser, PageMixin):
 
             if self.config.screenshot:
                 self.take_screenshot(page, boxes)
-
-        if len(bboxes) == 0 and self.config.ocr:
-            pass
 
         return Parsed(path, bboxes)
 
