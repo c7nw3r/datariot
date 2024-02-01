@@ -49,8 +49,11 @@ class HeuristicDocxFormatter(Formatter):
         return box.text
 
     def _format_image(self, image: DocxImageBox):
-        name = create_uuid_from_string(image.to_hash())
-        return f"![Abbildung]({name})"
+        try:
+            name = create_uuid_from_string(image.to_hash())
+            return f"![Abbildung]({name})"
+        except OSError:
+            return ""
 
     def _format_table(self, box: DocxTableBox):
         return box.__repr__()

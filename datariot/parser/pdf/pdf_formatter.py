@@ -62,5 +62,8 @@ class HeuristicPDFFormatter(Formatter):
         return text
 
     def _format_image(self, box: PDFImageBox):
-        name = create_uuid_from_string(box.to_hash())
-        return f"![Abbildung]({name})"
+        try:
+            name = create_uuid_from_string(box.to_hash())
+            return f"![Abbildung]({name})"
+        except OSError:
+            return ""
