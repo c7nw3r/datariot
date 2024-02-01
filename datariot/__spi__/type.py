@@ -45,13 +45,13 @@ class Parsed:
     def render(self, evaluator, delimiter: str = "\n\n"):
         return delimiter.join([e.render(evaluator) for e in self.bboxes])
 
-    def save(self, path: str, formatter: Formatter, delimiter: str = "\n\n"):
+    def save(self, path: str, formatter: Formatter, delimiter: str = "\n\n", image_quality: int = 10):
         write_file(path, self.render(formatter, delimiter))
 
         for box in self.bboxes:
             if isinstance(box, MediaAware):
                 name, file = box.get_file()
-                write_file(f"{get_dir(path)}/{name}.{file.type}", file)
+                file.save(f"{get_dir(path)}/{name}.webp", 'webp', optimize=True, quality=image_quality)
 
 
 class Parser(ABC):
