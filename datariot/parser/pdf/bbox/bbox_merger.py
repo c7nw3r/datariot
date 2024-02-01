@@ -18,7 +18,7 @@ class CoordinatesBoundingBoxMerger:
         results = []
         prev_bbox = bboxes[0].copy()
         for bbox in bboxes[1:]:
-            is_same_line = abs(prev_bbox.y2 - bbox.y2) < 3
+            is_same_line = abs(prev_bbox.y2 - bbox.y2) <= 3
 
             expr1 = is_same_line and prev_bbox.x2 < bbox.x1 and (prev_bbox.x2 - bbox.x1) < self.x_tolerance
             expr2 = (bbox.y1 - prev_bbox.y2) < self.y_tolerance

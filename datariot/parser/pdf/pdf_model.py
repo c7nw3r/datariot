@@ -57,17 +57,18 @@ class PDFTextBox(Box):
 class PDFOcrBox(PDFTextBox):
 
     def __init__(self, x1: int, y1: int, x2: int, y2: int, text: str):
-        super().__init__(x1, x2, y1, y2, text, -1, "regular")
+        super().__init__(x1, y1, x2, y2, text, -1, "regular")
 
     @staticmethod
     def from_ocr(data):
         ratio = IMAGE_RESOLUTION / DEFAULT_IMAGE_RESOLUTION
+        left, top, width, height, text = data
 
-        x1 = int(data[0] / ratio)
-        y1 = int(data[1] / ratio)
-        x2 = int((data[0] + data[2]) / ratio)
-        y2 = int((data[1] + data[3]) / ratio)
-        return PDFOcrBox(x1, y1, x2, y2, data[4])
+        x1 = int(left / ratio)
+        y1 = int(top / ratio)
+        x2 = int((left + width) / ratio)
+        y2 = int((top + height) / ratio)
+        return PDFOcrBox(x1, y1, x2, y2, text)
 
     def with_text(self, text: str):
         return PDFOcrBox(self.x1, self.y1, self.x2, self.y2, text)

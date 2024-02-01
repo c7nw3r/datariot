@@ -1,3 +1,4 @@
+import logging
 from typing import List
 
 from pdfminer.pdfdocument import PDFDocument
@@ -68,26 +69,29 @@ class PageMixin:
         import pytesseract
         box_merger = CoordinatesBoundingBoxMerger()
         box_filter = CoordinatesBoundingBoxFilter(50, 710)
-        box_sorter = CoordinatesBoundingBoxSorter()
+        box_sorter = CoordinatesBoundingBoxSorter(fuzzy=True)
         toc_filter = PDFOutlinesBoundingBoxFilter(document)
 
         # TODO: fix language
         dicts = pytesseract.image_to_data(box.data.original, output_type=pytesseract.Output.DICT, lang="deu")
         boxes = [PDFOcrBox.from_ocr(e) for e in zip(dicts[LEFT], dicts[TOP], dicts[WIDTH], dicts[HEIGHT], dicts[TEXT])]
         boxes = [e for e in boxes if len(e.text) > 0]
+        boxes = box_sorter(page, boxes)
         boxes = box_merger(page, boxes)
         boxes = toc_filter(page, boxes)
         boxes = box_filter(page, boxes)
-        boxes = box_sorter(page, boxes)
 
         return boxes
 
     def take_screenshot(self, page: Page, bboxes: List[PDFTextBox]):
-        image = page.to_image()
-        for bbox in bboxes:
-            color = (100, 100, 100)
-            image.draw_rect((bbox.x1, bbox.y1, bbox.x2, bbox.y2), fill=color + (50,), stroke=color)
-        image.save(f"./screenshot_{page.page_number}.jpg")
+        try:
+            image = page.to_image()
+            for bbox in bboxes:
+                color = (100, 100, 100)
+                image.draw_rect((bbox.x1, bbox.y1, bbox.x2, bbox.y2), fill=color + (50,), stroke=color)
+            image.save(f"./screenshot_{page.page_number}.jpg")
+        except ValueError as ex:
+            logging.warning(ex)
 
     def not_within_bboxes(self, bboxes: List[Box]):
         def _not_within_bboxes(obj: dict):
