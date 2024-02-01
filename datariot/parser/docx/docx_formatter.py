@@ -1,6 +1,7 @@
 from datariot.__spi__ import Formatter
 from datariot.__spi__.type import Box, Parsed
 from datariot.parser.docx.docx_model import DocxTextBox, DocxImageBox, DocxTableBox
+from datariot.util.io_util import get_filename
 from datariot.util.text_util import create_uuid_from_string
 
 
@@ -18,6 +19,8 @@ class HeuristicDocxFormatter(Formatter):
         else:
             self.most_used_size = max(set(sizes), key=sizes.count)
             self.sizes = list(reversed(sorted(set(sizes))))
+
+        self.doc_path = parsed.path
 
     def __call__(self, box: Box) -> str:
         if isinstance(box, DocxTextBox):
@@ -50,8 +53,9 @@ class HeuristicDocxFormatter(Formatter):
 
     def _format_image(self, image: DocxImageBox):
         try:
-            name = create_uuid_from_string(image.to_hash())
-            return f"![Abbildung]({name})"
+            doc_name = create_uuid_from_string(get_filename(self.doc_path))
+            img_name = create_uuid_from_string(image.to_hash())
+            return f"![Abbildung](doc/{doc_name}/{img_name})"
         except OSError:
             return ""
 

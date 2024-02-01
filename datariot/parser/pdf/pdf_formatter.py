@@ -3,6 +3,7 @@ from typing import List
 from datariot.__spi__ import Formatter, Parsed
 from datariot.__spi__.type import Box
 from datariot.parser.pdf import PDFTextBox, PDFTableBox, PDFImageBox
+from datariot.util.io_util import get_filename
 from datariot.util.text_util import create_uuid_from_string
 
 
@@ -22,6 +23,8 @@ class HeuristicPDFFormatter(Formatter):
         else:
             self.most_used_size = max(set(sizes), key=sizes.count)
             self.sizes = list(reversed(sorted(set(sizes))))
+
+        self.doc_path = parsed.path
 
     def __call__(self, box: Box) -> str:
         if isinstance(box, PDFTextBox):
@@ -63,7 +66,8 @@ class HeuristicPDFFormatter(Formatter):
 
     def _format_image(self, box: PDFImageBox):
         try:
-            name = create_uuid_from_string(box.to_hash())
-            return f"![Abbildung]({name})"
+            doc_name = create_uuid_from_string(get_filename(self.doc_path))
+            img_name = create_uuid_from_string(box.to_hash())
+            return f"![Abbildung](doc/{doc_name}/{img_name})"
         except OSError:
             return ""
