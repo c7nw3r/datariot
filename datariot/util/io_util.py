@@ -4,7 +4,6 @@ import pathlib
 
 from tqdm import tqdm
 
-from datariot.__spi__.type import MediaAware
 from datariot.util.text_util import create_uuid_from_string
 
 
@@ -46,7 +45,7 @@ def get_filename(path: str):
     return name
 
 
-def save_image(path: str, box: MediaAware, image_quality: int = 10):
+def save_image(path: str, box, image_quality: int = 10):
     if not os.path.exists(path):
         os.makedirs(path)
 
@@ -54,7 +53,7 @@ def save_image(path: str, box: MediaAware, image_quality: int = 10):
     try:
         name = create_uuid_from_string(box.to_hash())
     except OSError as ex:
-        logging.warning(ex)
+        logging.warning(str(ex))
         return
 
     try:
@@ -64,5 +63,5 @@ def save_image(path: str, box: MediaAware, image_quality: int = 10):
             logging.info(f"try to save image as {file.format}")
             file.save(f"{path}/{name}.{file.format}", file.format)
         except OSError as ex:
-            logging.warning(f"error while saving image of {path}", ex)
+            logging.warning(f"error while saving image of {path}", str(ex))
             return
