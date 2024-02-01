@@ -1,6 +1,7 @@
 import base64
 import csv
 import io
+import logging
 import xml.etree.ElementTree as ET
 from xml.etree import ElementTree
 
@@ -68,10 +69,19 @@ class DocxDocumentMixin:
                 blip_elem = pic.find("pic:blipFill/a:blip", my_namespaces)
                 embed_attr = blip_elem.get("{http://schemas.openxmlformats.org/officeDocument/2006/relationships}embed")
                 document_part = document.part
+
+                if embed_attr not in document_part.related_parts:
+                    return []
+
                 image_part = document_part.related_parts[embed_attr]
                 image_base64 = base64.b64encode(image_part._blob)
                 image_base64 = image_base64.decode()
-                image = from_base64(image_base64)
+
+                try:
+                    image = from_base64(image_base64)
+                except Exception as ex:
+                    logging.warning(ex)
+                    return []
 
                 return [DocxImageBox(name_attr, image)]
 
