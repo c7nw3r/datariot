@@ -1,12 +1,22 @@
 from datariot.__spi__ import Formatter
-from datariot.__spi__.type import Box
+from datariot.__spi__.type import Box, Parsed
 from datariot.parser.docx.docx_model import DocxTextBox
 
 
 class HeuristicDocxFormatter(Formatter):
 
-    def __init__(self, document):
-        self.document = document
+    def __init__(self, parsed: Parsed):
+        boxes = [e for e in parsed.bboxes if isinstance(e, DocxTextBox)]
+
+        sizes = ([int(e.font_size) for e in boxes])
+        sizes = list(reversed(sorted(sizes)))
+
+        if len(boxes) == 0:
+            self.most_used_size = None
+            self.sizes = []
+        else:
+            self.most_used_size = max(set(sizes), key=sizes.count)
+            self.sizes = list(reversed(sorted(set(sizes))))
 
     def __call__(self, box: Box) -> str:
         if isinstance(box, DocxTextBox):
@@ -22,11 +32,15 @@ class HeuristicDocxFormatter(Formatter):
             if box.style_name == "List Paragraph":
                 return f" * {box.text}"
 
+            if self.most_used_size is not None and int(box.font_size) > self.most_used_size:
+                order = self.sizes.index(int(box.font_size))
+                return ("#" * (order + 1)) + " " + box.text
+
             # FIXME
-            if box.font_size == 16:
-                if box.text[0].isdigit():
-                    return f"## {box.text}"
-                return f"# {box.text}"
-            return box.text
+            # if box.font_size == 16:
+            #     if box.text[0].isdigit():
+            #         return f"## {box.text}"
+            #     return f"# {box.text}"
+            # return box.text
 
         return box.render(self)

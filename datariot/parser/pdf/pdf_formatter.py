@@ -7,7 +7,9 @@ from datariot.parser.pdf import PDFTextBox, PDFTableBox, PDFImageBox
 
 class HeuristicPDFFormatter(Formatter):
 
-    def __init__(self, parsed: Parsed):
+    def __init__(self, parsed: Parsed, enable_json: bool = False):
+        self.enable_json = enable_json
+
         boxes = [e for e in parsed.bboxes if isinstance(e, PDFTextBox)]
 
         sizes = ([int(e.font_size) for e in boxes])
@@ -38,19 +40,22 @@ class HeuristicPDFFormatter(Formatter):
         return box.text
 
     def _format_table(self, box: PDFTableBox):
-        if len(box.rows) <= 5:
+        if len(box.rows) <= 5 or not self.enable_json:
             return box.__repr__()
 
-        # convert the rows to json lines
-        header = [e for e in box.rows[0] if e is not None and len(e) > 0]
+        try:
+            # convert the rows to json lines
+            header = [e for e in box.rows[0] if e is not None and len(e) > 0]
 
-        def to_dict(row: List[str]):
-            row = [e for e in row if e is not None and len(e) > 0]
-            return {header[i]: self._format_table_cell(e) for i, e in enumerate(row)}
+            def to_dict(row: List[str]):
+                row = [e for e in row if e is not None and len(e) > 0]
+                return {header[i]: self._format_table_cell(e) for i, e in enumerate(row)}
 
-        import json
-        rows = [to_dict(e) for e in box.rows[1:]]
-        return "\n".join([json.dumps(e) for e in rows])
+            import json
+            rows = [to_dict(e) for e in box.rows[1:]]
+            return "\n".join([json.dumps(e) for e in rows])
+        except IndexError:
+            return box.__repr__()
 
     def _format_table_cell(self, text: str):
         return text
