@@ -15,6 +15,10 @@ def get_local_dir(path: str, dir_name: str):
     return path
 
 
+def without_ext(path: str) -> str:
+    return path[:path.rfind(".")]
+
+
 def get_dir(path: str):
     return str(pathlib.Path(path).parent.resolve())
 
