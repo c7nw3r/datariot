@@ -19,10 +19,6 @@ def get_dir(path: str):
     return str(pathlib.Path(path).parent.resolve())
 
 
-def without_ext(path: str):
-    return path[:path.rfind(".")]
-
-
 def get_files(path: str, ext: str):
     for root, _, files in tqdm(os.walk(path), desc="get files of " + path):
         for file in files:

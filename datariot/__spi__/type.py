@@ -5,7 +5,7 @@ from typing import List, Literal, Optional, Tuple
 from PIL.Image import Image
 
 from datariot.util import write_file
-from datariot.util.io_util import without_ext, save_image
+from datariot.util.io_util import save_image, get_dir
 
 
 class Formatter(ABC):
@@ -68,7 +68,7 @@ class Parsed:
 
         for box in self.bboxes:
             if isinstance(box, MediaAware):
-                save_image(f"{without_ext(path)}", box, image_quality)
+                save_image(get_dir(path), box, image_quality)
 
 
 class Parser(ABC):
