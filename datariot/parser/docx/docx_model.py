@@ -4,7 +4,7 @@ from typing import List, Tuple
 from PIL.Image import Image
 from docx.text.paragraph import Paragraph, Run
 
-from datariot.__spi__.type import Formatter, Box, MediaAware
+from datariot.__spi__.type import Box, MediaAware
 from datariot.util.image_util import to_base64
 
 
@@ -97,9 +97,6 @@ class DocxImageBox(Box, MediaAware):
         super().__init__(None, None, None, None)
         self.name = name
         self.image = image
-
-    def render(self, formatter: Formatter):
-        return f"[image:{self.name}]"
 
     def get_file(self) -> Tuple[str, Image]:
         return self.name, self.image
