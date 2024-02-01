@@ -2,6 +2,8 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import List, Literal, Optional
 
+from datariot.util import write_file
+
 
 class Formatter(ABC):
 
@@ -28,6 +30,9 @@ class Parsed:
 
     def render(self, evaluator):
         return "\n".join([e.render(evaluator) for e in self.bboxes])
+
+    def save(self, path: str, formatter: Formatter):
+        write_file(path, self.render(formatter))
 
 
 class Parser(ABC):
