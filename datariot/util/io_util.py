@@ -2,8 +2,10 @@ import logging
 import os
 import pathlib
 
-from PIL.Image import Image
 from tqdm import tqdm
+
+from datariot.__spi__.type import MediaAware
+from datariot.util.text_util import create_uuid_from_string
 
 
 def get_local_dir(path: str, dir_name: str):
@@ -44,15 +46,23 @@ def get_filename(path: str):
     return name
 
 
-def save_image(path: str, image: Image, image_quality: int = 10):
-    if not os.path.exists(get_dir(path)):
-        os.makedirs(get_dir(path))
+def save_image(path: str, box: MediaAware, image_quality: int = 10):
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+    _, file = box.get_file()
+    try:
+        name = create_uuid_from_string(box.to_hash())
+    except OSError as ex:
+        logging.warning(ex)
+        return
 
     try:
-        image.save(path, 'webp', optimize=True, quality=image_quality)
+        file.save(f"{path}/{name}.webp", 'webp', optimize=True, quality=image_quality)
     except OSError:
         try:
-            logging.info(f"try to save image as {image.format}")
-            image.save(path.replace(".webp", f".{image.format}"), image.format)
+            logging.info(f"try to save image as {file.format}")
+            file.save(f"{path}/{name}.{file.format}", file.format)
         except OSError as ex:
             logging.warning(f"error while saving image of {path}", ex)
+            return
