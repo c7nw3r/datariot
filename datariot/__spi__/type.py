@@ -1,8 +1,11 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import List, Literal, Optional
+from typing import List, Literal, Optional, Tuple
+
+from PIL import Image
 
 from datariot.util import write_file
+from datariot.util.io_util import get_dir
 
 
 class Formatter(ABC):
@@ -23,6 +26,17 @@ class Box(ABC):
         return formatter(self)
 
 
+class MediaAware(ABC):
+
+    @abstractmethod
+    def get_file(self) -> Tuple[str, Image]:
+        pass
+
+    @abstractmethod
+    def to_hash(self) -> str:
+        pass
+
+
 @dataclass
 class Parsed:
     path: str
@@ -33,6 +47,11 @@ class Parsed:
 
     def save(self, path: str, formatter: Formatter, delimiter: str = "\n\n"):
         write_file(path, self.render(formatter, delimiter))
+
+        for box in self.bboxes:
+            if isinstance(box, MediaAware):
+                name, file = box.get_file()
+                write_file(f"{get_dir(path)}/{name}.{file.type}", file)
 
 
 class Parser(ABC):

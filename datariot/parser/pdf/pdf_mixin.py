@@ -47,7 +47,7 @@ class PageMixin:
 
     def get_table_boxes(self, _document: PDFDocument, page: Page):
         ts = {"vertical_strategy": "lines", "horizontal_strategy": "lines"}
-        return [PDFTableBox(e) for e in zip(page.find_tables(ts), page.extract_tables(ts))]
+        return [PDFTableBox(page, e) for e in zip(page.find_tables(ts), page.extract_tables(ts))]
 
     def get_image_boxes(self, document: PDFDocument, page: Page, use_ocr: bool = False):
         box_filter = BoxOverlapsBoundingBoxFilter()

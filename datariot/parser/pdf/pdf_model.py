@@ -1,9 +1,11 @@
 from typing import Optional, Tuple, List
 
+from PIL import Image
 from pdfplumber.page import Page
 from pdfplumber.table import Table
 
-from datariot.__spi__.type import FontWeight, Box
+from datariot.__spi__.type import FontWeight, Box, MediaAware
+from datariot.util.image_util import to_base64
 
 DEFAULT_IMAGE_RESOLUTION = 72
 IMAGE_RESOLUTION = 400
@@ -74,7 +76,7 @@ class PDFOcrBox(PDFTextBox):
         return PDFOcrBox(self.x1, self.y1, self.x2, self.y2, text)
 
 
-class PDFImageBox(Box):
+class PDFImageBox(Box, MediaAware):
 
     def __init__(self, page: Page, data: dict):
         super().__init__(int(data["x0"]), int(data["x1"]), int(data["top"]), int(data["bottom"]))
@@ -99,18 +101,25 @@ class PDFImageBox(Box):
     def __repr__(self):
         return f"x1:{self.x1}, y1:{self.y1}, x2:{self.x2}, y2:{self.y2}"
 
+    def get_file(self) -> Tuple[str, Image]:
+        name = f"image_{self.page_number}_{self.x1}_{self.y1}_{self.x2}_{self.y2}"
+        return name, self.data.original
+
+    def to_hash(self) -> str:
+        encoded = to_base64(self.data.original)
+        from hashlib import sha256
+        return str(sha256(encoded).hexdigest())
+
 
 class PDFTableBox(Box):
 
-    def __init__(self, data: Tuple[Table, List[List[str]]]):
+    def __init__(self, page: Page, data: Tuple[Table, List[List[str]]]):
         super().__init__(data[0].bbox[0], data[0].bbox[2], data[0].bbox[1], data[0].bbox[3])
         self.rows = data[1]
+        self.page_number = page.page_number
 
     def __repr__(self):
         def to_col(cols: List[str]):
             return " | ".join([col for col in cols if col is not None])
 
         return "\n".join([to_col(row) for row in self.rows])
-
-    #def render(self, formatter: Formatter):
-    #    return self.__repr__()

@@ -1,9 +1,11 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Tuple
 
+from PIL import Image
 from docx.text.paragraph import Paragraph, Run
 
-from datariot.__spi__.type import Formatter, Box
+from datariot.__spi__.type import Formatter, Box, MediaAware
+from datariot.util.image_util import to_base64
 
 
 @dataclass
@@ -86,7 +88,7 @@ class DocxTableBox(Box):
         return "\n" + "\n".join(buffer) + "\n"
 
 
-class DocxImageBox(Box):
+class DocxImageBox(Box, MediaAware):
     """
     Box implementation for the image docx elements.
     """
@@ -98,3 +100,11 @@ class DocxImageBox(Box):
 
     def render(self, formatter: Formatter):
         return f"[image:{self.name}]"
+
+    def get_file(self) -> Tuple[str, Image]:
+        return self.name, self.image
+
+    def to_hash(self) -> str:
+        encoded = to_base64(self.image)
+        from hashlib import sha256
+        return str(sha256(encoded).hexdigest())

@@ -29,3 +29,8 @@ def from_base64(encoded_image: Union[str, bytes]):
 
         return image
     return Image.open(BytesIO(base64.b64decode(encoded_image)))
+
+def to_base64(image):
+    im_file = BytesIO()
+    image.save(im_file, format=image.format)
+    return base64.b64encode(im_file.getvalue())
