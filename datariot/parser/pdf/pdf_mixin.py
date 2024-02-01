@@ -8,7 +8,7 @@ from datariot.parser.pdf.bbox.bbox_filter import CoordinatesBoundingBoxFilter, P
     BoxOverlapsBoundingBoxFilter
 from datariot.parser.pdf.bbox.bbox_merger import CoordinatesBoundingBoxMerger
 from datariot.parser.pdf.bbox.bbox_sorter import CoordinatesBoundingBoxSorter
-from datariot.parser.pdf.pdf_model import PdfTextBox, PDFImageBox, PDFOcrBox, PDFTableBox
+from datariot.parser.pdf.pdf_model import PDFTextBox, PDFImageBox, PDFOcrBox, PDFTableBox
 from datariot.util.array_util import flatten
 
 LEFT = "left"
@@ -28,14 +28,14 @@ class PageMixin:
 
         return boxes
 
-    def get_text_boxes(self, document: PDFDocument, page: Page) -> List[PdfTextBox]:
+    def get_text_boxes(self, document: PDFDocument, page: Page) -> List[PDFTextBox]:
         box_merger = CoordinatesBoundingBoxMerger()
         box_filter = CoordinatesBoundingBoxFilter(50, 710)
         box_sorter = CoordinatesBoundingBoxSorter()
         toc_filter = PDFOutlinesBoundingBoxFilter(document)
 
         boxes = page.extract_words(extra_attrs=["fontname", "size"])
-        boxes = [PdfTextBox.from_dict(word) for word in boxes]
+        boxes = [PDFTextBox.from_dict(word) for word in boxes]
         boxes = box_merger(page, boxes)
         boxes = toc_filter(page, boxes)
         boxes = box_filter(page, boxes)
@@ -81,7 +81,7 @@ class PageMixin:
 
         return boxes
 
-    def take_screenshot(self, page: Page, bboxes: List[PdfTextBox]):
+    def take_screenshot(self, page: Page, bboxes: List[PDFTextBox]):
         image = page.to_image()
         for bbox in bboxes:
             color = (100, 100, 100)

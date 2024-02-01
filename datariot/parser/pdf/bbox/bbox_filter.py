@@ -4,7 +4,7 @@ from pdfminer.pdfdocument import PDFDocument, PDFNoOutlines
 from pdfplumber.page import Page
 
 from datariot.__spi__.type import Box
-from datariot.parser.pdf.pdf_model import PdfTextBox
+from datariot.parser.pdf.pdf_model import PDFTextBox
 
 
 class CoordinatesBoundingBoxFilter:
@@ -12,7 +12,7 @@ class CoordinatesBoundingBoxFilter:
         self.min_y = min_y
         self.max_y = max_y
 
-    def __call__(self, page: Page, bboxes: List[PdfTextBox]) -> List[PdfTextBox]:
+    def __call__(self, page: Page, bboxes: List[PDFTextBox]) -> List[PDFTextBox]:
         is_landscape = page.layout.width > page.layout.height
 
         def _filter(bbox):
@@ -35,8 +35,8 @@ class PDFOutlinesBoundingBoxFilter:
         except PDFNoOutlines:
             self.outlines = []
 
-    def __call__(self, page: Page, bboxes: List[PdfTextBox]) -> List[PdfTextBox]:
-        def _filter(box: PdfTextBox):
+    def __call__(self, page: Page, bboxes: List[PDFTextBox]) -> List[PDFTextBox]:
+        def _filter(box: PDFTextBox):
             # if box.text.lower() == "inhaltsverzeichnis":
             #     return False
 

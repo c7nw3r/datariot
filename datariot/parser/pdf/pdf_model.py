@@ -9,7 +9,7 @@ DEFAULT_IMAGE_RESOLUTION = 72
 IMAGE_RESOLUTION = 400
 
 
-class PdfTextBox(Box):
+class PDFTextBox(Box):
 
     def __init__(self, x1: int, y1: int, x2: int, y2: int, text: str, size: int, font_name: str):
         super().__init__(x1, x2, y1, y2)
@@ -26,10 +26,10 @@ class PdfTextBox(Box):
         text = data["text"]
         font_name = data["fontname"]
         font_size = data["size"]
-        return PdfTextBox(x1, y1, x2, y2, text, font_size, font_name)
+        return PDFTextBox(x1, y1, x2, y2, text, font_size, font_name)
 
     def with_text(self, text: str):
-        return PdfTextBox(self.x1, self.y1, self.x2, self.y2, text, self._size, self._font_name)
+        return PDFTextBox(self.x1, self.y1, self.x2, self.y2, text, self._size, self._font_name)
 
     @property
     def text(self) -> str:
@@ -48,7 +48,7 @@ class PdfTextBox(Box):
         return "regular"
 
     def copy(self):
-        return PdfTextBox(self.x1, self.y1, self.x2, self.y2, self.text, self.font_size, self._font_name)
+        return PDFTextBox(self.x1, self.y1, self.x2, self.y2, self.text, self.font_size, self._font_name)
 
     def __repr__(self):
         return self.text

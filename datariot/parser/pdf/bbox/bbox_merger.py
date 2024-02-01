@@ -2,7 +2,7 @@ from typing import List
 
 from pdfplumber.page import Page
 
-from datariot.parser.pdf.pdf_model import PdfTextBox
+from datariot.parser.pdf.pdf_model import PDFTextBox
 
 
 class CoordinatesBoundingBoxMerger:
@@ -11,7 +11,7 @@ class CoordinatesBoundingBoxMerger:
         self.x_tolerance = x_tolerance
         self.y_tolerance = y_tolerance
 
-    def __call__(self, page: Page, bboxes: List[PdfTextBox]) -> List[PdfTextBox]:
+    def __call__(self, page: Page, bboxes: List[PDFTextBox]) -> List[PDFTextBox]:
         if len(bboxes) == 0:
             return []
 
