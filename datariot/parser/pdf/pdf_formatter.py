@@ -3,6 +3,7 @@ from typing import List
 from datariot.__spi__ import Formatter, Parsed
 from datariot.__spi__.type import Box
 from datariot.parser.pdf import PDFTextBox, PDFTableBox, PDFImageBox
+from datariot.util.text_util import create_uuid_from_string
 
 
 class HeuristicPDFFormatter(Formatter):
@@ -61,4 +62,5 @@ class HeuristicPDFFormatter(Formatter):
         return text
 
     def _format_image(self, box: PDFImageBox):
-        return "[image]"
+        name = create_uuid_from_string(box.to_hash())
+        return f"![Abbildung]({name})"

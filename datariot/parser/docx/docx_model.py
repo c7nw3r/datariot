@@ -72,7 +72,7 @@ class DocxTableBox(Box):
         super().__init__(None, None, None, None)
         self.rows = rows
 
-    def render(self, evaluator: Formatter):
+    def __repr__(self):
         lenghts = []
         for row in self.rows:
             lenghts.append([])

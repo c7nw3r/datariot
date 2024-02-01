@@ -1,6 +1,7 @@
 from datariot.__spi__ import Formatter
 from datariot.__spi__.type import Box, Parsed
-from datariot.parser.docx.docx_model import DocxTextBox
+from datariot.parser.docx.docx_model import DocxTextBox, DocxImageBox, DocxTableBox
+from datariot.util.text_util import create_uuid_from_string
 
 
 class HeuristicDocxFormatter(Formatter):
@@ -20,29 +21,36 @@ class HeuristicDocxFormatter(Formatter):
 
     def __call__(self, box: Box) -> str:
         if isinstance(box, DocxTextBox):
-            if box.style_name == "Title":
-                return f"# {box.text}"
+            return self._format_text(box)
+        if isinstance(box, DocxImageBox):
+            return self._format_image(box)
+        if isinstance(box, DocxTableBox):
+            return self._format_table(box)
 
-            if box.style_name == "Heading 1":
-                return f"## {box.text}"
-            if box.style_name == "Heading 2":
-                return f"### {box.text}"
-            if box.style_name == "Heading 3":
-                return f"### {box.text}"
-            if box.style_name == "List Paragraph":
-                return f" * {box.text}"
+        return str(box)
 
-            if self.most_used_size is not None and int(box.font_size) > self.most_used_size:
-                order = self.sizes.index(int(box.font_size))
-                return ("#" * (order + 1)) + " " + box.text
+    def _format_text(self, box: DocxTextBox):
+        if box.style_name == "Title":
+            return f"# {box.text}"
 
-            return box.text
+        if box.style_name == "Heading 1":
+            return f"## {box.text}"
+        if box.style_name == "Heading 2":
+            return f"### {box.text}"
+        if box.style_name == "Heading 3":
+            return f"### {box.text}"
+        if box.style_name == "List Paragraph":
+            return f" * {box.text}"
 
-            # FIXME
-            # if box.font_size == 16:
-            #     if box.text[0].isdigit():
-            #         return f"## {box.text}"
-            #     return f"# {box.text}"
-            # return box.text
+        if self.most_used_size is not None and int(box.font_size) > self.most_used_size:
+            order = self.sizes.index(int(box.font_size))
+            return ("#" * (order + 1)) + " " + box.text
 
-        return box.render(self)
+        return box.text
+
+    def _format_image(self, image: DocxImageBox):
+        name = create_uuid_from_string(image.to_hash())
+        return f"![Abbildung]({name})"
+
+    def _format_table(self, box: DocxTableBox):
+        return box.__repr__()
