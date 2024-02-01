@@ -29,9 +29,4 @@ class HeuristicPDFFormatter(Formatter):
             order = self.sizes.index(int(box.font_size))
             return ("#" * (order + 1)) + " " + box.text
 
-        if ord(box.text[0]) == 61623:
-            return " *" + box.text[1:]
-        if ord(box.text[0]) == 9633:
-            return " *" + box.text[1:]
-
         return box.text

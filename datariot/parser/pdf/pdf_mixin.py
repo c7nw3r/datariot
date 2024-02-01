@@ -21,17 +21,19 @@ TEXT = "text"
 class PageMixin:
 
     def get_boxes(self, document: PDFDocument, page: Page):
+        box_sorter = CoordinatesBoundingBoxSorter()
+
         boxes = []
         boxes.extend(self.get_table_boxes(document, page))
         boxes.extend(self.get_text_boxes(document, page.filter(self.not_within_bboxes(boxes))))
         boxes.extend(self.get_image_boxes(document, page, use_ocr=len(boxes) == 0))
+        boxes = box_sorter(page, boxes)
 
         return boxes
 
     def get_text_boxes(self, document: PDFDocument, page: Page) -> List[PDFTextBox]:
         box_merger = CoordinatesBoundingBoxMerger()
         box_filter = CoordinatesBoundingBoxFilter(50, 710)
-        box_sorter = CoordinatesBoundingBoxSorter()
         toc_filter = PDFOutlinesBoundingBoxFilter(document)
 
         boxes = page.extract_words(extra_attrs=["fontname", "size"])
@@ -39,7 +41,6 @@ class PageMixin:
         boxes = box_merger(page, boxes)
         boxes = toc_filter(page, boxes)
         boxes = box_filter(page, boxes)
-        boxes = box_sorter(page, boxes)
 
         return boxes
 

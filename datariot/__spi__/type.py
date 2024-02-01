@@ -28,11 +28,11 @@ class Parsed:
     path: str
     bboxes: List[Box]
 
-    def render(self, evaluator):
-        return "\n".join([e.render(evaluator) for e in self.bboxes])
+    def render(self, evaluator, delimiter: str = "\n"):
+        return delimiter.join([e.render(evaluator) for e in self.bboxes])
 
-    def save(self, path: str, formatter: Formatter):
-        write_file(path, self.render(formatter))
+    def save(self, path: str, formatter: Formatter, delimiter: str = "\n"):
+        write_file(path, self.render(formatter, delimiter))
 
 
 class Parser(ABC):
