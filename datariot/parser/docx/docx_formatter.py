@@ -36,6 +36,8 @@ class HeuristicDocxFormatter(Formatter):
                 order = self.sizes.index(int(box.font_size))
                 return ("#" * (order + 1)) + " " + box.text
 
+            return box.text
+
             # FIXME
             # if box.font_size == 16:
             #     if box.text[0].isdigit():
