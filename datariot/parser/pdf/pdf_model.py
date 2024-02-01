@@ -55,11 +55,10 @@ class PDFTextBox(Box):
         return self.text
 
 
-class PDFOcrBox(Box):
+class PDFOcrBox(PDFTextBox):
 
     def __init__(self, x1: int, y1: int, x2: int, y2: int, text: str):
-        super().__init__(x1, x2, y1, y2)
-        self._text = text
+        super().__init__(x1, x2, y1, y2, text, -1, "regular")
 
     @staticmethod
     def from_ocr(data):
@@ -73,24 +72,6 @@ class PDFOcrBox(Box):
 
     def with_text(self, text: str):
         return PDFOcrBox(self.x1, self.y1, self.x2, self.y2, text)
-
-    @property
-    def text(self) -> str:
-        return self._text
-
-    @property
-    def font_size(self) -> int:
-        return -1
-
-    @property
-    def font_weight(self) -> Optional[FontWeight]:
-        return "regular"
-
-    def copy(self):
-        return PDFOcrBox(self.x1, self.y1, self.x2, self.y2, self.text)
-
-    def __repr__(self):
-        return self.text
 
 
 class PDFImageBox(Box):
