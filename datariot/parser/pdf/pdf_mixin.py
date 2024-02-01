@@ -3,11 +3,12 @@ from typing import List
 from pdfminer.pdfdocument import PDFDocument
 from pdfplumber.page import Page
 
+from datariot.__spi__.type import Box
 from datariot.parser.pdf.bbox.bbox_filter import CoordinatesBoundingBoxFilter, PDFOutlinesBoundingBoxFilter, \
     BoxOverlapsBoundingBoxFilter
 from datariot.parser.pdf.bbox.bbox_merger import CoordinatesBoundingBoxMerger
 from datariot.parser.pdf.bbox.bbox_sorter import CoordinatesBoundingBoxSorter
-from datariot.parser.pdf.pdf_model import PdfTextBox, PDFImageBox, PDFOcrBox
+from datariot.parser.pdf.pdf_model import PdfTextBox, PDFImageBox, PDFOcrBox, PDFTableBox
 from datariot.util.array_util import flatten
 
 LEFT = "left"
@@ -16,11 +17,14 @@ WIDTH = "width"
 HEIGHT = "height"
 TEXT = "text"
 
+
 class PageMixin:
 
     def get_boxes(self, document: PDFDocument, page: Page):
-        boxes = self.get_text_boxes(document, page)
-        boxes = [*boxes, *self.get_image_boxes(document, page, use_ocr=len(boxes) == 0)]
+        boxes = []
+        boxes.extend(self.get_table_boxes(document, page))
+        boxes.extend(self.get_text_boxes(document, page.filter(self.not_within_bboxes(boxes))))
+        boxes.extend(self.get_image_boxes(document, page, use_ocr=len(boxes) == 0))
 
         return boxes
 
@@ -38,6 +42,10 @@ class PageMixin:
         boxes = box_sorter(page, boxes)
 
         return boxes
+
+    def get_table_boxes(self, _document: PDFDocument, page: Page):
+        ts = {"vertical_strategy": "lines", "horizontal_strategy": "lines"}
+        return [PDFTableBox(e) for e in zip(page.find_tables(ts), page.extract_tables(ts))]
 
     def get_image_boxes(self, document: PDFDocument, page: Page, use_ocr: bool = False):
         box_filter = BoxOverlapsBoundingBoxFilter()
@@ -79,3 +87,14 @@ class PageMixin:
             color = (100, 100, 100)
             image.draw_rect((bbox.x1, bbox.y1, bbox.x2, bbox.y2), fill=color + (50,), stroke=color)
         image.save(f"./screenshot_{page.page_number}.jpg")
+
+    def not_within_bboxes(self, bboxes: List[Box]):
+        def _not_within_bboxes(obj: dict):
+            def obj_in_bbox(_bbox):
+                v_mid = (obj["top"] + obj["bottom"]) / 2
+                h_mid = (obj["x0"] + obj["x1"]) / 2
+                return (h_mid >= _bbox.x1) and (h_mid < _bbox.x2) and (v_mid >= _bbox.y1) and (v_mid < _bbox.y2)
+
+            return not any(obj_in_bbox(__bbox) for __bbox in bboxes)
+
+        return _not_within_bboxes

@@ -13,6 +13,7 @@ class DocxTextBox(Box):
     """
 
     def __init__(self, paragraph: Paragraph):
+        super().__init__(None, None, None, None)
         self.p = paragraph
 
     @property
@@ -66,6 +67,7 @@ class DocxTableBox(Box):
     """
 
     def __init__(self, rows: list):
+        super().__init__(None, None, None, None)
         self.rows = rows
 
     def render(self, evaluator: Formatter):
@@ -90,6 +92,7 @@ class DocxImageBox(Box):
     """
 
     def __init__(self, name: str, image):
+        super().__init__(None, None, None, None)
         self.name = name
         self.image = image
 

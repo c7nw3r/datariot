@@ -1,19 +1,18 @@
-from typing import Optional
+from typing import Optional, Tuple, List
 
 from pdfplumber.page import Page
+from pdfplumber.table import Table
 
 from datariot.__spi__.type import FontWeight, Box
 
 DEFAULT_IMAGE_RESOLUTION = 72
 IMAGE_RESOLUTION = 400
 
+
 class PdfTextBox(Box):
 
     def __init__(self, x1: int, y1: int, x2: int, y2: int, text: str, size: int, font_name: str):
-        self.x1 = x1
-        self.y1 = y1
-        self.x2 = x2
-        self.y2 = y2
+        super().__init__(x1, x2, y1, y2)
         self._text = text
         self._size = size
         self._font_name = font_name
@@ -58,10 +57,7 @@ class PdfTextBox(Box):
 class PDFOcrBox(Box):
 
     def __init__(self, x1: int, y1: int, x2: int, y2: int, text: str):
-        self.x1 = x1
-        self.y1 = y1
-        self.x2 = x2
-        self.y2 = y2
+        super().__init__(x1, x2, y1, y2)
         self._text = text
 
     @staticmethod
@@ -99,10 +95,7 @@ class PDFOcrBox(Box):
 class PDFImageBox(Box):
 
     def __init__(self, page: Page, data: dict):
-        self.x1 = int(data["x0"])
-        self.y1 = int(data["top"])
-        self.x2 = int(data["x1"])
-        self.y2 = int(data["bottom"])
+        super().__init__(int(data["x0"]), int(data["x1"]), int(data["top"]), int(data["bottom"]))
         self.page_number = page.page_number
 
         self.data = page.crop((self.x1,
@@ -123,3 +116,16 @@ class PDFImageBox(Box):
 
     def __repr__(self):
         return f"x1:{self.x1}, y1:{self.y1}, x2:{self.x2}, y2:{self.y2}"
+
+
+class PDFTableBox(Box):
+
+    def __init__(self, data: Tuple[Table, List[List[str]]]):
+        super().__init__(data[0].bbox[0], data[0].bbox[2], data[0].bbox[1], data[0].bbox[3])
+        self.rows = data[1]
+
+    def __repr__(self):
+        def to_col(cols: List[str]):
+            return " | ".join([col for col in cols if col is not None])
+
+        return "\n".join([to_col(row) for row in self.rows])
