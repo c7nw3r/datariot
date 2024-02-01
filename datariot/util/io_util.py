@@ -1,6 +1,8 @@
+import logging
 import os
 import pathlib
 
+from PIL.Image import Image
 from tqdm import tqdm
 
 
@@ -14,6 +16,10 @@ def get_local_dir(path: str, dir_name: str):
 
 def get_dir(path: str):
     return str(pathlib.Path(path).parent.resolve())
+
+
+def without_ext(path: str):
+    return path[:path.rfind(".")]
 
 
 def get_files(path: str, ext: str):
@@ -36,3 +42,17 @@ def get_filename(path: str):
     name = path[path.rfind("/") + 1:]
     name = name[:name.rfind(".")]
     return name
+
+
+def save_image(path: str, image: Image, image_quality: int = 10):
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+    try:
+        image.save(path, 'webp', optimize=True, quality=image_quality)
+    except OSError:
+        try:
+            logging.info(f"try to save image as {image.format}")
+            image.save(path.replace(".webp", f".{image.format}"), image.format)
+        except OSError as ex:
+            logging.warning(f"error while saving image of {path}", ex)

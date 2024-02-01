@@ -1,4 +1,3 @@
-import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import List, Literal, Optional, Tuple
@@ -6,7 +5,7 @@ from typing import List, Literal, Optional, Tuple
 from PIL.Image import Image
 
 from datariot.util import write_file
-from datariot.util.io_util import get_dir
+from datariot.util.io_util import without_ext, save_image
 
 
 class Formatter(ABC):
@@ -64,17 +63,13 @@ class Parsed:
     def save(self, path: str,
              formatter: Formatter,
              delimiter: str = "\n\n",
-             image_quality: int = 10,
-             save_image: bool = True):
+             image_quality: int = 10):
         write_file(path, self.render(formatter, delimiter))
 
         for box in self.bboxes:
-            if save_image and isinstance(box, MediaAware):
-                try:
-                    name, file = box.get_file()
-                    file.save(f"{get_dir(path)}/{name}.webp", 'webp', optimize=True, quality=image_quality)
-                except OSError as ex:
-                    logging.warning("error while saving image", ex)
+            if isinstance(box, MediaAware):
+                name, file = box.get_file()
+                save_image(f"{without_ext(path)}/{name}.webp", file, image_quality)
 
 
 class Parser(ABC):
