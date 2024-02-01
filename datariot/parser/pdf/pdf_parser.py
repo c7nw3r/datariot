@@ -14,7 +14,7 @@ class Config:
     ocr: bool = False
 
 
-class PdfParser(Parser, PageMixin):
+class PDFParser(Parser, PageMixin):
 
     def __init__(self, config: Config = Config()):
         self.config = config
@@ -49,6 +49,6 @@ class PdfParser(Parser, PageMixin):
     def parse_folder(path: str, config: Config = Config()) -> Iterator[Parsed]:
         for file in get_files(path, ".pdf"):
             try:
-                yield PdfParser(config).parse(file)
+                yield PDFParser(config).parse(file)
             except DataRiotException as ex:
                 logging.warning(ex)

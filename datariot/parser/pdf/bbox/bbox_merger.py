@@ -24,7 +24,7 @@ class CoordinatesBoundingBoxMerger:
             expr2 = (bbox.y1 - prev_bbox.y2) < self.y_tolerance
 
             if expr1 or expr2:
-                prev_bbox = prev_bbox.with_text(prev_bbox.text + " " + bbox.text)
+                prev_bbox = prev_bbox.with_text(prev_bbox.text + (" " if is_same_line else "\n") + bbox.text)
                 prev_bbox.x1 = min(prev_bbox.x1, bbox.x1)
                 prev_bbox.y1 = min(prev_bbox.y1, bbox.y1)
                 prev_bbox.x2 = max(prev_bbox.x2, bbox.x2)
