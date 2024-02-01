@@ -1,4 +1,3 @@
-from .pdf_formatter import HeuristicPDFFormatter
 from .pdf_model import PDFImageBox
 from .pdf_model import PDFOcrBox
 from .pdf_model import PDFTableBox
