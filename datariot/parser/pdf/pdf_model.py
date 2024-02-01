@@ -1,6 +1,6 @@
 from typing import Optional, Tuple, List
 
-from PIL import Image
+from PIL.Image import Image
 from pdfplumber.page import Page
 from pdfplumber.table import Table
 

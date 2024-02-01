@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List, Tuple
 
-from PIL import Image
+from PIL.Image import Image
 from docx.text.paragraph import Paragraph, Run
 
 from datariot.__spi__.type import Formatter, Box, MediaAware

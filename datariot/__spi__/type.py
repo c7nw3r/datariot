@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import List, Literal, Optional, Tuple
 
-from PIL import Image
+from PIL.Image import Image
 
 from datariot.util import write_file
 from datariot.util.io_util import get_dir
