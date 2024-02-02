@@ -17,7 +17,7 @@ setup(
     long_description_content_type="text/markdown",
     author='c7nw3r',
     url='https://github.com/c7nw3r/datariot',
-    download_url='https://github.com/c7nw3r/datariot/archive/refs/tags/v0.3.0.tar.gz',
+    download_url='https://github.com/c7nw3r/datariot/archive/refs/tags/v0.1.0.tar.gz',
     setup_requires=['setuptools_scm'],
     include_package_data=True,
     install_requires=[
