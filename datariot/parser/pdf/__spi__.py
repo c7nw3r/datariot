@@ -19,3 +19,5 @@ class BBoxConfig:
     merge_same_line_tolerance: int = 3
     merge_x_tolerance: int = 10
     merge_y_tolerance: int = 10
+    columns_split: bool = True
+    columns_gap: int = 10

@@ -14,6 +14,7 @@ from datariot.parser.pdf.bbox.bbox_filter import (
 )
 from datariot.parser.pdf.bbox.bbox_merger import CoordinatesBoundingBoxMerger
 from datariot.parser.pdf.bbox.bbox_sorter import CoordinatesBoundingBoxSorter
+from datariot.parser.pdf.bbox.bbox_splitter import ColumnLayoutBoundingBoxSplitter
 from datariot.parser.pdf.pdf_model import PDFImageBox, PDFOcrBox, PDFTableBox, PDFTextBox
 from datariot.util.array_util import flatten
 
@@ -40,6 +41,7 @@ class PageMixin:
 
     def get_text_boxes(self, document: PDFDocument, page: Page, config: BBoxConfig) -> List[PDFTextBox]:
         box_merger = CoordinatesBoundingBoxMerger(config)
+        box_splitter = ColumnLayoutBoundingBoxSplitter(config)
         box_filter = CoordinatesBoundingBoxFilter(config)
         content_filter = ContentBoundingBoxFilter(config)
         toc_filter = PDFOutlinesBoundingBoxFilter(document)
@@ -50,6 +52,7 @@ class PageMixin:
         )
         boxes = [PDFTextBox.from_dict(word) for word in boxes]
         boxes = box_merger(page, boxes)
+        boxes = box_splitter(page, boxes)
         boxes = toc_filter(page, boxes)
         boxes = box_filter(page, boxes)
         boxes = content_filter(page, boxes)

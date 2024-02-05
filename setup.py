@@ -37,7 +37,8 @@ setup(
             "python-docx==1.1.0"
         ],
         'pdf': [
-            "pdfplumber==0.10.3"
+            "pdfplumber==0.10.3",
+            "numpy==1.26.3"
         ],
         'ocr': [
             "pytesseract==0.3.10"
