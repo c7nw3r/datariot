@@ -13,10 +13,10 @@ IMAGE_RESOLUTION = 400
 
 class PDFTextBox(Box):
 
-    def __init__(self, x1: int, y1: int, x2: int, y2: int, text: str, size: int, font_name: str):
+    def __init__(self, x1: int, y1: int, x2: int, y2: int, text: str, font_size: int, font_name: str):
         super().__init__(x1, x2, y1, y2)
         self._text = text
-        self._size = size
+        self._font_size = font_size
         self._font_name = font_name
 
     @staticmethod
@@ -31,7 +31,7 @@ class PDFTextBox(Box):
         return PDFTextBox(x1, y1, x2, y2, text, font_size, font_name)
 
     def with_text(self, text: str):
-        return PDFTextBox(self.x1, self.y1, self.x2, self.y2, text, self._size, self._font_name)
+        return PDFTextBox(self.x1, self.y1, self.x2, self.y2, text, self._font_size, self._font_name)
 
     @property
     def text(self) -> str:
@@ -39,7 +39,19 @@ class PDFTextBox(Box):
 
     @property
     def font_size(self) -> int:
-        return self._size
+        return self._font_size
+
+    @font_size.setter
+    def font_size(self, value):
+        self._font_size = value
+
+    @property
+    def font_name(self) -> str:
+        return self._font_name
+
+    @font_name.setter
+    def font_name(self, value):
+        self._font_name = value
 
     @property
     def font_weight(self) -> Optional[FontWeight]:

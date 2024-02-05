@@ -4,6 +4,7 @@ from typing import Iterator
 
 from datariot.__spi__.error import DataRiotImportException, DataRiotException
 from datariot.__spi__.type import Parser, Parsed
+from datariot.parser.pdf.__spi__ import BBoxConfig
 from datariot.parser.pdf.pdf_mixin import PageMixin
 from datariot.util.io_util import get_files
 
@@ -12,6 +13,7 @@ from datariot.util.io_util import get_files
 class Config:
     screenshot: bool = False
     ocr: bool = False
+    bbox_config: BBoxConfig = BBoxConfig()
 
 
 class PDFParser(Parser, PageMixin):
@@ -32,14 +34,14 @@ class PDFParser(Parser, PageMixin):
         import pdfplumber
 
         bboxes = []
-        reader = pdfplumber.open(path)
 
-        for page in reader.pages:
-            boxes = self.get_boxes(reader.doc, page)
-            bboxes.extend(boxes)
+        with pdfplumber.open(path) as reader:
+            for page in reader.pages:
+                boxes = self.get_boxes(reader.doc, page, self.config.bbox_config)
+                bboxes.extend(boxes)
 
-            if self.config.screenshot:
-                self.take_screenshot(page, boxes)
+                if self.config.screenshot:
+                    self.take_screenshot(page, boxes)
 
         return Parsed(path, bboxes)
 

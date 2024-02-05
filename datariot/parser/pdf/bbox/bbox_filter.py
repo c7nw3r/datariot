@@ -1,33 +1,35 @@
-from typing import List
+import re
+from typing import List, TypeVar
 
 from pdfminer.pdfdocument import PDFDocument, PDFNoOutlines
 from pdfplumber.page import Page
 
 from datariot.__spi__.type import Box
+from datariot.parser.pdf.__spi__ import BBoxConfig
+from datariot.parser.pdf.bbox.__spi__ import BoundingBoxFilter
 from datariot.parser.pdf.pdf_model import PDFTextBox
 
 
-class CoordinatesBoundingBoxFilter:
-    def __init__(self, min_y: float, max_y: float):
-        self.min_y = min_y
-        self.max_y = max_y
+class CoordinatesBoundingBoxFilter(BoundingBoxFilter):
+    def __init__(self, config: BBoxConfig):
+        self._config = config
 
     def __call__(self, page: Page, bboxes: List[PDFTextBox]) -> List[PDFTextBox]:
         is_landscape = page.layout.width > page.layout.height
 
-        def _filter(bbox):
+        def _filter(bbox: PDFTextBox):
             if is_landscape:
                 return True
 
-            expr1 = bbox.y1 <= self.max_y if self.max_y is not None else True
-            expr2 = bbox.y1 >= self.min_y if self.min_y is not None else True
+            expr1 = bbox.y1 <= self._config.filter_max_y if self._config.filter_max_y is not None else True
+            expr2 = bbox.y1 >= self._config.filter_min_y if self._config.filter_min_y is not None else True
 
             return expr1 and expr2
 
-        return [bbox for bbox in bboxes if _filter(bbox)]
+        return [b for b in bboxes if _filter(b)]
 
 
-class PDFOutlinesBoundingBoxFilter:
+class PDFOutlinesBoundingBoxFilter(BoundingBoxFilter):
 
     def __init__(self, document: PDFDocument):
         try:
@@ -44,10 +46,11 @@ class PDFOutlinesBoundingBoxFilter:
                 return False
             return True
 
-        return list(filter(_filter, bboxes))
+        return [b for b in bboxes if _filter(b)]
 
-from typing import List, TypeVar
+
 T = TypeVar('T')
+
 
 class BoxOverlapsBoundingBoxFilter:
 
@@ -84,3 +87,23 @@ class BoxOverlapsBoundingBoxFilter:
                 result.append(box1)
 
         return result
+
+
+class ContentBoundingBoxFilter(BoundingBoxFilter):
+
+    def __init__(self, config: BBoxConfig) -> None:
+        self._config = config
+
+    def __call__(self, page: Page, bboxes: List[PDFTextBox]) -> List[PDFTextBox]:
+        def _filter(box: PDFTextBox):
+            for regex in self._config.filter_must_regexes:
+                if not re.search(regex.pattern, box.text, regex.flags):
+                    return False
+
+            for regex in self._config.filter_must_not_regexes:
+                if re.search(regex.pattern, box.text, regex.flags):
+                    return False
+
+            return True
+
+        return [b for b in bboxes if _filter(b)]
