@@ -29,7 +29,7 @@ TEXT = "text"
 class PageMixin:
 
     def get_boxes(self, document: PDFDocument, page: Page, config: BBoxConfig):
-        box_sorter = CoordinatesBoundingBoxSorter()
+        box_sorter = CoordinatesBoundingBoxSorter(config)
 
         boxes = []
         boxes.extend(self.get_table_boxes(document, page))

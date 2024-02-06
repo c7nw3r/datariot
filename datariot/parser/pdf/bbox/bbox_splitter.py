@@ -3,10 +3,12 @@ from typing import List
 import numpy as np
 from pdfplumber.display import PageImage
 from pdfplumber.page import Page
+from datariot.parser.__spi__ import DocumentFonts
 
 from datariot.parser.pdf.__spi__ import BBoxConfig
 from datariot.parser.pdf.bbox.bbox_merger import CoordinatesBoundingBoxMerger
 from datariot.parser.pdf.pdf_model import PDFTextBox
+from datariot.parser.utils.fonts import check_font_specs
 
 
 class ColumnLayoutBoundingBoxSplitter:
@@ -19,11 +21,13 @@ class ColumnLayoutBoundingBoxSplitter:
         if not bboxes or not self._config.columns_split:
             return bboxes
 
+        doc_fonts = DocumentFonts.from_bboxes(bboxes)
         results = []
         for bbox in bboxes:
             if (
                 (bbox.x1 < page.width / 2 < bbox.x2)
                 and len(bbox.text.splitlines()) >= self._config.columns_min_lines
+                and check_font_specs(bbox, doc_fonts, self._config.columns_split_fonts)
             ):
                 bbox_center_x = bbox.x1 + (bbox.x2 - bbox.x1) / 2
                 gap = page.crop(
@@ -31,8 +35,6 @@ class ColumnLayoutBoundingBoxSplitter:
                     strict=False
                 )
                 if self._is_monochrome(gap.to_image()):
-                    print("HEY")
-                    # TODO: check if bounding box center is column gap
                     crop_left = page.crop(
                         (bbox.x1, bbox.y1, bbox_center_x, bbox.y2),
                         strict=False

@@ -16,8 +16,8 @@ class PDFTextBox(Box):
     def __init__(self, x1: int, y1: int, x2: int, y2: int, text: str, font_size: int, font_name: str):
         super().__init__(x1, x2, y1, y2)
         self._text = text
-        self._font_size = font_size
-        self._font_name = font_name
+        self.font_size = font_size
+        self.font_name = font_name
 
     @staticmethod
     def from_dict(data: dict):
@@ -43,7 +43,7 @@ class PDFTextBox(Box):
 
     @font_size.setter
     def font_size(self, value):
-        self._font_size = value
+        self._font_size = round(value)
 
     @property
     def font_name(self) -> str:

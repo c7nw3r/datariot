@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from typing import List, Optional
 
 from datariot.parser.__spi__ import RegexPattern
+from datariot.parser.__spi__ import FontSpecification
 
 
 @dataclass
@@ -22,3 +23,6 @@ class BBoxConfig:
     columns_split: bool = True
     columns_gap: int = 2
     columns_min_lines: int = 2
+    columns_split_fonts: List[FontSpecification] = field(default_factory=lambda: ["most_common"])
+    sorter_fuzzy: bool = False
+    sorter_y_tolerance: int = 5
