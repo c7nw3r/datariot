@@ -20,4 +20,5 @@ class BBoxConfig:
     merge_x_tolerance: int = 10
     merge_y_tolerance: int = 10
     columns_split: bool = True
-    columns_gap: int = 10
+    columns_gap: int = 2
+    columns_min_lines: int = 2

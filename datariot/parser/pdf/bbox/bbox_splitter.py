@@ -21,13 +21,18 @@ class ColumnLayoutBoundingBoxSplitter:
 
         results = []
         for bbox in bboxes:
-            if bbox.x1 < page.width / 2 < bbox.x2:
-                bbox_center_x = (bbox.x2 - bbox.x1) / 2
+            if (
+                (bbox.x1 < page.width / 2 < bbox.x2)
+                and len(bbox.text.splitlines()) >= self._config.columns_min_lines
+            ):
+                bbox_center_x = bbox.x1 + (bbox.x2 - bbox.x1) / 2
                 gap = page.crop(
                     (bbox_center_x-self._config.columns_gap, bbox.y1, bbox_center_x+self._config.columns_gap, bbox.y2),
                     strict=False
                 )
                 if self._is_monochrome(gap.to_image()):
+                    print("HEY")
+                    # TODO: check if bounding box center is column gap
                     crop_left = page.crop(
                         (bbox.x1, bbox.y1, bbox_center_x, bbox.y2),
                         strict=False
@@ -38,15 +43,17 @@ class ColumnLayoutBoundingBoxSplitter:
                     )
 
                     for crop in (crop_left, crop_right):
-                        boxes = crop.extract_words(
+                        crop_bboxes = crop.extract_words(
                             extra_attrs=self._config.extract_words_extra_attrs,
                             keep_blank_chars=self._config.extract_words_keep_blank_chars
                         )
-                        boxes = [PDFTextBox.from_dict(word) for word in boxes]
-                        boxes = self._box_merger(page, boxes)
-                        results.extend(boxes)
-            else:
-                results.append(bbox)
+                        crop_bboxes = [PDFTextBox.from_dict(word) for word in crop_bboxes]
+                        crop_bboxes = self._box_merger(page, crop_bboxes)
+                        results.extend(crop_bboxes)
+
+                    continue
+
+            results.append(bbox)
 
         return results
 
