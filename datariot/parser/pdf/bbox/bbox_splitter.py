@@ -7,7 +7,7 @@ from datariot.parser.__spi__ import DocumentFonts
 
 from datariot.parser.pdf.__spi__ import BBoxConfig
 from datariot.parser.pdf.bbox.bbox_merger import CoordinatesBoundingBoxMerger
-from datariot.parser.pdf.pdf_model import PDFTextBox
+from datariot.parser.pdf.pdf_model import PDFColumnTextBox, PDFTextBox
 from datariot.parser.utils.fonts import check_font_specs
 
 
@@ -44,13 +44,15 @@ class ColumnLayoutBoundingBoxSplitter:
                         strict=False
                     )
 
-                    for crop in (crop_left, crop_right):
+                    for crop, col in ((crop_left, "left"), (crop_right, "right")):
+                        # TODO: refactor to avoid code repetition from mixin
                         crop_bboxes = crop.extract_words(
                             extra_attrs=self._config.extract_words_extra_attrs,
                             keep_blank_chars=self._config.extract_words_keep_blank_chars
                         )
                         crop_bboxes = [PDFTextBox.from_dict(word) for word in crop_bboxes]
                         crop_bboxes = self._box_merger(page, crop_bboxes)
+                        crop_bboxes = [PDFColumnTextBox.from_pdf_text_box(b, col) for b in crop_bboxes]
                         results.extend(crop_bboxes)
 
                     continue

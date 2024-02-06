@@ -5,6 +5,7 @@ from datariot.parser.__spi__ import RegexPattern
 from datariot.parser.__spi__ import FontSpecification
 
 
+# TODO: split into separate config classes
 @dataclass
 class BBoxConfig:
     filter_min_y: Optional[int] = 50

@@ -64,7 +64,7 @@ class DocumentFonts:
 
     # TODO: generalize to arbitrary text boxes
     @staticmethod
-    def from_bboxes(bboxes: List[PDFTextBox]) -> 'DocumentFonts':
+    def from_bboxes(bboxes: List[PDFTextBox]) -> "DocumentFonts":
         return DocumentFonts([Font(b.font_name, b.font_size, b.font_weight) for b in bboxes])
 
 

@@ -1,11 +1,12 @@
-from typing import Optional, Tuple, List
+from typing import List, Optional, Tuple
 
-from PIL.Image import Image
 from pdfplumber.page import Page
 from pdfplumber.table import Table
+from PIL.Image import Image
 
-from datariot.__spi__.type import FontWeight, Box, MediaAware
+from datariot.__spi__.type import Box, ColumnPosition, FontWeight, MediaAware
 from datariot.util.image_util import to_base64
+
 
 DEFAULT_IMAGE_RESOLUTION = 72
 IMAGE_RESOLUTION = 400
@@ -66,6 +67,27 @@ class PDFTextBox(Box):
 
     def __repr__(self):
         return self.text
+
+
+class PDFColumnTextBox(PDFTextBox):
+
+    def __init__(
+            self,
+            x1: int,
+            y1: int,
+            x2: int,
+            y2: int,
+            text: str,
+            font_size: int,
+            font_name: str,
+            column: ColumnPosition
+    ):
+        super().__init__(x1, y1, x2, y2, text, font_size, font_name)
+        self.column = column
+
+    @staticmethod
+    def from_pdf_text_box(box: PDFTextBox, column: ColumnPosition) -> "PDFColumnTextBox":
+        return PDFColumnTextBox(box.x1, box.y1, box.x2, box.y2, box.text, box.font_size, box.font_name, column)
 
 
 class PDFOcrBox(PDFTextBox):
