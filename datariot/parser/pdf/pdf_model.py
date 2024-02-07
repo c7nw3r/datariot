@@ -80,14 +80,25 @@ class PDFColumnTextBox(PDFTextBox):
             text: str,
             font_size: int,
             font_name: str,
+            num_columns: int,
             column: ColumnPosition
     ):
         super().__init__(x1, y1, x2, y2, text, font_size, font_name)
         self.column = column
 
     @staticmethod
-    def from_pdf_text_box(box: PDFTextBox, column: ColumnPosition) -> "PDFColumnTextBox":
-        return PDFColumnTextBox(box.x1, box.y1, box.x2, box.y2, box.text, box.font_size, box.font_name, column)
+    def from_pdf_text_box(box: PDFTextBox, num_columns: int, column: ColumnPosition) -> "PDFColumnTextBox":
+        return PDFColumnTextBox(
+            box.x1,
+            box.y1,
+            box.x2,
+            box.y2,
+            box.text,
+            box.font_size,
+            box.font_name,
+            num_columns,
+            column
+        )
 
 
 class PDFOcrBox(PDFTextBox):

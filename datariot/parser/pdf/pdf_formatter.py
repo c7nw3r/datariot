@@ -2,6 +2,7 @@ from typing import List
 
 from datariot.__spi__ import Formatter, Parsed
 from datariot.__spi__.type import Box
+from datariot.parser.__spi__ import DocumentFonts
 from datariot.parser.pdf import PDFTextBox, PDFTableBox, PDFImageBox
 from datariot.util.io_util import get_filename
 from datariot.util.text_util import create_uuid_from_string
@@ -12,17 +13,9 @@ class HeuristicPDFFormatter(Formatter):
     def __init__(self, parsed: Parsed, enable_json: bool = False):
         self.enable_json = enable_json
 
-        boxes = [e for e in parsed.bboxes if isinstance(e, PDFTextBox)]
-
-        sizes = ([int(e.font_size) for e in boxes])
-        sizes = list(reversed(sorted(sizes)))
-
-        if len(boxes) == 0:
-            self.most_used_size = None
-            self.sizes = []
-        else:
-            self.most_used_size = max(set(sizes), key=sizes.count)
-            self.sizes = list(reversed(sorted(set(sizes))))
+        self._doc_fonts = DocumentFonts.from_bboxes(
+            [b for b in parsed.bboxes if isinstance(b, PDFTextBox)]
+        )
 
         self.doc_path = parsed.path
 
@@ -34,11 +27,13 @@ class HeuristicPDFFormatter(Formatter):
         if isinstance(box, PDFImageBox):
             return self._format_image(box)
 
-        return box.render(self)
+        # TODO: infinite recursion?
+        # return box.render(self)
+        return repr(box)
 
     def _format_text(self, box: PDFTextBox):
-        if self.most_used_size is not None and int(box.font_size) > self.most_used_size:
-            order = self.sizes.index(int(box.font_size))
+        if self._doc_fonts.most_common_size and box.font_size > self._doc_fonts.most_common_size:
+            order = self._doc_fonts.get_size_rank(box.font_size)
             return ("#" * (order + 1)) + " " + box.text
 
         return box.text

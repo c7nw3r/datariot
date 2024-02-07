@@ -17,7 +17,11 @@ class BBoxConfig:
     merge_same_font_name: bool = True
     merge_same_font_size: bool = True
     merge_same_font_weight: bool = True
+    # always merge boxes with spaces only irrespective of font
     merge_blank_always: bool = True
+    # always merge boxes with single non-space character irrespective of font
+    merge_single_char_always: bool = True
+    merge_blank_consecutive_lines: bool = True
     merge_same_line_tolerance: int = 3
     merge_x_tolerance: int = 10
     merge_y_tolerance: int = 10

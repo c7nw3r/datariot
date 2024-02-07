@@ -82,4 +82,4 @@ class Parser(ABC):
 
 
 FontWeight = Literal["regular", "bold"]
-ColumnPosition = Literal["left", "right"]
+ColumnPosition = Literal["left", "center", "right"]
