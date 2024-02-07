@@ -50,7 +50,7 @@ class PageMixin:
             extra_attrs=config.extract_words_extra_attrs,
             keep_blank_chars=config.extract_words_keep_blank_chars
         )
-        boxes = [PDFTextBox.from_dict(word) for word in boxes]
+        boxes = [PDFTextBox.from_dict({**word, "page_number": page.page_number}) for word in boxes]
         boxes = box_merger(page, boxes)
         boxes = box_splitter(page, boxes)
         boxes = toc_filter(page, boxes)

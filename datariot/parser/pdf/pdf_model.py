@@ -14,11 +14,22 @@ IMAGE_RESOLUTION = 400
 
 class PDFTextBox(Box):
 
-    def __init__(self, x1: int, y1: int, x2: int, y2: int, text: str, font_size: int, font_name: str):
+    def __init__(
+            self,
+            x1: int,
+            y1: int,
+            x2: int,
+            y2: int,
+            text: str,
+            font_size: int,
+            font_name: str,
+            page_number: int
+    ):
         super().__init__(x1, x2, y1, y2)
         self._text = text
         self.font_size = font_size
         self.font_name = font_name
+        self.page_number = page_number
 
     @staticmethod
     def from_dict(data: dict):
@@ -29,10 +40,11 @@ class PDFTextBox(Box):
         text = data["text"]
         font_name = data["fontname"]
         font_size = data["size"]
-        return PDFTextBox(x1, y1, x2, y2, text, font_size, font_name)
+        page_number = data["page_number"]
+        return PDFTextBox(x1, y1, x2, y2, text, font_size, font_name, page_number)
 
     def with_text(self, text: str):
-        return PDFTextBox(self.x1, self.y1, self.x2, self.y2, text, self._font_size, self._font_name)
+        return PDFTextBox(self.x1, self.y1, self.x2, self.y2, text, self._font_size, self._font_name, self.page_number)
 
     @property
     def text(self) -> str:
@@ -63,7 +75,16 @@ class PDFTextBox(Box):
         return "regular"
 
     def copy(self):
-        return PDFTextBox(self.x1, self.y1, self.x2, self.y2, self.text, self.font_size, self._font_name)
+        return PDFTextBox(
+            self.x1,
+            self.y1,
+            self.x2,
+            self.y2,
+            self.text,
+            self.font_size,
+            self._font_name,
+            self.page_number
+        )
 
     def __repr__(self):
         return self.text
@@ -80,10 +101,12 @@ class PDFColumnTextBox(PDFTextBox):
             text: str,
             font_size: int,
             font_name: str,
+            page_number: int,
             num_columns: int,
             column: ColumnPosition
     ):
-        super().__init__(x1, y1, x2, y2, text, font_size, font_name)
+        super().__init__(x1, y1, x2, y2, text, font_size, font_name, page_number)
+        self.num_columns = num_columns
         self.column = column
 
     @staticmethod
@@ -96,6 +119,7 @@ class PDFColumnTextBox(PDFTextBox):
             box.text,
             box.font_size,
             box.font_name,
+            box.page_number,
             num_columns,
             column
         )
@@ -103,8 +127,8 @@ class PDFColumnTextBox(PDFTextBox):
 
 class PDFOcrBox(PDFTextBox):
 
-    def __init__(self, x1: int, y1: int, x2: int, y2: int, text: str):
-        super().__init__(x1, y1, x2, y2, text, -1, "regular")
+    def __init__(self, x1: int, y1: int, x2: int, y2: int, text: str, page_number: int = -1):
+        super().__init__(x1, y1, x2, y2, text, -1, "regular", page_number)
 
     @staticmethod
     def from_ocr(data):

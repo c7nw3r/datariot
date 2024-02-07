@@ -41,7 +41,10 @@ class ColumnLayoutBoundingBoxSplitter:
                             extra_attrs=self._config.extract_words_extra_attrs,
                             keep_blank_chars=self._config.extract_words_keep_blank_chars
                         )
-                        crop_bboxes = [PDFTextBox.from_dict(word) for word in crop_bboxes]
+                        crop_bboxes = [
+                            PDFTextBox.from_dict({**word, "page_number": page.page_number})
+                            for word in crop_bboxes
+                        ]
                         crop_bboxes = self._box_merger(page, crop_bboxes)
                         crop_bboxes = [PDFColumnTextBox.from_pdf_text_box(b, num, col) for b in crop_bboxes]
                         results.extend(crop_bboxes)
