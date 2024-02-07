@@ -22,6 +22,8 @@ class BBoxConfig:
     # always merge boxes with single non-space character irrespective of font
     merge_single_char_always: bool = True
     merge_blank_consecutive_lines: bool = True
+    # always merge next word to current bounding box if current bounding box has most common font
+    merge_same_line_always_after_most_common: bool = True
     merge_same_line_tolerance: int = 3
     merge_x_tolerance: int = 10
     merge_y_tolerance: int = 10
