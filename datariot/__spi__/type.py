@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from typing import List, Literal, Optional, Tuple
 
 from PIL.Image import Image
+from tqdm import tqdm
 
 from datariot.util import write_file
 from datariot.util.io_util import save_image, without_ext
@@ -57,8 +58,9 @@ class Parsed:
     path: str
     bboxes: List[Box]
 
-    def render(self, evaluator, delimiter: str = "\n\n"):
-        return delimiter.join([e.render(evaluator) for e in self.bboxes])
+    def render(self, evaluator, delimiter: str = "\n\n", show_progress: bool = False):
+        array = tqdm(self.bboxes, disable=not show_progress, desc="render")
+        return delimiter.join([e.render(evaluator) for e in array])
 
     def save(self, path: str,
              formatter: Formatter,

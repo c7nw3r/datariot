@@ -19,6 +19,7 @@ HEIGHT = "height"
 TEXT = "text"
 
 
+# noinspection PyMethodMayBeStatic
 class PageMixin:
 
     def get_boxes(self, document: PDFDocument, page: Page):

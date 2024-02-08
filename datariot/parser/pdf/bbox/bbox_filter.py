@@ -37,17 +37,17 @@ class PDFOutlinesBoundingBoxFilter:
 
     def __call__(self, page: Page, bboxes: List[PDFTextBox]) -> List[PDFTextBox]:
         def _filter(box: PDFTextBox):
-            # if box.text.lower() == "inhaltsverzeichnis":
-            #     return False
-
             if box.text[0].isdigit() and "....." in box.text:
                 return False
             return True
 
         return list(filter(_filter, bboxes))
 
+
 from typing import List, TypeVar
+
 T = TypeVar('T')
+
 
 class BoxOverlapsBoundingBoxFilter:
 

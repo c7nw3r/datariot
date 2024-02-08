@@ -20,7 +20,7 @@ class DocxParser(Parser, DocumentMixin):
 
         try:
             document = Document(path)
-        except:
+        except OSError:
             raise DataRiotException("error while opening docx file " + path)
 
         elements = [

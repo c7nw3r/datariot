@@ -55,6 +55,7 @@ class HeuristicDocxFormatter(Formatter):
         try:
             doc_name = create_uuid_from_string(get_filename(self.doc_path))
             img_name = create_uuid_from_string(image.to_hash())
+            # FIXME: language
             return f"![Abbildung](doc/{doc_name}/{img_name})"
         except OSError:
             return ""

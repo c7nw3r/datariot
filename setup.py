@@ -41,6 +41,12 @@ setup(
         ],
         'ocr': [
             "pytesseract==0.3.10"
+        ],
+        'web': [
+            "selenium==4.17.2",
+            "beautifulsoup4==4.12.3",
+            "webdriver_manager==4.0.1",
+            "lxml==5.1.0"
         ]
     }
 )
