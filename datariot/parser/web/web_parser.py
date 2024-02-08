@@ -1,3 +1,4 @@
+import logging
 from typing import List
 
 from selenium import webdriver
@@ -11,6 +12,7 @@ from datariot.parser.web.bbox.bbox_sorter import CoordinatesBoundingBoxSorter
 from datariot.parser.web.web_mixin import WebMixin, USER_AGENT
 from datariot.parser.web.web_model import WebBox
 from datariot.util.array_util import flatten
+from datariot.util.io_util import get_files
 
 
 class WebParser(WebMixin):
@@ -115,3 +117,13 @@ class WebParser(WebMixin):
 
         candidates = [wn for wn in candidates if all(f(wn) for f in filters)]
         return candidates
+
+    @staticmethod
+    def parse_folder(path: str, root: str = "//"):
+        parser = WebParser(root=root)
+
+        for file in get_files(path, "html", recursive=False):
+            try:
+                yield parser(f"file:////{file}")
+            except OSError as ex:
+                logging.warning(ex)
