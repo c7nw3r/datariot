@@ -1,24 +1,16 @@
 import logging
-from dataclasses import dataclass
 from typing import Iterator
 
 from datariot.__spi__.error import DataRiotImportException, DataRiotException
-from datariot.__spi__.type import Parser, Parsed
-from datariot.parser.pdf.__spi__ import BBoxConfig
+from datariot.__spi__.type import Parser
+from datariot.parser.pdf.__spi__ import PDFParserConfig, ParsedPDF
 from datariot.parser.pdf.pdf_mixin import PageMixin
 from datariot.util.io_util import get_files
 
 
-@dataclass
-class Config:
-    screenshot: bool = False
-    ocr: bool = False
-    bbox_config: BBoxConfig = BBoxConfig()
-
-
 class PDFParser(Parser, PageMixin):
 
-    def __init__(self, config: Config = Config()):
+    def __init__(self, config: PDFParserConfig = PDFParserConfig()):
         self.config = config
         try:
             import pdfplumber
@@ -37,16 +29,16 @@ class PDFParser(Parser, PageMixin):
 
         with pdfplumber.open(path) as reader:
             for page in reader.pages:
-                boxes = self.get_boxes(reader.doc, page, self.config.bbox_config)
+                boxes = self.get_boxes(reader.doc, page, self.config)
                 bboxes.extend(boxes)
 
                 if self.config.screenshot:
                     self.take_screenshot(page, boxes)
 
-        return Parsed(path, bboxes)
+        return ParsedPDF(path, bboxes)
 
     @staticmethod
-    def parse_folder(path: str, config: Config = Config()) -> Iterator[Parsed]:
+    def parse_folder(path: str, config: PDFParserConfig = PDFParserConfig()) -> Iterator[ParsedPDF]:
         for file in get_files(path, ".pdf"):
             try:
                 yield PDFParser(config).parse(file)

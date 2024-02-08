@@ -5,7 +5,7 @@ from pdfminer.pdfdocument import PDFDocument
 from pdfplumber.page import Page
 
 from datariot.__spi__.type import Box
-from datariot.parser.pdf.__spi__ import BBoxConfig
+from datariot.parser.pdf.__spi__ import PDFParserConfig, BBoxConfig
 from datariot.parser.pdf.bbox.bbox_filter import (
     BoxOverlapsBoundingBoxFilter,
     ContentBoundingBoxFilter,
@@ -28,13 +28,13 @@ TEXT = "text"
 
 class PageMixin:
 
-    def get_boxes(self, document: PDFDocument, page: Page, config: BBoxConfig):
-        box_sorter = CoordinatesBoundingBoxSorter(config)
+    def get_boxes(self, document: PDFDocument, page: Page, config: PDFParserConfig):
+        box_sorter = CoordinatesBoundingBoxSorter(config.bbox_config)
 
         boxes = []
         boxes.extend(self.get_table_boxes(document, page))
-        boxes.extend(self.get_text_boxes(document, page.filter(self.not_within_bboxes(boxes)), config))
-        boxes.extend(self.get_image_boxes(document, page, use_ocr=len(boxes) == 0))
+        boxes.extend(self.get_text_boxes(document, page.filter(self.not_within_bboxes(boxes)), config.bbox_config))
+        boxes.extend(self.get_image_boxes(document, page, use_ocr=config.ocr))
         boxes = box_sorter(page, boxes)
 
         return boxes

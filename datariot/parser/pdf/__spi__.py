@@ -1,8 +1,9 @@
 from dataclasses import dataclass, field
 from typing import List, Optional
 
-from datariot.parser.__spi__ import RegexPattern
-from datariot.parser.__spi__ import FontSpecification
+from datariot.__spi__.type import Parsed
+from datariot.parser.__spi__ import FontSpecification, RegexPattern
+from datariot.parser.pdf.pdf_formatter import JSONPDFFormatter
 
 
 # TODO: split into separate config classes
@@ -33,3 +34,20 @@ class BBoxConfig:
     columns_split_fonts: List[FontSpecification] = field(default_factory=lambda: ["most_common"])
     sorter_fuzzy: bool = False
     sorter_y_tolerance: int = 5
+
+
+@dataclass
+class PDFParserConfig:
+    screenshot: bool = False
+    ocr: bool = False
+    bbox_config: BBoxConfig = BBoxConfig()
+
+
+class ParsedPDF(Parsed):
+
+    def to_json(self):
+        formatter = JSONPDFFormatter()
+        return {
+            "path": self.path,
+            "bboxes": [b.render(formatter) for b in self.bboxes]
+        }
