@@ -10,7 +10,7 @@ long_description = Path(__file__).with_name("README.md").read_text()
 setup(
     name='datariot',
     packages=find_packages(exclude=("test")),
-    version='0.1.0dev',
+    version='0.2.0dev',
     license='Apache Software License',
     description='tbd',
     long_description=long_description,
