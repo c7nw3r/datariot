@@ -23,7 +23,12 @@ def get_dir(path: str):
     return str(pathlib.Path(path).parent.resolve())
 
 
-def get_files(path: str, ext: str):
+def get_files(path: str, ext: str, recursive: bool = True):
+    if not recursive:
+        for file in tqdm(os.listdir(path), desc="get files of " + path):
+            if file.endswith(ext):
+                yield f"{path}/{file}"
+
     for root, _, files in tqdm(os.walk(path), desc="get files of " + path):
         for file in files:
             if file.endswith(ext):

@@ -7,17 +7,18 @@ from setuptools import find_packages, setup
 
 long_description = Path(__file__).with_name("README.md").read_text()
 
+version = "0.2.0"
 setup(
     name='datariot',
     packages=find_packages(exclude=("test")),
-    version='0.2.0dev',
+    version=version,
     license='Apache Software License',
     description='tbd',
     long_description=long_description,
     long_description_content_type="text/markdown",
     author='c7nw3r',
     url='https://github.com/c7nw3r/datariot',
-    download_url='https://github.com/c7nw3r/datariot/archive/refs/tags/v0.1.0.tar.gz',
+    download_url=f'https://github.com/c7nw3r/datariot/archive/refs/tags/v{version}.tar.gz',
     setup_requires=['setuptools_scm'],
     include_package_data=True,
     install_requires=[
@@ -42,6 +43,12 @@ setup(
         ],
         'ocr': [
             "pytesseract==0.3.10"
+        ],
+        'web': [
+            "selenium==4.17.2",
+            "beautifulsoup4==4.12.3",
+            "webdriver_manager==4.0.1",
+            "lxml==5.1.0"
         ]
     }
 )
