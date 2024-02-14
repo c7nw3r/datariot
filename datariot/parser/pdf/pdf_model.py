@@ -1,11 +1,12 @@
-from typing import Optional, Tuple, List
+from typing import List, Optional, Tuple
 
-from PIL.Image import Image
 from pdfplumber.page import Page
 from pdfplumber.table import Table
+from PIL.Image import Image
 
-from datariot.__spi__.type import FontWeight, Box, MediaAware
+from datariot.__spi__.type import Box, ColumnPosition, FontWeight, MediaAware
 from datariot.util.image_util import to_base64
+
 
 DEFAULT_IMAGE_RESOLUTION = 72
 IMAGE_RESOLUTION = 400
@@ -13,11 +14,22 @@ IMAGE_RESOLUTION = 400
 
 class PDFTextBox(Box):
 
-    def __init__(self, x1: int, y1: int, x2: int, y2: int, text: str, size: int, font_name: str):
+    def __init__(
+            self,
+            x1: int,
+            y1: int,
+            x2: int,
+            y2: int,
+            text: str,
+            font_size: int,
+            font_name: str,
+            page_number: int
+    ):
         super().__init__(x1, x2, y1, y2)
         self._text = text
-        self._size = size
-        self._font_name = font_name
+        self.font_size = font_size
+        self.font_name = font_name
+        self.page_number = page_number
 
     @staticmethod
     def from_dict(data: dict):
@@ -28,10 +40,11 @@ class PDFTextBox(Box):
         text = data["text"]
         font_name = data["fontname"]
         font_size = data["size"]
-        return PDFTextBox(x1, y1, x2, y2, text, font_size, font_name)
+        page_number = data["page_number"]
+        return PDFTextBox(x1, y1, x2, y2, text, font_size, font_name, page_number)
 
     def with_text(self, text: str):
-        return PDFTextBox(self.x1, self.y1, self.x2, self.y2, text, self._size, self._font_name)
+        return PDFTextBox(self.x1, self.y1, self.x2, self.y2, text, self._font_size, self._font_name, self.page_number)
 
     @property
     def text(self) -> str:
@@ -39,7 +52,19 @@ class PDFTextBox(Box):
 
     @property
     def font_size(self) -> int:
-        return self._size
+        return self._font_size
+
+    @font_size.setter
+    def font_size(self, value):
+        self._font_size = round(value)
+
+    @property
+    def font_name(self) -> str:
+        return self._font_name
+
+    @font_name.setter
+    def font_name(self, value):
+        self._font_name = value
 
     @property
     def font_weight(self) -> Optional[FontWeight]:
@@ -50,16 +75,60 @@ class PDFTextBox(Box):
         return "regular"
 
     def copy(self):
-        return PDFTextBox(self.x1, self.y1, self.x2, self.y2, self.text, self.font_size, self._font_name)
+        return PDFTextBox(
+            self.x1,
+            self.y1,
+            self.x2,
+            self.y2,
+            self.text,
+            self.font_size,
+            self._font_name,
+            self.page_number
+        )
 
     def __repr__(self):
         return self.text
 
 
+class PDFColumnTextBox(PDFTextBox):
+
+    def __init__(
+            self,
+            x1: int,
+            y1: int,
+            x2: int,
+            y2: int,
+            text: str,
+            font_size: int,
+            font_name: str,
+            page_number: int,
+            num_columns: int,
+            column: ColumnPosition
+    ):
+        super().__init__(x1, y1, x2, y2, text, font_size, font_name, page_number)
+        self.num_columns = num_columns
+        self.column = column
+
+    @staticmethod
+    def from_pdf_text_box(box: PDFTextBox, num_columns: int, column: ColumnPosition) -> "PDFColumnTextBox":
+        return PDFColumnTextBox(
+            box.x1,
+            box.y1,
+            box.x2,
+            box.y2,
+            box.text,
+            box.font_size,
+            box.font_name,
+            box.page_number,
+            num_columns,
+            column
+        )
+
+
 class PDFOcrBox(PDFTextBox):
 
-    def __init__(self, x1: int, y1: int, x2: int, y2: int, text: str):
-        super().__init__(x1, y1, x2, y2, text, -1, "regular")
+    def __init__(self, x1: int, y1: int, x2: int, y2: int, text: str, page_number: int = -1):
+        super().__init__(x1, y1, x2, y2, text, -1, "regular", page_number)
 
     @staticmethod
     def from_ocr(data):
@@ -82,10 +151,10 @@ class PDFImageBox(Box, MediaAware):
         super().__init__(int(data["x0"]), int(data["x1"]), int(data["top"]), int(data["bottom"]))
         self.page_number = page.page_number
 
-        self.data = page.crop((self.x1,
-                               max(0, int(page.height - self.y2)),
-                               self.x2,
-                               max(0, int(page.height - self.y1)))).to_image(resolution=IMAGE_RESOLUTION)
+        self.data = page.crop(
+            (self.x1, max(0, int(page.height - self.y2)), self.x2, max(0, int(page.height - self.y1))),
+            strict=False
+        ).to_image(resolution=IMAGE_RESOLUTION)
 
     @property
     def width(self):
