@@ -86,7 +86,7 @@ class BoxOverlapsBoundingBoxFilter:
         return result
 
 
-class ContentBoundingBoxFilter(BoundingBoxFilter):
+class TextContentBoundingBoxFilter(BoundingBoxFilter):
 
     def __init__(self, config: BBoxConfig) -> None:
         self._config = config

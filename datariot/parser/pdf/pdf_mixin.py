@@ -8,16 +8,15 @@ from datariot.__spi__.type import Box
 from datariot.parser.pdf.__spi__ import PDFParserConfig, BBoxConfig
 from datariot.parser.pdf.bbox.bbox_filter import (
     BoxOverlapsBoundingBoxFilter,
-    ContentBoundingBoxFilter,
+    TextContentBoundingBoxFilter,
     CoordinatesBoundingBoxFilter,
     PDFOutlinesBoundingBoxFilter,
 )
 from datariot.parser.pdf.bbox.bbox_merger import CoordinatesBoundingBoxMerger
+from datariot.parser.pdf.bbox.bbox_slicer import ColumnStyleBoundingBoxSlicer
 from datariot.parser.pdf.bbox.bbox_sorter import CoordinatesBoundingBoxSorter
-from datariot.parser.pdf.bbox.bbox_splitter import ColumnLayoutBoundingBoxSplitter
 from datariot.parser.pdf.pdf_model import PDFImageBox, PDFOcrBox, PDFTableBox, PDFTextBox
 from datariot.util.array_util import flatten
-
 
 LEFT = "left"
 TOP = "top"
@@ -35,16 +34,16 @@ class PageMixin:
         boxes = []
         boxes.extend(self.get_table_boxes(document, page))
         boxes.extend(self.get_text_boxes(document, page.filter(self.not_within_bboxes(boxes)), config.bbox_config))
-        boxes.extend(self.get_image_boxes(document, page, use_ocr=config.ocr))
+        boxes.extend(self.get_image_boxes(document, page, config))
         boxes = box_sorter(page, boxes)
 
         return boxes
 
     def get_text_boxes(self, document: PDFDocument, page: Page, config: BBoxConfig) -> List[PDFTextBox]:
         box_merger = CoordinatesBoundingBoxMerger(config)
-        box_splitter = ColumnLayoutBoundingBoxSplitter(config)
-        box_filter = CoordinatesBoundingBoxFilter(config)
-        content_filter = ContentBoundingBoxFilter(config)
+        box_slicer = ColumnStyleBoundingBoxSlicer(config)
+        pos_filter = CoordinatesBoundingBoxFilter(config)
+        txt_filter = TextContentBoundingBoxFilter(config)
         toc_filter = PDFOutlinesBoundingBoxFilter(document)
 
         boxes = page.extract_words(
@@ -53,10 +52,10 @@ class PageMixin:
         )
         boxes = [PDFTextBox.from_dict({**word, "page_number": page.page_number}) for word in boxes]
         boxes = box_merger(page, boxes)
-        boxes = box_splitter(page, boxes)
+        boxes = box_slicer(page, boxes)
         boxes = toc_filter(page, boxes)
-        boxes = box_filter(page, boxes)
-        boxes = content_filter(page, boxes)
+        boxes = pos_filter(page, boxes)
+        boxes = txt_filter(page, boxes)
 
         return boxes
 
@@ -64,7 +63,7 @@ class PageMixin:
         ts = {"vertical_strategy": "lines", "horizontal_strategy": "lines"}
         return [PDFTableBox(page, e) for e in zip(page.find_tables(ts), page.extract_tables(ts))]
 
-    def get_image_boxes(self, document: PDFDocument, page: Page, use_ocr: bool = False):
+    def get_image_boxes(self, document: PDFDocument, page: Page, config: PDFParserConfig):
         box_filter = BoxOverlapsBoundingBoxFilter()
 
         boxes = page.images
@@ -75,16 +74,16 @@ class PageMixin:
         boxes = [box for box in boxes if box.height >= 300]
         boxes = box_filter(page, boxes)
 
-        if use_ocr:
-            boxes = flatten([self.get_text_boxes_by_ocr(document, page, box) for box in boxes])
+        if config.ocr:
+            boxes = flatten([self.get_text_boxes_by_ocr(document, page, box, config.bbox_config) for box in boxes])
 
         return boxes
 
-    def get_text_boxes_by_ocr(self, document: PDFDocument, page: Page, box: PDFImageBox):
+    def get_text_boxes_by_ocr(self, document: PDFDocument, page: Page, box: PDFImageBox, config: BBoxConfig):
         import pytesseract
-        box_merger = CoordinatesBoundingBoxMerger()
-        box_filter = CoordinatesBoundingBoxFilter(50, 710)
-        box_sorter = CoordinatesBoundingBoxSorter(fuzzy=True)
+        box_merger = CoordinatesBoundingBoxMerger(config)
+        box_filter = CoordinatesBoundingBoxFilter(config)
+        box_sorter = CoordinatesBoundingBoxSorter(config)
         toc_filter = PDFOutlinesBoundingBoxFilter(document)
 
         # TODO: fix language

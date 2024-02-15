@@ -8,7 +8,7 @@ from datariot.parser.web.web_model import WebBox
 from datariot.util.text_util import remove_whitespace
 
 
-class WebMarkdownFormatter(Formatter):
+class WebMarkdownFormatter(Formatter[str]):
 
     def __call__(self, box: WebBox) -> str:
         html = box.element.get_attribute("outerHTML")

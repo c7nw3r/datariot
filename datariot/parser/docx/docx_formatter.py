@@ -5,7 +5,7 @@ from datariot.util.io_util import get_filename
 from datariot.util.text_util import create_uuid_from_string
 
 
-class HeuristicDocxFormatter(Formatter):
+class HeuristicDocxFormatter(Formatter[str]):
 
     def __init__(self, parsed: Parsed):
         boxes = [e for e in parsed.bboxes if isinstance(e, DocxTextBox)]

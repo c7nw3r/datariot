@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import List, Literal, Optional, Tuple
+from typing import List, Literal, Optional, Tuple, TypeVar, Generic
 
 from PIL.Image import Image
 from tqdm import tqdm
@@ -8,14 +8,16 @@ from tqdm import tqdm
 from datariot.util import write_file
 from datariot.util.io_util import save_image, without_ext
 
+T = TypeVar('T')
 
-class Formatter(ABC):
+
+class Formatter(ABC, Generic[T]):
     """
     tbd
     """
 
     @abstractmethod
-    def __call__(self, box: 'Box'):
+    def __call__(self, box: 'Box') -> T:
         pass
 
 

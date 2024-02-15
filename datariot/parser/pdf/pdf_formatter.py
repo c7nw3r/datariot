@@ -1,16 +1,16 @@
 from copy import copy
-from typing import Any, List
+from typing import List
 
 from datariot.__spi__ import Formatter, Parsed
 from datariot.__spi__.type import Box
 from datariot.parser.__spi__ import DocumentFonts
 from datariot.parser.pdf import PDFImageBox, PDFTableBox, PDFTextBox
+from datariot.util.image_util import to_base64
 from datariot.util.io_util import get_filename
 from datariot.util.text_util import create_uuid_from_string
-from datariot.util.image_util import to_base64
 
 
-class HeuristicPDFFormatter(Formatter):
+class HeuristicPDFFormatter(Formatter[str]):
 
     def __init__(self, parsed: Parsed, enable_json: bool = False):
         self.enable_json = enable_json
@@ -71,9 +71,9 @@ class HeuristicPDFFormatter(Formatter):
             return ""
 
 
-class JSONPDFFormatter(Formatter):
+class JSONPDFFormatter(Formatter[dict]):
 
-    def __call__(self, box: Box) -> dict[str, Any]:
+    def __call__(self, box: Box) -> dict:
         data = copy(box.__dict__)
         data["type"] = box.__class__.__name__
 

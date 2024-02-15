@@ -1,6 +1,5 @@
 from typing import List, Tuple
 
-import numpy as np
 from pdfplumber.display import PageImage
 from pdfplumber.page import CroppedPage, Page
 
@@ -12,7 +11,7 @@ from datariot.parser.pdf.pdf_model import PDFColumnTextBox, PDFTextBox
 from datariot.parser.utils.fonts import check_font_specs
 
 
-class ColumnLayoutBoundingBoxSplitter:
+class ColumnStyleBoundingBoxSlicer:
 
     def __init__(self, config: BBoxConfig):
         self._config = config
@@ -105,6 +104,5 @@ class ColumnLayoutBoundingBoxSplitter:
         return []
 
     def _is_monochrome(self, img: PageImage) -> bool:
-        array = np.array(img.original.convert("RGB"))
-
-        return np.sum(array == array[0, 0]) == array.size
+        _min, _max = img.original.convert("L").getextrema()
+        return _min == _max
