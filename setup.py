@@ -48,6 +48,9 @@ setup(
             "beautifulsoup4==4.12.3",
             "webdriver_manager==4.0.1",
             "lxml==5.1.0"
+        ],
+        "eml": [
+            "fast-mail-parser==0.2.5"
         ]
     }
 )
