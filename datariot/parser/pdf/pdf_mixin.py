@@ -48,7 +48,9 @@ class PageMixin:
 
         boxes = page.extract_words(
             extra_attrs=config.extract_words_extra_attrs,
-            keep_blank_chars=config.extract_words_keep_blank_chars
+            keep_blank_chars=config.extract_words_keep_blank_chars,
+            x_tolerance=config.parser_x_tolerance,
+            y_tolerance=config.parser_y_tolerance
         )
         boxes = [PDFTextBox.from_dict({**word, "page_number": page.page_number}) for word in boxes]
         boxes = box_merger(page, boxes)

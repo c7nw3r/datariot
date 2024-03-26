@@ -34,6 +34,8 @@ class BBoxConfig:
     columns_split_fonts: List[FontSpecification] = field(default_factory=lambda: ["most_common"])
     sorter_fuzzy: bool = False
     sorter_y_tolerance: int = 5
+    parser_x_tolerance: int = 3
+    parser_y_tolerance: int = 3
 
 
 @dataclass
