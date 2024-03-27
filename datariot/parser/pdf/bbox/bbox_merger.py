@@ -1,9 +1,10 @@
 from typing import List
 
 from pdfplumber.page import Page
+
+from datariot.__spi__.type import Box
 from datariot.parser.__spi__ import DocumentFonts
 from datariot.parser.pdf.__spi__ import BBoxConfig
-
 from datariot.parser.pdf.pdf_model import PDFTextBox
 
 
@@ -77,3 +78,29 @@ class CoordinatesBoundingBoxMerger:
             results.append(prev_bbox)
 
         return results
+
+
+class GeometricImageSegmentsMerger:
+
+    def __init__(self, config: BBoxConfig):
+        self._config = config
+
+    def __call__(self, page: Page, bboxes: List[PDFTextBox]) -> List[PDFTextBox]:
+        if len(bboxes) == 0:
+            return []
+
+        c_boxes = [Box.from_dict(e) for e in page.curves]
+        l_boxes = [Box.from_dict(e) for e in page.lines]
+
+        # for text_box in bboxes:
+        #     for curve_box in c_boxes:
+        #         if curve_box.intersect(text_box):
+        #             print("intersect curve")
+
+        # for text_box in bboxes:
+        #     for line_box in l_boxes:
+        #         if line_box.intersect(text_box):
+        #             print("intersect line")
+        #             text_box = self._extend(text_box, line_box)
+
+        return bboxes

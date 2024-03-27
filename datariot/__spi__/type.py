@@ -35,6 +35,21 @@ class Box(ABC):
     def render(self, formatter: Formatter):
         return formatter(self)
 
+    def intersect(self, box: 'Box', x_tolerance: int = 0, y_tolerance: int = 0):
+        expr1 = (box.x1 - x_tolerance) <= self.x1
+        expr2 = (box.x2 + x_tolerance) >= self.x2
+        expr3 = (box.y1 - y_tolerance) <= self.y1
+        expr4 = (box.y2 + y_tolerance) >= self.y2
+
+        return expr1 and expr2 and expr3 and expr4
+
+    @staticmethod
+    def from_dict(dictionary: dict):
+        return Box(x1=dictionary["x0"], y1=dictionary["y0"], x2=dictionary["x1"], y2=dictionary["y1"])
+
+    def __repr__(self):
+        return f"({self.x1},{self.y1},{self.x2},{self.y2})"
+
 
 class MediaAware(ABC):
     """

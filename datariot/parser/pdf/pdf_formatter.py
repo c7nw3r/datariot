@@ -29,8 +29,6 @@ class HeuristicPDFFormatter(Formatter[str]):
         if isinstance(box, PDFImageBox):
             return self._format_image(box)
 
-        # TODO: infinite recursion?
-        # return box.render(self)
         return repr(box)
 
     def _format_text(self, box: PDFTextBox):
