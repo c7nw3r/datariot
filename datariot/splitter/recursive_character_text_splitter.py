@@ -8,6 +8,22 @@ from datariot.__spi__.splitter import Splitter, Chunk
 
 @dataclass
 class RecursiveCharacterTextSplitter(Splitter):
+    """
+Splitting text by recursively look at characters.
+
+Recursively tries to split by different characters to find one
+that works.
+
+Args:
+    chunk_size: Maximum size of chunks to return
+    chunk_overlap: Overlap in characters between chunks
+    separators: The separators to use for text splitting
+    keep_separator: Whether to keep the separator in the chunks
+    is_separator_regex: Indicates if the separator is a regex
+    strip_whitespace: If `True`, strips whitespace from the start and end of
+                          every document
+"""
+
     chunk_size: int = 4000
     chunk_overlap: int = 200
     separators: List[str] = field(default_factory=lambda: ["\n\n", "\n", " ", ""])
@@ -73,7 +89,6 @@ class RecursiveCharacterTextSplitter(Splitter):
         else:
             splits = list(text)
         return [s for s in splits if s != ""]
-
 
     def merge_splits(self, splits: Iterable[str], separator: str) -> List[str]:
         # We now want to combine these smaller pieces into medium size
