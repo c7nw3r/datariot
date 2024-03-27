@@ -1,4 +1,5 @@
 import pathlib
+from dataclasses import dataclass, field
 from io import BytesIO, StringIO
 from typing import List, Tuple, TypedDict, Dict, Any
 
@@ -6,6 +7,14 @@ import requests
 
 from datariot.__spi__.splitter import Splitter, Chunk
 
+DEFAULT_TAGS = [
+    ("h1", "Header 1"),
+    ("h2", "Header 2"),
+    ("h3", "Header 3"),
+    ("h4", "Header 4"),
+    ("h5", "Header 5"),
+    ("h6", "Header 6"),
+]
 
 class ElementType(TypedDict):
     """Element type as typed dict."""
@@ -16,28 +25,23 @@ class ElementType(TypedDict):
     metadata: Dict[str, str]
 
 
-class HTMLHeaderTextSplitter(Splitter):
+@dataclass
+class HTMLTagSplitter(Splitter):
     """
     Splitting HTML files based on specified headers.
     Requires lxml package.
-    """
 
-    def __init__(
-            self,
-            headers_to_split_on: List[Tuple[str, str]],
-            return_each_element: bool = False,
-    ):
-        """Create a new HTMLHeaderTextSplitter.
-
-        Args:
-            headers_to_split_on: list of tuples of headers we want to track mapped to
+    Args:
+            tags_to_split_on: list of tuples of headers we want to track mapped to
                 (arbitrary) keys for metadata. Allowed header values: h1, h2, h3, h4,
                 h5, h6 e.g. [("h1", "Header 1"), ("h2", "Header 2)].
             return_each_element: Return each element w/ associated headers.
-        """
-        # Output element-by-element or aggregated into chunks w/ common headers
-        self.return_each_element = return_each_element
-        self.headers_to_split_on = sorted(headers_to_split_on)
+    """
+    tags_to_split_on: List[Tuple[str, str]] = field(default_factory=lambda: DEFAULT_TAGS)
+    return_each_element: bool = False
+
+    def __post_init__(self):
+        self.tags_to_split_on = sorted(self.tags_to_split_on)
 
     def aggregate_elements_to_chunks(self, elements: List[ElementType]) -> List[Chunk]:
         """Combine elements with common metadata into chunks
@@ -109,8 +113,8 @@ class HTMLHeaderTextSplitter(Splitter):
         result_dom = etree.fromstring(str(result))
 
         # create filter and mapping for header metadata
-        header_filter = [header[0] for header in self.headers_to_split_on]
-        header_mapping = dict(self.headers_to_split_on)
+        header_filter = [header[0] for header in self.tags_to_split_on]
+        header_mapping = dict(self.tags_to_split_on)
 
         # map xhtml namespace prefix
         ns_map = {"h": "http://www.w3.org/1999/xhtml"}

@@ -1,1 +1,3 @@
+from .html_tag_splitter import HTMLTagSplitter
 from .moving_window_splitter import MovingWindowSplitter
+from .recursive_character_splitter import RecursiveCharacterSplitter

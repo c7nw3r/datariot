@@ -7,7 +7,7 @@ from datariot.__spi__.splitter import Splitter, Chunk
 
 
 @dataclass
-class RecursiveCharacterTextSplitter(Splitter):
+class RecursiveCharacterSplitter(Splitter):
     """
 Splitting text by recursively look at characters.
 
@@ -59,10 +59,10 @@ Args:
             else:
                 if _good_splits:
                     merged_text = self.merge_splits(_good_splits, _separator)
-                    final_chunks.extend([Chunk(e, {}) for e in merged_text])
+                    final_chunks.extend([Chunk(e) for e in merged_text])
                     _good_splits = []
                 if not new_separators:
-                    final_chunks.append(Chunk(s, {}))
+                    final_chunks.append(Chunk(s))
                 else:
                     other_info = self._split_text(s, new_separators)
                     final_chunks.extend(other_info)
@@ -74,10 +74,10 @@ Args:
     def __call__(self, text: str) -> List[Chunk]:
         return self._split_text(text, self.separators)
 
-    def split_text_with_regex(text: str, separator: str, keep_separator: bool) -> List[str]:
+    def split_text_with_regex(self, text: str, separator: str) -> List[str]:
         # Now that we have the separator, split the text
         if separator:
-            if keep_separator:
+            if self.keep_separator:
                 # The parentheses in the pattern keep the delimiters in the result.
                 _splits = re.split(f"({separator})", text)
                 splits = [_splits[i] + _splits[i + 1] for i in range(1, len(_splits), 2)]
