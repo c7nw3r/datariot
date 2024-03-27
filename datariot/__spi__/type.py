@@ -5,8 +5,8 @@ from typing import List, Literal, Optional, Tuple, TypeVar, Generic
 from PIL.Image import Image
 from tqdm import tqdm
 
-from datariot.util import write_file
-from datariot.util.io_util import save_image, without_ext
+from datariot.__util__ import write_file
+from datariot.__util__.io_util import save_image, without_ext
 
 T = TypeVar('T')
 
@@ -36,10 +36,10 @@ class Box(ABC):
         return formatter(self)
 
     def intersect(self, box: 'Box', x_tolerance: int = 0, y_tolerance: int = 0):
-        expr1 = (box.x1 - x_tolerance) <= self.x1
-        expr2 = (box.x2 + x_tolerance) >= self.x2
-        expr3 = (box.y1 - y_tolerance) <= self.y1
-        expr4 = (box.y2 + y_tolerance) >= self.y2
+        expr1 = ((box.x1 or 0) - x_tolerance) <= (self.x1 or 0)
+        expr2 = ((box.x2 or 0) + x_tolerance) >= (self.x2 or 0)
+        expr3 = ((box.y1 or 0) - y_tolerance) <= (self.y1 or 0)
+        expr4 = ((box.y2 or 0) + y_tolerance) >= (self.y2 or 0)
 
         return expr1 and expr2 and expr3 and expr4
 

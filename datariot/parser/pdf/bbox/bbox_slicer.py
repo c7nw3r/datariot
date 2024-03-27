@@ -4,11 +4,11 @@ from pdfplumber.display import PageImage
 from pdfplumber.page import CroppedPage, Page
 
 from datariot.__spi__.type import ColumnPosition
+from datariot.__util__.fonts import check_font_specs
 from datariot.parser.__spi__ import DocumentFonts
 from datariot.parser.pdf.__spi__ import BBoxConfig
 from datariot.parser.pdf.bbox.bbox_merger import CoordinatesBoundingBoxMerger
 from datariot.parser.pdf.pdf_model import PDFColumnTextBox, PDFTextBox
-from datariot.parser.utils.fonts import check_font_specs
 
 
 class ColumnStyleBoundingBoxSlicer:

@@ -1,8 +1,8 @@
 from datariot.__spi__ import Formatter
 from datariot.__spi__.type import Box, Parsed
+from datariot.__util__.io_util import get_filename
+from datariot.__util__.text_util import create_uuid_from_string
 from datariot.parser.docx.docx_model import DocxTextBox, DocxImageBox, DocxTableBox
-from datariot.util.io_util import get_filename
-from datariot.util.text_util import create_uuid_from_string
 
 
 class HeuristicDocxFormatter(Formatter[str]):

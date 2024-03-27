@@ -5,7 +5,7 @@ from PIL.Image import Image
 from docx.text.paragraph import Paragraph, Run
 
 from datariot.__spi__.type import Box, MediaAware
-from datariot.util.image_util import to_base64
+from datariot.__util__.image_util import to_base64
 
 
 @dataclass

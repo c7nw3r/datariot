@@ -13,8 +13,8 @@ from docx.table import _Cell, Table
 from docx.text.paragraph import Paragraph, Run
 
 from datariot.__spi__.error import DataRiotException
+from datariot.__util__.image_util import from_base64
 from datariot.parser.docx.docx_model import DocxTextBox, DocxTableBox, DocxImageBox
-from datariot.util.image_util import from_base64
 
 
 # noinspection PyMethodMayBeStatic

@@ -7,12 +7,12 @@ from selenium.webdriver.remote.webdriver import By, WebDriver
 from webdriver_manager.chrome import ChromeDriverManager
 
 from datariot.__spi__ import Parsed
+from datariot.__util__.array_util import flatten
+from datariot.__util__.io_util import get_files
 from datariot.parser.web.bbox.bbox_filter import DomCollapseBoundingBoxFilter, ExcludeListBoundingBoxFilter
 from datariot.parser.web.bbox.bbox_sorter import CoordinatesBoundingBoxSorter
 from datariot.parser.web.web_mixin import WebMixin, USER_AGENT
 from datariot.parser.web.web_model import WebBox
-from datariot.util.array_util import flatten
-from datariot.util.io_util import get_files
 
 
 class WebParser(WebMixin):

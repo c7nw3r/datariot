@@ -3,8 +3,8 @@ from typing import Iterator
 
 from datariot.__spi__.error import DataRiotImportException, DataRiotException
 from datariot.__spi__.type import Parsed, Parser
+from datariot.__util__.io_util import get_files
 from datariot.parser.docx.docx_mixin import DocumentMixin
-from datariot.util.io_util import get_files
 
 
 class DocxParser(Parser, DocumentMixin):

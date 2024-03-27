@@ -3,9 +3,9 @@ from typing import Iterator
 
 from datariot.__spi__.error import DataRiotImportException, DataRiotException
 from datariot.__spi__.type import Parser
+from datariot.__util__.io_util import get_files
 from datariot.parser.pdf.__spi__ import PDFParserConfig, ParsedPDF
 from datariot.parser.pdf.pdf_mixin import PageMixin
-from datariot.util.io_util import get_files
 
 
 class PDFParser(Parser, PageMixin):

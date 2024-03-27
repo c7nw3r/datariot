@@ -4,7 +4,7 @@ import pathlib
 
 from tqdm import tqdm
 
-from datariot.util.text_util import create_uuid_from_string
+from datariot.__util__.text_util import create_uuid_from_string
 
 
 def get_local_dir(path: str, dir_name: str):

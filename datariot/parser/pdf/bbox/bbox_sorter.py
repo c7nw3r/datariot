@@ -1,10 +1,10 @@
 from typing import List
 
 from pdfplumber.page import Page
-from datariot.parser.pdf.__spi__ import BBoxConfig
 
+from datariot.__util__.array_util import flatten
+from datariot.parser.pdf.__spi__ import BBoxConfig
 from datariot.parser.pdf.pdf_model import PDFTextBox
-from datariot.util.array_util import flatten
 
 
 class CoordinatesBoundingBoxSorter:

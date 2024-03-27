@@ -5,6 +5,7 @@ from pdfminer.pdfdocument import PDFDocument
 from pdfplumber.page import Page
 
 from datariot.__spi__.type import Box
+from datariot.__util__.array_util import flatten
 from datariot.parser.pdf.__spi__ import PDFParserConfig, BBoxConfig
 from datariot.parser.pdf.bbox.bbox_filter import (
     BoxOverlapsBoundingBoxFilter,
@@ -16,7 +17,6 @@ from datariot.parser.pdf.bbox.bbox_merger import CoordinatesBoundingBoxMerger, G
 from datariot.parser.pdf.bbox.bbox_slicer import ColumnStyleBoundingBoxSlicer
 from datariot.parser.pdf.bbox.bbox_sorter import CoordinatesBoundingBoxSorter
 from datariot.parser.pdf.pdf_model import PDFImageBox, PDFOcrBox, PDFTableBox, PDFTextBox
-from datariot.util.array_util import flatten
 
 LEFT = "left"
 TOP = "top"

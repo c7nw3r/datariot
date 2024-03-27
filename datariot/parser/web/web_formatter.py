@@ -4,8 +4,8 @@ from bs4 import BeautifulSoup, Tag
 from bs4 import NavigableString
 
 from datariot.__spi__ import Formatter
+from datariot.__util__.text_util import remove_whitespace
 from datariot.parser.web.web_model import WebBox
-from datariot.util.text_util import remove_whitespace
 
 
 class WebMarkdownFormatter(Formatter[str]):

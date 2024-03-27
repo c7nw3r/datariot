@@ -1,12 +1,11 @@
 from typing import List, Optional, Tuple
 
+from PIL.Image import Image
 from pdfplumber.page import Page
 from pdfplumber.table import Table
-from PIL.Image import Image
 
 from datariot.__spi__.type import Box, ColumnPosition, FontWeight, MediaAware
-from datariot.util.image_util import to_base64
-
+from datariot.__util__.image_util import to_base64
 
 DEFAULT_IMAGE_RESOLUTION = 72
 IMAGE_RESOLUTION = 400

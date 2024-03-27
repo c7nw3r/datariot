@@ -3,11 +3,11 @@ from typing import List
 
 from datariot.__spi__ import Formatter, Parsed
 from datariot.__spi__.type import Box
+from datariot.__util__.image_util import to_base64
+from datariot.__util__.io_util import get_filename
+from datariot.__util__.text_util import create_uuid_from_string
 from datariot.parser.__spi__ import DocumentFonts
 from datariot.parser.pdf import PDFImageBox, PDFTableBox, PDFTextBox
-from datariot.util.image_util import to_base64
-from datariot.util.io_util import get_filename
-from datariot.util.text_util import create_uuid_from_string
 
 
 class HeuristicPDFFormatter(Formatter[str]):
