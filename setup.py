@@ -50,7 +50,6 @@ setup(
             "lxml==5.1.0"
         ],
         "eml": [
-            "fast-mail-parser==0.2.5"
         ]
     }
 )
