@@ -36,6 +36,8 @@ class BBoxConfig:
     sorter_y_tolerance: int = 5
     parser_x_tolerance: int = 3
     parser_y_tolerance: int = 3
+    min_image_width: int = 30
+    min_image_height: int = 30
 
 
 @dataclass

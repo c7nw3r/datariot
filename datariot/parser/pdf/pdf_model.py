@@ -150,10 +150,8 @@ class PDFImageBox(Box, MediaAware):
         super().__init__(int(data["x0"]), int(data["x1"]), int(data["top"]), int(data["bottom"]))
         self.page_number = page.page_number
 
-        self.data = page.crop(
-            (self.x1, max(0, int(page.height - self.y2)), self.x2, max(0, int(page.height - self.y1))),
-            strict=False
-        ).to_image(resolution=IMAGE_RESOLUTION)
+        crop_box = (self.x1, self.y1, self.x2, self.y2)
+        self.data = page.crop(crop_box, strict=False).to_image(resolution=IMAGE_RESOLUTION)
 
     @property
     def width(self):

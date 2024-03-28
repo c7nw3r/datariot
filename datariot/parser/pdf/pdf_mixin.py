@@ -74,8 +74,8 @@ class PageMixin:
         boxes = [e for e in boxes if abs(int(e["x0"]) - int(e["x1"])) > 0]
         boxes = [e for e in boxes if abs(int(e["top"]) - int(e["bottom"])) > 0]
         boxes = [PDFImageBox(page, e) for e in boxes]
-        boxes = [box for box in boxes if box.width >= 300]
-        boxes = [box for box in boxes if box.height >= 300]
+        boxes = [box for box in boxes if box.width >= config.bbox_config.min_image_width]
+        boxes = [box for box in boxes if box.height >= config.bbox_config.min_image_height]
         boxes = box_filter(page, boxes)
 
         if config.ocr:
