@@ -218,3 +218,6 @@ class PDFTableBox(Box):
             return " | ".join([col for col in cols if col is not None])
 
         return "\n".join([to_col(row) for row in self.rows])
+
+    def __len__(self):
+        return len(str(self).strip())

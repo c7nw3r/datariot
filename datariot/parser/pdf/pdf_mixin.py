@@ -4,6 +4,7 @@ from typing import List
 from pdfminer.pdfdocument import PDFDocument
 from pdfplumber.page import Page
 
+from datariot.__spi__.const import LEFT, TOP, WIDTH, HEIGHT, TEXT
 from datariot.__spi__.type import Box
 from datariot.__util__.array_util import flatten
 from datariot.parser.pdf.__spi__ import PDFParserConfig, BBoxConfig
@@ -17,12 +18,6 @@ from datariot.parser.pdf.bbox.bbox_merger import CoordinatesBoundingBoxMerger, G
 from datariot.parser.pdf.bbox.bbox_slicer import ColumnStyleBoundingBoxSlicer
 from datariot.parser.pdf.bbox.bbox_sorter import CoordinatesBoundingBoxSorter
 from datariot.parser.pdf.pdf_model import PDFImageBox, PDFOcrBox, PDFTableBox, PDFTextBox, PDFLineCurveBox
-
-LEFT = "left"
-TOP = "top"
-WIDTH = "width"
-HEIGHT = "height"
-TEXT = "text"
 
 
 # noinspection PyMethodMayBeStatic
@@ -67,7 +62,10 @@ class PageMixin:
 
     def get_table_boxes(self, _document: PDFDocument, page: Page):
         ts = {"vertical_strategy": "lines", "horizontal_strategy": "lines"}
-        return [PDFTableBox(page, e) for e in zip(page.find_tables(ts), page.extract_tables(ts))]
+        boxes = [PDFTableBox(page, e) for e in zip(page.find_tables(ts), page.extract_tables(ts))]
+        boxes = [e for e in boxes if len(e) > 1]
+
+        return boxes
 
     def get_image_boxes(self, document: PDFDocument, page: Page, config: PDFParserConfig):
         box_filter = BoxIdentityBoundingBoxFilter()
@@ -117,7 +115,7 @@ class PageMixin:
 
         return boxes
 
-    def take_screenshot(self, page: Page, bboxes: List[PDFTextBox]):
+    def take_screenshot(self, page: Page, bboxes: List[Box]):
         try:
             image = page.to_image()
             for bbox in bboxes:

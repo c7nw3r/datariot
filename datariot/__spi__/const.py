@@ -1,0 +1,5 @@
+LEFT = "left"
+TOP = "top"
+WIDTH = "width"
+HEIGHT = "height"
+TEXT = "text"
