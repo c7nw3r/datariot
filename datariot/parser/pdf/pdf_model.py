@@ -148,10 +148,7 @@ class PDFImageBox(Box, MediaAware):
 
     def __init__(self, page: Page, data: dict):
         super().__init__(int(data["x0"]), int(data["x1"]), int(data["top"]), int(data["bottom"]))
-        self.page_number = page.page_number
-
-        crop_box = (self.x1, self.y1, self.x2, self.y2)
-        self.data = page.crop(crop_box, strict=False).to_image(resolution=IMAGE_RESOLUTION)
+        self.page = page
 
     @property
     def width(self):
@@ -161,20 +158,52 @@ class PDFImageBox(Box, MediaAware):
     def height(self):
         return self.y2 - self.y1
 
-    def save(self):
-        return self.data.save(f"./image_{self.page_number}_{self.x1}_{self.y1}_{self.x2}_{self.y2}.png")
+    @property
+    def page_number(self):
+        return self.page.page_number
+
+    def crop(self, crop_box: Optional[Box] = None):
+        crop_box = crop_box or (self.x1, self.y1, self.x2, self.y2)
+        return self.page.crop(crop_box, strict=False).to_image(resolution=IMAGE_RESOLUTION)
+
+    def save(self, crop_box: Optional[Box] = None):
+        data = self.crop(crop_box)
+        x1, y1, x2, y2 = crop_box or (self.x1, self.y1, self.x2, self.y2)
+        return data.save(f"./image_{self.page_number}_{x1}_{y1}_{x2}_{y2}.png")
 
     def __repr__(self):
         return f"x1:{self.x1}, y1:{self.y1}, x2:{self.x2}, y2:{self.y2}"
 
-    def get_file(self) -> Tuple[str, Image]:
-        name = f"image_{self.page_number}_{self.x1}_{self.y1}_{self.x2}_{self.y2}"
-        return name, self.data.original
+    def get_file(self, crop_box: Optional[Box] = None) -> Tuple[str, Image]:
+        data = self.crop(crop_box)
+        x1, y1, x2, y2 = crop_box or (self.x1, self.y1, self.x2, self.y2)
 
-    def to_hash(self) -> str:
-        encoded = to_base64(self.data.original)
+        name = f"image_{self.page_number}_{x1}_{y1}_{x2}_{y2}"
+        return name, data.original
+
+    def to_hash(self, crop_box: Optional[Box] = None) -> str:
+        data = self.crop(crop_box)
+        encoded = to_base64(data.original)
         from hashlib import sha256
         return str(sha256(encoded).hexdigest())
+
+
+class PDFLineCurveBox(Box):
+
+    def __init__(self, page: Page, data: dict):
+        super().__init__(int(data["x0"]), int(data["x1"]), int(data["top"]), int(data["bottom"]))
+        self.page_number = page.page_number
+
+    @property
+    def width(self):
+        return self.x2 - self.x1
+
+    @property
+    def height(self):
+        return self.y2 - self.y1
+
+    def __repr__(self):
+        return f"x1:{self.x1}, y1:{self.y1}, x2:{self.x2}, y2:{self.y2}"
 
 
 class PDFTableBox(Box):

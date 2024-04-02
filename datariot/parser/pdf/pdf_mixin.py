@@ -8,15 +8,15 @@ from datariot.__spi__.type import Box
 from datariot.__util__.array_util import flatten
 from datariot.parser.pdf.__spi__ import PDFParserConfig, BBoxConfig
 from datariot.parser.pdf.bbox.bbox_filter import (
-    BoxOverlapsBoundingBoxFilter,
     TextContentBoundingBoxFilter,
     CoordinatesBoundingBoxFilter,
     PDFOutlinesBoundingBoxFilter,
+    BoxIdentityBoundingBoxFilter,
 )
 from datariot.parser.pdf.bbox.bbox_merger import CoordinatesBoundingBoxMerger, GeometricImageSegmentsMerger
 from datariot.parser.pdf.bbox.bbox_slicer import ColumnStyleBoundingBoxSlicer
 from datariot.parser.pdf.bbox.bbox_sorter import CoordinatesBoundingBoxSorter
-from datariot.parser.pdf.pdf_model import PDFImageBox, PDFOcrBox, PDFTableBox, PDFTextBox
+from datariot.parser.pdf.pdf_model import PDFImageBox, PDFOcrBox, PDFTableBox, PDFTextBox, PDFLineCurveBox
 
 LEFT = "left"
 TOP = "top"
@@ -35,6 +35,7 @@ class PageMixin:
         boxes.extend(self.get_table_boxes(document, page))
         boxes.extend(self.get_text_boxes(document, page.filter(self.not_within_bboxes(boxes)), config.bbox_config))
         boxes.extend(self.get_image_boxes(document, page, config))
+        boxes.extend(self.get_linecurve_boxes(document, page, config))
         boxes = box_sorter(page, boxes)
 
         return boxes
@@ -69,7 +70,7 @@ class PageMixin:
         return [PDFTableBox(page, e) for e in zip(page.find_tables(ts), page.extract_tables(ts))]
 
     def get_image_boxes(self, document: PDFDocument, page: Page, config: PDFParserConfig):
-        box_filter = BoxOverlapsBoundingBoxFilter()
+        box_filter = BoxIdentityBoundingBoxFilter()
 
         boxes = page.images
         boxes = [e for e in boxes if abs(int(e["x0"]) - int(e["x1"])) > 0]
@@ -84,6 +85,20 @@ class PageMixin:
 
         return boxes
 
+    def get_linecurve_boxes(self, document: PDFDocument, page: Page, config: PDFParserConfig):
+        box_filter = BoxIdentityBoundingBoxFilter()
+
+        boxes = page.lines
+        boxes.extend(page.curves)
+        boxes = [e for e in boxes if abs(int(e["x0"]) - int(e["x1"])) > 0]
+        boxes = [e for e in boxes if abs(int(e["top"]) - int(e["bottom"])) > 0]
+        boxes = [PDFLineCurveBox(page, e) for e in boxes]
+        boxes = [box for box in boxes if box.width >= 0]
+        boxes = [box for box in boxes if box.height >= 0]
+        boxes = box_filter(page, boxes)
+
+        return boxes
+
     def get_text_boxes_by_ocr(self, document: PDFDocument, page: Page, box: PDFImageBox, config: BBoxConfig):
         import pytesseract
         box_merger = CoordinatesBoundingBoxMerger(config)
@@ -92,7 +107,7 @@ class PageMixin:
         toc_filter = PDFOutlinesBoundingBoxFilter(document)
 
         # TODO: fix language
-        dicts = pytesseract.image_to_data(box.data.original, output_type=pytesseract.Output.DICT, lang="deu")
+        dicts = pytesseract.image_to_data(box.get_file()[1], output_type=pytesseract.Output.DICT, lang="deu")
         boxes = [PDFOcrBox.from_ocr(e) for e in zip(dicts[LEFT], dicts[TOP], dicts[WIDTH], dicts[HEIGHT], dicts[TEXT])]
         boxes = [e for e in boxes if len(e.text) > 0]
         boxes = box_sorter(page, boxes)
