@@ -54,6 +54,7 @@ class PageMixin:
             y_tolerance=config.parser_y_tolerance
         )
         boxes = [PDFTextBox.from_dict({**word, "page_number": page.page_number}) for word in boxes]
+        boxes = [e for e in boxes if len(e.text.strip()) > 0]
         boxes = box_merger(page, boxes)
         boxes = box_slicer(page, boxes)
         boxes = toc_filter(page, boxes)
