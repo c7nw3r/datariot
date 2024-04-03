@@ -132,13 +132,13 @@ class PDFOcrBox(PDFTextBox):
     @staticmethod
     def from_ocr(data):
         ratio = IMAGE_RESOLUTION / DEFAULT_IMAGE_RESOLUTION
-        left, top, width, height, text = data
+        left, top, width, height, text, page_number = data
 
         x1 = int(left / ratio)
         y1 = int(top / ratio)
         x2 = int((left + width) / ratio)
         y2 = int((top + height) / ratio)
-        return PDFOcrBox(x1, y1, x2, y2, text)
+        return PDFOcrBox(x1, y1, x2, y2, text, page_number)
 
     def with_text(self, text: str):
         return PDFOcrBox(self.x1, self.y1, self.x2, self.y2, text)

@@ -110,7 +110,10 @@ class PageMixin:
 
         # TODO: fix language
         dicts = pytesseract.image_to_data(box.get_file()[1], output_type=pytesseract.Output.DICT, lang="deu")
-        boxes = [PDFOcrBox.from_ocr(e) for e in zip(dicts[LEFT], dicts[TOP], dicts[WIDTH], dicts[HEIGHT], dicts[TEXT])]
+        pages = [page.page_number]*len(dicts[LEFT])
+        pages = zip(dicts[LEFT], dicts[TOP], dicts[WIDTH], dicts[HEIGHT], dicts[TEXT], pages)
+
+        boxes = [PDFOcrBox.from_ocr(e) for e in pages]
         boxes = [e for e in boxes if len(e.text) > 0]
         boxes = box_sorter(page, boxes)
         boxes = box_merger(page, boxes)
