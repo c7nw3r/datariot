@@ -13,6 +13,7 @@ from datariot.parser.pdf.bbox.bbox_filter import (
     CoordinatesBoundingBoxFilter,
     PDFOutlinesBoundingBoxFilter,
     BoxIdentityBoundingBoxFilter,
+    NestedTableBoundingBoxFilter,
 )
 from datariot.parser.pdf.bbox.bbox_merger import CoordinatesBoundingBoxMerger, GeometricImageSegmentsMerger
 from datariot.parser.pdf.bbox.bbox_slicer import ColumnStyleBoundingBoxSlicer
@@ -61,9 +62,12 @@ class PageMixin:
         return boxes
 
     def get_table_boxes(self, _document: PDFDocument, page: Page):
+        box_filter = NestedTableBoundingBoxFilter()
+
         ts = {"vertical_strategy": "lines", "horizontal_strategy": "lines"}
         boxes = [PDFTableBox(page, e) for e in zip(page.find_tables(ts), page.extract_tables(ts))]
         boxes = [e for e in boxes if len(e) > 1]
+        boxes = box_filter(page, boxes)
 
         return boxes
 

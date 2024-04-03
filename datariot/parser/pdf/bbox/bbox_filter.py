@@ -122,6 +122,43 @@ class BoxIdentityBoundingBoxFilter:
         return result
 
 
+class NestedTableBoundingBoxFilter:
+
+    def __call__(self, page: Page, bboxes: List[T]) -> List[T]:
+        if len(bboxes) == 0:
+            return []
+
+        def by_size(_box: Box):
+            w = _box.x2 - _box.x1
+            h = _box.y2 - _box.y1
+            return w * h
+
+        bboxes = list(reversed(sorted(bboxes, key=by_size)))
+        result = []
+
+        for i in range(len(bboxes)):
+            box1 = bboxes[i]
+            exclude = False
+            for j in range(len(bboxes)):
+                if i == j:
+                    continue
+
+                box2 = bboxes[j]
+
+                # checking if first box is contains in second one
+                expr1 = box1.x1 >= box2.x1
+                expr2 = box1.x2 <= box2.x2
+                expr3 = box1.y1 >= box2.y1
+                expr4 = box1.y2 <= box2.y2
+
+                if all([expr1, expr2, expr3, expr4]):
+                    exclude = True
+
+            if not exclude:
+                result.append(box1)
+
+        return result
+
 class TextContentBoundingBoxFilter(BoundingBoxFilter):
 
     def __init__(self, config: BBoxConfig) -> None:
