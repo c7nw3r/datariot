@@ -1,3 +1,4 @@
+import copy
 import logging
 import re
 from dataclasses import dataclass, field
@@ -70,6 +71,28 @@ Args:
             merged_text = self.merge_splits(_good_splits, _separator)
             final_chunks.extend(merged_text)
         return final_chunks
+
+    def create_documents(self, texts: List[str], metadatas: Optional[List[dict]] = None) -> List[Chunk]:
+        """Create documents from a list of texts."""
+        _metadatas = metadatas or [{}] * len(texts)
+        documents = []
+        for i, text in enumerate(texts):
+            for chunk in self._split_text(text, separators=self.separators):
+                metadata = copy.deepcopy(_metadatas[i])
+                new_doc = Chunk(text=chunk, data=metadata)
+                documents.append(new_doc)
+        return documents
+
+    def split_text(self, text: str) -> List[str]:
+        return self._split_text(text, self._separators)
+
+    def split_documents(self, documents: Iterable[Chunk]) -> List[Chunk]:
+        """Split documents."""
+        texts, metadatas = [], []
+        for doc in documents:
+            texts.append(doc.text)
+            metadatas.append(doc.data)
+        return self.create_documents(texts, metadatas=metadatas)
 
     def __call__(self, text: str) -> List[Chunk]:
         return self._split_text(text, self.separators)
