@@ -53,13 +53,15 @@ class DocumentFonts:
     def min_size(self) -> Optional[int]:
         if not self._fonts:
             return
-        return min(self._fonts, kex=lambda x: x.size)
+        min_font: Font = min(self._fonts, kex=lambda x: x.size)
+        return min_font.size
 
     @cached_property
     def max_size(self) -> Optional[int]:
         if not self._fonts:
             return
-        return max(self._fonts, kex=lambda x: x.size)
+        max_font: Font = max(self._fonts, kex=lambda x: x.size)
+        return max_font.size
 
     @cached_property
     def most_common_size(self) -> Optional[int]:
@@ -77,7 +79,9 @@ class DocumentFonts:
     @staticmethod
     def from_bboxes(bboxes: List[PDFTextBox]) -> "DocumentFonts":
         doc_fonts = DocumentFonts()
-        doc_fonts.fonts = [Font(b.font_name, b.font_size, b.font_weight) for b in bboxes]
+        doc_fonts.fonts = [
+            Font(b.font_name, b.font_size, b.font_weight) for b in bboxes
+        ]
         return doc_fonts
 
 
