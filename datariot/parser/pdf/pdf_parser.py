@@ -1,16 +1,18 @@
 import logging
 from typing import Iterator
 
-from datariot.__spi__.error import DataRiotImportException, DataRiotException
-from datariot.__spi__.type import Parser, FileFilter
+from datariot.__spi__.error import DataRiotException, DataRiotImportException
+from datariot.__spi__.type import FileFilter, Parser
 from datariot.__util__.io_util import get_files
-from datariot.parser.pdf.__spi__ import PDFParserConfig, ParsedPDF
+from datariot.parser.pdf.__spi__ import ParsedPDF, PDFParserConfig
 from datariot.parser.pdf.pdf_mixin import PageMixin
 
 
-class PDFParser(Parser, PageMixin):
+DEFAULT_PARSER_CONFIG = PDFParserConfig()
 
-    def __init__(self, config: PDFParserConfig = PDFParserConfig()):
+
+class PDFParser(Parser, PageMixin):
+    def __init__(self, config: PDFParserConfig = DEFAULT_PARSER_CONFIG):
         self.config = config
         try:
             import pdfplumber
@@ -38,9 +40,11 @@ class PDFParser(Parser, PageMixin):
         return ParsedPDF(path, bboxes)
 
     @staticmethod
-    def parse_folder(path: str,
-                     config: PDFParserConfig = PDFParserConfig(),
-                     file_filter: FileFilter = lambda _: True) -> Iterator[ParsedPDF]:
+    def parse_folder(
+        path: str,
+        config: PDFParserConfig = DEFAULT_PARSER_CONFIG,
+        file_filter: FileFilter = lambda _: True,
+    ) -> Iterator[ParsedPDF]:
         parser = PDFParser(config)
         for file in get_files(path, ".pdf"):
             try:
