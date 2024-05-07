@@ -14,11 +14,14 @@ from docx.text.paragraph import Paragraph, Run
 
 from datariot.__spi__.error import DataRiotException
 from datariot.__util__.image_util import from_base64
-from datariot.parser.docx.docx_model import DocxTextBox, DocxTableBox, DocxImageBox
+from datariot.parser.docx.docx_model import DocxTextBox, DocxTableBox, DocxImageBox, DocxListBox
 
 
 # noinspection PyMethodMayBeStatic
 class DocumentMixin:
+
+    def has_numbering(self, paragraph: Paragraph):
+        return len(paragraph._element.xpath("w:pPr/w:numPr/w:ilvl/@w:val")) > 0
 
     def iter_block_items(self, parent):
         if isinstance(parent, DocxDocument):
@@ -43,7 +46,10 @@ class DocumentMixin:
         for block in self.iter_block_items(root):
             if isinstance(block, Paragraph):
                 if len(block.text.strip()) > 0:
-                    elements.append(DocxTextBox(block))
+                    if self.has_numbering(block):
+                        elements.append(DocxListBox(block))
+                    else:
+                        elements.append(DocxTextBox(block))
                     for run in block.runs:
                         elements.extend(self.parse_images(document, run))
 

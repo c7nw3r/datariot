@@ -2,7 +2,7 @@ from datariot.__spi__ import Formatter
 from datariot.__spi__.type import Box, Parsed
 from datariot.__util__.io_util import get_filename
 from datariot.__util__.text_util import create_uuid_from_string
-from datariot.parser.docx.docx_model import DocxTextBox, DocxImageBox, DocxTableBox
+from datariot.parser.docx.docx_model import DocxTextBox, DocxImageBox, DocxTableBox, DocxListBox
 
 
 class HeuristicDocxFormatter(Formatter[str]):
@@ -12,6 +12,7 @@ class HeuristicDocxFormatter(Formatter[str]):
 
         sizes = ([int(e.font_size) for e in boxes])
         sizes = list(reversed(sorted(sizes)))
+        sizes = [e for e in sizes if e > 0]
 
         if len(boxes) == 0:
             self.most_used_size = None
@@ -23,6 +24,8 @@ class HeuristicDocxFormatter(Formatter[str]):
         self.doc_path = parsed.path
 
     def __call__(self, box: Box) -> str:
+        if isinstance(box, DocxListBox):
+            return self._format_list(box)
         if isinstance(box, DocxTextBox):
             return self._format_text(box)
         if isinstance(box, DocxImageBox):
@@ -50,6 +53,9 @@ class HeuristicDocxFormatter(Formatter[str]):
             return ("#" * (order + 1)) + " " + box.text
 
         return box.text
+
+    def _format_list(self, box: DocxListBox):
+        return f"{'*' * (box.numbering + 1)} {box.text}"
 
     def _format_image(self, image: DocxImageBox):
         try:

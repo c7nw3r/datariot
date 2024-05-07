@@ -63,6 +63,15 @@ class DocxTextBox(Box):
         return self.text
 
 
+class DocxListBox(DocxTextBox):
+
+    def __init__(self, paragraph: Paragraph):
+        super().__init__(paragraph)
+
+        ilvl = self.p._element.xpath("w:pPr/w:numPr/w:ilvl/@w:val")
+        self.numbering = int(ilvl[0])
+
+
 class DocxTableBox(Box):
     """
     Box implementation for the table docx elements.
