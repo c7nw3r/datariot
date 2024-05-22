@@ -2,7 +2,7 @@ import logging
 from typing import Iterator
 
 from datariot.__spi__.error import DataRiotImportException, DataRiotException
-from datariot.__spi__.type import Parser
+from datariot.__spi__.type import Parser, FileFilter
 from datariot.__util__.io_util import get_files
 from datariot.parser.pdf.__spi__ import PDFParserConfig, ParsedPDF
 from datariot.parser.pdf.pdf_mixin import PageMixin
@@ -38,9 +38,12 @@ class PDFParser(Parser, PageMixin):
         return ParsedPDF(path, bboxes)
 
     @staticmethod
-    def parse_folder(path: str, config: PDFParserConfig = PDFParserConfig()) -> Iterator[ParsedPDF]:
+    def parse_folder(path: str,
+                     config: PDFParserConfig = PDFParserConfig(),
+                     file_filter: FileFilter = lambda _: True) -> Iterator[ParsedPDF]:
         for file in get_files(path, ".pdf"):
             try:
-                yield PDFParser(config).parse(file)
+                if file_filter(file):
+                    yield PDFParser(config).parse(file)
             except DataRiotException as ex:
                 logging.warning(ex)

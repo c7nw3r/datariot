@@ -2,7 +2,7 @@ import logging
 from typing import Iterator
 
 from datariot.__spi__.error import DataRiotImportException, DataRiotException
-from datariot.__spi__.type import Parsed, Parser
+from datariot.__spi__.type import Parsed, Parser, FileFilter
 from datariot.__util__.io_util import get_files
 from datariot.parser.docx.docx_mixin import DocumentMixin
 
@@ -31,9 +31,10 @@ class DocxParser(Parser, DocumentMixin):
         return Parsed(path, elements)
 
     @staticmethod
-    def parse_folder(path: str) -> Iterator[Parsed]:
+    def parse_folder(path: str, file_filter: FileFilter = lambda _: True) -> Iterator[Parsed]:
         for file in get_files(path, ".docx"):
             try:
-                yield DocxParser().parse(file)
+                if file_filter(file):
+                    yield DocxParser().parse(file)
             except DataRiotException as ex:
                 logging.warning(ex)

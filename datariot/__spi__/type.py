@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import List, Literal, Optional, Tuple, TypeVar, Generic
+from typing import List, Literal, Optional, Tuple, TypeVar, Generic, Callable
 
 from PIL.Image import Image
 from tqdm import tqdm
@@ -108,3 +108,5 @@ class Parser(ABC):
 
 FontWeight = Literal["regular", "bold"]
 ColumnPosition = Literal["left", "center", "right"]
+
+FileFilter = Callable[[str], bool]
