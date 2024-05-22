@@ -1,5 +1,6 @@
 from datariot.__spi__ import Formatter
 from datariot.__spi__.type import Box, Parsed
+from datariot.__util__.array_util import flatten
 from datariot.__util__.io_util import get_filename
 from datariot.__util__.text_util import create_uuid_from_string
 from datariot.parser.docx.docx_model import DocxTextBox, DocxImageBox, DocxTableBox, DocxListBox
@@ -8,13 +9,19 @@ from datariot.parser.docx.docx_model import DocxTextBox, DocxImageBox, DocxTable
 class HeuristicDocxFormatter(Formatter[str]):
 
     def __init__(self, parsed: Parsed):
-        boxes = [e for e in parsed.bboxes if isinstance(e, DocxTextBox)]
+        boxes1 = [e for e in parsed.bboxes if isinstance(e, DocxTextBox)]
+        boxes2 = [e for e in parsed.bboxes if isinstance(e, DocxTableBox)]
 
-        sizes = ([int(e.font_size) for e in boxes])
-        sizes = list(reversed(sorted(sizes)))
+        sizes1 = ([int(e.font_size) for e in boxes1])
+        sizes1 = list(reversed(sorted(sizes1)))
+
+        sizes2 = flatten([e.font_sizes for e in boxes2])
+        sizes2 = list(reversed(sorted(sizes2)))
+
+        sizes = [*sizes1, *sizes2]
         sizes = [e for e in sizes if e > 0]
 
-        if len(boxes) == 0:
+        if len(boxes1) == 0:
             self.most_used_size = None
             self.sizes = []
         else:

@@ -5,6 +5,7 @@ from PIL.Image import Image
 from docx.text.paragraph import Paragraph, Run
 
 from datariot.__spi__.type import Box, MediaAware
+from datariot.__util__.array_util import flatten
 from datariot.__util__.image_util import to_base64
 
 
@@ -77,9 +78,28 @@ class DocxTableBox(Box):
     Box implementation for the table docx elements.
     """
 
-    def __init__(self, rows: list):
+    def __init__(self, rows: list, paragraphs: List[List[Paragraph]]):
         super().__init__(None, None, None, None)
         self.rows = rows
+        self.paragraphs = paragraphs
+
+    @property
+    def font_sizes(self) -> List[int]:
+        def get_font_size(runs: List[Run]) -> int:
+            max_size = -1
+            for run in runs:
+                font_size = int(run.font.size.pt) if run.font.size is not None else -1
+                if font_size > max_size:
+                    max_size = run.font.size.pt
+
+                if max_size == -1:
+                    array = run.element.xpath("./w:rPr/w:szCs/@w:val")
+                    if len(array) > 0:
+                        max_size = int(array[0]) / 2
+
+            return max_size
+
+        return [get_font_size(p.runs) for p in flatten(self.paragraphs)]
 
     def __repr__(self):
         lenghts = []

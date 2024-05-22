@@ -13,6 +13,7 @@ from docx.table import _Cell, Table
 from docx.text.paragraph import Paragraph, Run
 
 from datariot.__spi__.error import DataRiotException
+from datariot.__util__.array_util import flatten
 from datariot.__util__.image_util import from_base64
 from datariot.parser.docx.docx_model import DocxTextBox, DocxTableBox, DocxImageBox, DocxListBox
 
@@ -56,12 +57,14 @@ class DocumentMixin:
             elif isinstance(block, Table):
                 vf = io.StringIO()
                 writer = csv.writer(vf)
+                paragraphs = []
                 for row in block.rows:
+                    paragraphs.append(flatten([cell.paragraphs for cell in row.cells]))
                     writer.writerow(cell.text for cell in row.cells)
                 vf.seek(0)
 
                 rows = list(csv.reader(vf, delimiter=','))
-                elements.append(DocxTableBox(rows))
+                elements.append(DocxTableBox(rows, paragraphs))
 
         return elements
 
