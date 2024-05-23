@@ -55,7 +55,9 @@ class DocumentMixin:
                     else:
                         elements.append(DocxTextBox(root_name, block))
                     for run in block.runs:
-                        elements.extend(self.parse_images(root_name, document, run))
+                        # FIXME
+                        if root_name != "header":
+                            elements.extend(self.parse_images(root_name, document, run))
 
             elif isinstance(block, Table):
                 vf = io.StringIO()
