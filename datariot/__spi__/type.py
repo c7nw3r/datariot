@@ -1,3 +1,4 @@
+import json
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import List, Literal, Optional, Tuple, TypeVar, Generic, Callable
@@ -95,6 +96,9 @@ class Parsed:
         for box in self.bboxes:
             if isinstance(box, MediaAware):
                 save_image(without_ext(path), box, image_quality)
+
+        if len(self.properties) > 0:
+            write_file(without_ext(path) + ".json", json.dumps(self.properties))
 
 
 class Parser(ABC):

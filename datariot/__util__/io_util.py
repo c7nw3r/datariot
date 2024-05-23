@@ -65,6 +65,11 @@ def save_image(path: str, box, image_quality: int = 10):
         file.save(f"{path}/{name}.webp", 'webp', optimize=True, quality=image_quality)
     except OSError:
         try:
+            import platform
+            if platform.system() == "Linux" and file.format == "WMF":
+                logging.warning("cannot save WMF image file")
+                return
+
             logging.info(f"try to save image as {file.format}")
             file.save(f"{path}/{name}.{file.format}", file.format)
         except OSError as ex:
