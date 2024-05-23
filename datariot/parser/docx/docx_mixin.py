@@ -101,3 +101,19 @@ class DocumentMixin:
                 return [DocxImageBox(root_name, name_attr, image)]
 
         return []
+
+    def parse_custom_properties(self, path: str):
+        import zipfile
+        import lxml.etree
+        zipped_file = zipfile.ZipFile(path)
+        opened_file = zipped_file.open("docProps/custom.xml")
+        xml = lxml.etree.parse(opened_file)
+        opened_file.close()
+        zipped_file.close()
+        root = xml.getroot()
+        name_to_value = {}
+
+        for element in root:
+            name_to_value[element.attrib["name"]] = element[0].text
+
+        return name_to_value

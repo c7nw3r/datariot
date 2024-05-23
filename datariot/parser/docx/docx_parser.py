@@ -28,7 +28,8 @@ class DocxParser(Parser, DocumentMixin):
             *self.parse_elements(document, document)
         ]
 
-        return Parsed(path, elements)
+        properties = self.parse_custom_properties(path)
+        return Parsed(path, elements, properties)
 
     @staticmethod
     def parse_folder(path: str, file_filter: FileFilter = lambda _: True) -> Iterator[Parsed]:

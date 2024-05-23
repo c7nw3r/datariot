@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List, Literal, Optional, Tuple, TypeVar, Generic, Callable
 
 from PIL.Image import Image
@@ -80,6 +80,7 @@ class Parsed:
 
     path: str
     bboxes: List[Box]
+    properties: dict = field(default_factory=lambda: {})
 
     def render(self, evaluator, delimiter: str = "\n\n", show_progress: bool = False):
         array = tqdm(self.bboxes, disable=not show_progress, desc="render")
