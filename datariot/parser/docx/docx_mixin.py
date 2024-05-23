@@ -43,16 +43,19 @@ class DocumentMixin:
                 yield Table(child, parent)
 
     def parse_elements(self, document, root):
+        root_name = type(root).__name__.replace("_", "").lower()
+
         elements = []
         for block in self.iter_block_items(root):
             if isinstance(block, Paragraph):
-                if len(block.text.strip()) > 0:
+                w_t = block._element.xpath(".//w:sdt//w:t")
+                if len(block.text.strip()) > 0 or len(w_t) > 0:
                     if self.has_numbering(block):
-                        elements.append(DocxListBox(block))
+                        elements.append(DocxListBox(root_name, block))
                     else:
-                        elements.append(DocxTextBox(block))
+                        elements.append(DocxTextBox(root_name, block))
                     for run in block.runs:
-                        elements.extend(self.parse_images(document, run))
+                        elements.extend(self.parse_images(root_name, document, run))
 
             elif isinstance(block, Table):
                 vf = io.StringIO()
@@ -64,11 +67,11 @@ class DocumentMixin:
                 vf.seek(0)
 
                 rows = list(csv.reader(vf, delimiter=','))
-                elements.append(DocxTableBox(rows, paragraphs))
+                elements.append(DocxTableBox(root_name, rows, paragraphs))
 
         return elements
 
-    def parse_images(self, document, run: Run):
+    def parse_images(self, root_name: str, document, run: Run):
         xmlstr = str(run.element.xml)
         my_namespaces = dict([node for _, node in ElementTree.iterparse(io.StringIO(xmlstr), events=['start-ns'])])
         root = ET.fromstring(xmlstr)
@@ -84,7 +87,7 @@ class DocumentMixin:
                     return []
 
                 image_part = document_part.related_parts[embed_attr]
-                image_base64 = base64.b64encode(image_part._blob)
+                image_base64 = base64.b64encode(image_part.blob)
                 image_base64 = image_base64.decode()
 
                 try:
@@ -93,6 +96,6 @@ class DocumentMixin:
                     logging.warning(ex)
                     return []
 
-                return [DocxImageBox(name_attr, image)]
+                return [DocxImageBox(root_name, name_attr, image)]
 
         return []

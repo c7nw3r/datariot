@@ -15,12 +15,17 @@ class DocxTextBox(Box):
     Box implementation for the plain text docx elements.
     """
 
-    def __init__(self, paragraph: Paragraph):
+    def __init__(self, root_name: str, paragraph: Paragraph):
         super().__init__(None, None, None, None)
         self.p = paragraph
+        self.root_name = root_name
 
     @property
     def text(self):
+        if len(self.p._element.xpath(".//w:sdt//w:t")) > 0:
+            segments = self.p._element.xpath(".//w:t")
+            return " ".join([str(e) for e in segments])
+
         return self.p.text
 
     @property
@@ -66,8 +71,8 @@ class DocxTextBox(Box):
 
 class DocxListBox(DocxTextBox):
 
-    def __init__(self, paragraph: Paragraph):
-        super().__init__(paragraph)
+    def __init__(self, root_name: str, paragraph: Paragraph):
+        super().__init__(root_name, paragraph)
 
         ilvl = self.p._element.xpath("w:pPr/w:numPr/w:ilvl/@w:val")
         self.numbering = int(ilvl[0])
@@ -78,10 +83,11 @@ class DocxTableBox(Box):
     Box implementation for the table docx elements.
     """
 
-    def __init__(self, rows: list, paragraphs: List[List[Paragraph]]):
+    def __init__(self, root_name: str, rows: list, paragraphs: List[List[Paragraph]]):
         super().__init__(None, None, None, None)
         self.rows = rows
         self.paragraphs = paragraphs
+        self.root_name = root_name
 
     @property
     def font_sizes(self) -> List[int]:
@@ -122,15 +128,20 @@ class DocxImageBox(Box, MediaAware):
     Box implementation for the image docx elements.
     """
 
-    def __init__(self, name: str, image):
+    def __init__(self, root_name: str, name: str, image):
         super().__init__(None, None, None, None)
         self.name = name
         self.image = image
+        self.root_name = root_name
 
     def get_file(self) -> Tuple[str, Image]:
         return self.name, self.image
 
-    def to_hash(self) -> str:
-        encoded = to_base64(self.image)
+    def to_hash(self, fast: bool = False) -> str:
         from hashlib import sha256
+
+        if fast:
+            return str(sha256(self.name.encode("utf-8")).hexdigest())
+
+        encoded = to_base64(self.image)
         return str(sha256(encoded).hexdigest())

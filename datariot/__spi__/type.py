@@ -67,7 +67,7 @@ class MediaAware(ABC):
         pass
 
     @abstractmethod
-    def to_hash(self) -> str:
+    def to_hash(self, fast: bool = False) -> str:
         pass
 
 

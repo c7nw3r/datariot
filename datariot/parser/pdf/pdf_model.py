@@ -181,10 +181,16 @@ class PDFImageBox(Box, MediaAware):
         name = f"image_{self.page_number}_{x1}_{y1}_{x2}_{y2}"
         return name, data.original
 
-    def to_hash(self, crop_box: Optional[Box] = None) -> str:
+    def to_hash(self, crop_box: Optional[Box] = None, fast: bool = False) -> str:
+        from hashlib import sha256
+
+        if fast:
+            key = f"{self.page_number}:{self.x1}:{self.y1}:{self.x2}:{self.y2}"
+            return str(sha256(key.encode("utf-8")).hexdigest())
+
         data = self.crop(crop_box)
         encoded = to_base64(data.original)
-        from hashlib import sha256
+
         return str(sha256(encoded).hexdigest())
 
 

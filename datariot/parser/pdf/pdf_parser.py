@@ -41,9 +41,10 @@ class PDFParser(Parser, PageMixin):
     def parse_folder(path: str,
                      config: PDFParserConfig = PDFParserConfig(),
                      file_filter: FileFilter = lambda _: True) -> Iterator[ParsedPDF]:
+        parser = PDFParser(config)
         for file in get_files(path, ".pdf"):
             try:
                 if file_filter(file):
-                    yield PDFParser(config).parse(file)
+                    yield parser.parse(file)
             except DataRiotException as ex:
                 logging.warning(ex)

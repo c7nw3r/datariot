@@ -56,7 +56,7 @@ def save_image(path: str, box, image_quality: int = 10):
 
     _, file = box.get_file()
     try:
-        name = create_uuid_from_string(box.to_hash())
+        name = create_uuid_from_string(box.to_hash(fast=True))
     except OSError as ex:
         logging.warning(str(ex))
         return
