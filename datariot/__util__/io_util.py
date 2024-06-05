@@ -1,6 +1,8 @@
+import json
 import logging
 import os
 import pathlib
+from typing import List
 
 from tqdm import tqdm
 
@@ -75,3 +77,14 @@ def save_image(path: str, box, image_quality: int = 10):
         except OSError as ex:
             logging.warning(f"error while saving image of {path}", str(ex))
             return
+
+
+def write_json_lines(path: str, data: List[dict]):
+    _dir = pathlib.Path(path).parent.resolve()
+    if not os.path.exists(_dir):
+        os.makedirs(_dir)
+
+    with open(path, "w") as file:
+        for item in data:
+            file.write(json.dumps(item))
+            file.write("\n")

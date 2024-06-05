@@ -7,6 +7,7 @@ from PIL.Image import Image
 from tqdm import tqdm
 
 from datariot.__util__ import write_file
+from datariot.__util__.array_util import filter_none
 from datariot.__util__.io_util import save_image, without_ext
 
 T = TypeVar('T')
@@ -85,7 +86,11 @@ class Parsed:
 
     def render(self, evaluator, delimiter: str = "\n\n", show_progress: bool = False):
         array = tqdm(self.bboxes, disable=not show_progress, desc="render")
-        return delimiter.join([e.render(evaluator) for e in array])
+        return delimiter.join(filter_none([e.render(evaluator) for e in array]))
+
+    def filter_by(self, expression: Callable[[Box], bool]):
+        bboxes = [e for e in self.bboxes if expression(e)]
+        return Parsed(self.path, bboxes, self.properties)
 
     def save(self, path: str,
              formatter: Formatter,
@@ -115,3 +120,7 @@ FontWeight = Literal["regular", "bold"]
 ColumnPosition = Literal["left", "center", "right"]
 
 FileFilter = Callable[[str], bool]
+
+
+def starts_with_filter(prefix: str) -> FileFilter:
+    return lambda file: file[file.rfind("/") + 1:].startswith(prefix)

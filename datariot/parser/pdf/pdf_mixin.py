@@ -61,10 +61,13 @@ class PageMixin:
 
         return boxes
 
-    def get_table_boxes(self, _document: PDFDocument, page: Page):
+    def get_table_boxes(self, _document: PDFDocument, page: Page, config: PDFParserConfig):
         box_filter = NestedTableBoundingBoxFilter()
 
-        ts = {"vertical_strategy": "lines", "horizontal_strategy": "lines"}
+        ts = {
+            "vertical_strategy": config.bbox_config.table_vertical_strategy,
+            "horizontal_strategy": config.bbox_config.table_horizontal_strategy
+        }
         boxes = [PDFTableBox(page, e) for e in zip(page.find_tables(ts), page.extract_tables(ts))]
         boxes = [e for e in boxes if len(e) > 1]
         boxes = box_filter(page, boxes)

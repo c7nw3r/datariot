@@ -60,10 +60,10 @@ Args:
             else:
                 if _good_splits:
                     merged_text = self.merge_splits(_good_splits, _separator)
-                    final_chunks.extend([Chunk(e) for e in merged_text])
+                    final_chunks.extend([e for e in merged_text])
                     _good_splits = []
                 if not new_separators:
-                    final_chunks.append(Chunk(s))
+                    final_chunks.append(s)
                 else:
                     other_info = self._split_text(s, new_separators)
                     final_chunks.extend(other_info)

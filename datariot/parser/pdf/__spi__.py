@@ -38,6 +38,8 @@ class BBoxConfig:
     parser_y_tolerance: int = 3
     min_image_width: int = 30
     min_image_height: int = 30
+    table_vertical_strategy: str = "lines_strict"
+    table_horizontal_strategy: str = "lines_strict"
 
 
 @dataclass

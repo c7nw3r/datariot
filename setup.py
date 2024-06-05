@@ -7,7 +7,7 @@ from setuptools import find_packages, setup
 
 long_description = Path(__file__).with_name("README.md").read_text()
 
-version = "0.3.6"
+version = "0.3.7"
 setup(
     name='datariot',
     packages=find_packages(exclude=("test")),
@@ -48,6 +48,12 @@ setup(
             "beautifulsoup4==4.12.3",
             "webdriver_manager==4.0.1",
             "lxml==5.1.0"
+        ],
+        'xlsx': [
+            "openpyxl==3.1.2"
+        ],
+        'camelot': [
+            "camelot-py==0.11.0"
         ]
     }
 )
