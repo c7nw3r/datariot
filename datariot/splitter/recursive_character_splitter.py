@@ -79,12 +79,12 @@ Args:
         for i, text in enumerate(texts):
             for chunk in self._split_text(text, separators=self.separators):
                 metadata = copy.deepcopy(_metadatas[i])
-                new_doc = Chunk(text=chunk, data=metadata)
+                new_doc = Chunk(text=chunk.text, data=metadata)
                 documents.append(new_doc)
         return documents
 
-    def split_text(self, text: str) -> List[str]:
-        return self._split_text(text, self._separators)
+    def split_text(self, text: str) -> List[Chunk]:
+        return self._split_text(text, self.separators)
 
     def split_documents(self, documents: Iterable[Chunk]) -> List[Chunk]:
         """Split documents."""
