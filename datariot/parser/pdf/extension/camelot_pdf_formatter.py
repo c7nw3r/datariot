@@ -9,13 +9,15 @@ from datariot.__spi__.splitter import Chunk
 from datariot.__util__.image_util import to_base64
 from datariot.__util__.text_util import create_uuid_from_string
 from datariot.parser.pdf import PDFTableBox, PDFTextBox, PDFImageBox
+from datariot.parser.pdf.__spi__ import PDFParserConfig
 from datariot.parser.pdf.pdf_formatter import HeuristicPDFFormatter
 from datariot.parser.pdf.pdf_model import PDFLineCurveBox
 from datariot.splitter import HTMLTagSplitter, RecursiveCharacterSplitter
 
 
 class CamelotPDFFormatter(HeuristicPDFFormatter):
-    def __init__(self, parsed: Parsed, enable_json: bool = False):
+    def __init__(self, parsed: Parsed, config: PDFParserConfig, enable_json: bool = False):
+        self.config = config
         self.parsed_withtblsandimgs, self.media_list = self.process_tables_and_images(parsed)
         super().__init__(parsed, enable_json)
 
@@ -166,20 +168,22 @@ class CamelotPDFFormatter(HeuristicPDFFormatter):
         boxes_to_process = datariot_result.bboxes.copy()
         box_groups = []
         for idx, bbox in enumerate(datariot_result.bboxes):
-            if isinstance(bbox, PDFImageBox):
+            if isinstance(bbox, PDFImageBox) or isinstance(bbox, PDFLineCurveBox):
                 if bbox in boxes_to_process:
                     intersecting_boxes = self.find_intersections_recursive(bbox, boxes_to_process)
+                    # intersecting_boxes = [bbox] #skip grouping
                     box_groups.append((bbox, intersecting_boxes))
 
         group_image_boxes = []
         for box_origin, box_group in box_groups:
             x1, y1, x2, y2 = self.get_group_bbox(box_group)
             newimagebox = PDFImageBox(box_origin.page, data={"x0": x1, "x1": x2, "top": y1, "bottom": y2})
-            group_image_boxes.append(newimagebox)
-            datariot_result.bboxes[datariot_result.bboxes.index(box_origin)] = newimagebox
+            if newimagebox.width > self.config.bbox_config.min_image_width and newimagebox.height > self.config.bbox_config.min_image_height:
+                group_image_boxes.append(newimagebox)
+                datariot_result.bboxes[datariot_result.bboxes.index(box_origin)] = newimagebox
 
         boxes_to_remove = [box for box in datariot_result.bboxes if isinstance(box, PDFLineCurveBox) or (
-                isinstance(box, PDFImageBox) and (box not in group_image_boxes))]
+                    isinstance(box, PDFImageBox) and (box not in group_image_boxes))]
         for box in boxes_to_remove:
             datariot_result.bboxes.remove(box)
 
@@ -251,7 +255,7 @@ class CamelotPDFFormatter(HeuristicPDFFormatter):
         running_pagenum = 0
         for b in self.parsed_withtblsandimgs.bboxes:
             if b.text.startswith("#"):
-                b.text = " " + b.text  # Hashtag at the beginning of line shall not be misinterpreted as header, therefore space is added
+                b._text = " " + b.text  # Hashtag at the beginning of line shall not be misinterpreted as header, therefore space is added
             formatted = b.render(self)
             m = re.search('^#+', formatted.split(" ")[0])
             if m is None:

@@ -28,7 +28,7 @@ class PageMixin:
         box_sorter = CoordinatesBoundingBoxSorter(config.bbox_config)
 
         boxes = []
-        boxes.extend(self.get_table_boxes(document, page))
+        boxes.extend(self.get_table_boxes(document, page, config))
         boxes.extend(self.get_text_boxes(document, page.filter(self.not_within_bboxes(boxes)), config.bbox_config))
         boxes.extend(self.get_image_boxes(document, page, config))
         boxes.extend(self.get_linecurve_boxes(document, page, config))

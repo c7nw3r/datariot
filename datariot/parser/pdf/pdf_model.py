@@ -198,7 +198,7 @@ class PDFLineCurveBox(Box):
 
     def __init__(self, page: Page, data: dict):
         super().__init__(int(data["x0"]), int(data["x1"]), int(data["top"]), int(data["bottom"]))
-        self.page_number = page.page_number
+        self.page = page
 
     @property
     def width(self):
@@ -207,6 +207,10 @@ class PDFLineCurveBox(Box):
     @property
     def height(self):
         return self.y2 - self.y1
+
+    @property
+    def page_number(self):
+        return self.page.page_number
 
     def __repr__(self):
         return f"x1:{self.x1}, y1:{self.y1}, x2:{self.x2}, y2:{self.y2}"

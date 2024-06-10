@@ -79,7 +79,7 @@ Args:
         for i, text in enumerate(texts):
             for chunk in self._split_text(text, separators=self.separators):
                 metadata = copy.deepcopy(_metadatas[i])
-                new_doc = Chunk(text=chunk.text, data=metadata)
+                new_doc = Chunk(text=chunk, data=metadata)
                 documents.append(new_doc)
         return documents
 
