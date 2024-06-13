@@ -9,8 +9,8 @@ from datariot.parser.pdf.pdf_formatter import JSONPDFFormatter
 # TODO: split into separate config classes
 @dataclass
 class BBoxConfig:
-    filter_min_y: Optional[int] = 50
-    filter_max_y: Optional[int] = 710
+    filter_min_y: Optional[int] = None
+    filter_max_y: Optional[int] = None
     filter_must_regexes: List[RegexPattern] = field(default_factory=list)
     filter_must_not_regexes: List[RegexPattern] = field(
         default_factory=lambda: [RegexPattern(r"^\s*$")]

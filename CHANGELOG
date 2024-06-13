@@ -1,0 +1,7 @@
+# CHANGELOG
+
+## v0.4.0
+
+* config default `filter_min_y = 50` to `filter_min_y = None`
+* config default `filter_max_y = 710` to `filter_max_y = None`
+
