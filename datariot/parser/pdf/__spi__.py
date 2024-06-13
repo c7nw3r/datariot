@@ -6,6 +6,14 @@ from datariot.parser.__spi__ import FontSpecification, RegexPattern
 from datariot.parser.pdf.pdf_formatter import JSONPDFFormatter
 
 
+@dataclass
+class BoxSizeConfig:
+    min_width: Optional[int] = None
+    max_width: Optional[int] = None
+    min_height: Optional[int] = None
+    max_height: Optional[int] = None
+
+
 # TODO: split into separate config classes
 @dataclass
 class BBoxConfig:
@@ -48,10 +56,21 @@ class BBoxConfig:
     sorter_y_tolerance: int = 5
     parser_x_tolerance: int = 3
     parser_y_tolerance: int = 3
-    min_image_width: int = 30
-    min_image_height: int = 30
+    image_filter_box_size: BoxSizeConfig = BoxSizeConfig(min_width=30, min_height=30)
     table_vertical_strategy: str = "lines_strict"
     table_horizontal_strategy: str = "lines_strict"
+
+    ocr_tesseract_languages: list[str] = ["deu", "eng"]
+    """Tesseract language abbreviations for ocr"""
+
+    ocr_tesseract_config: str = "--psm 3"
+    """String of Tesseract command line options, e.g. --oem, --psm, ..."""
+
+    ocr_filter_box_min_chars: int = 50
+    """Minimum number of characters in an ocr box to be included"""
+
+    ocr_keep_image_box: bool = True
+    """Whether to keep image boxes in addition to ocr boxes"""
 
 
 @dataclass

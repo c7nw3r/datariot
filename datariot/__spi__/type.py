@@ -1,7 +1,8 @@
 import json
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import List, Literal, Optional, Tuple, TypeVar, Generic, Callable
+from math import ceil, floor
+from typing import Callable, Generic, List, Literal, Optional, Tuple, TypeVar
 
 from PIL.Image import Image
 from tqdm import tqdm
@@ -10,7 +11,8 @@ from datariot.__util__ import write_file
 from datariot.__util__.array_util import filter_none
 from datariot.__util__.io_util import save_image, without_ext
 
-T = TypeVar('T')
+
+T = TypeVar("T")
 
 
 class Formatter(ABC, Generic[T]):
@@ -19,25 +21,60 @@ class Formatter(ABC, Generic[T]):
     """
 
     @abstractmethod
-    def __call__(self, box: 'Box') -> T:
+    def __call__(self, box: "Box") -> T:
         pass
 
 
-class Box(ABC):
+class Box:
     """
     tbd
     """
 
-    def __init__(self, x1: Optional[int], x2: Optional[int], y1: Optional[int], y2: Optional[int]):
-        self.x1 = x1
-        self.x2 = x2
-        self.y1 = y1
-        self.y2 = y2
+    def __init__(
+        self,
+        x1: Optional[float],
+        x2: Optional[float],
+        y1: Optional[float],
+        y2: Optional[float],
+    ):
+        self.x1 = floor(x1) if x1 is not None else None
+        self.x2 = ceil(x2) if x2 is not None else None
+        self.y1 = floor(y1) if y1 is not None else None
+        self.y2 = ceil(y2) if y2 is not None else None
+
+    @property
+    def width(self) -> int:
+        assert self.x1 is not None
+        assert self.x2 is not None
+
+        return abs(self.x2 - self.x1)
+
+    @property
+    def height(self) -> int:
+        assert self.y1 is not None
+        assert self.y2 is not None
+
+        return abs(self.y2 - self.y1)
+
+    @property
+    def size(self) -> int:
+        return self.width * self.height
+
+    def is_contained_in(self, box: "Box") -> bool:
+        expr1 = self.x1 >= box.x1
+        expr2 = self.x2 <= box.x2
+        expr3 = self.y1 >= box.y1
+        expr4 = self.y2 <= box.y2
+
+        if all([expr1, expr2, expr3, expr4]):
+            return True
+
+        return False
 
     def render(self, formatter: Formatter):
         return formatter(self)
 
-    def intersect(self, box: 'Box', x_tolerance: int = 0, y_tolerance: int = 0):
+    def intersect(self, box: "Box", x_tolerance: int = 0, y_tolerance: int = 0):
         expr1 = ((box.x1 or 0) - x_tolerance) <= (self.x1 or 0)
         expr2 = ((box.x2 or 0) + x_tolerance) >= (self.x2 or 0)
         expr3 = ((box.y1 or 0) - y_tolerance) <= (self.y1 or 0)
@@ -47,7 +84,12 @@ class Box(ABC):
 
     @staticmethod
     def from_dict(dictionary: dict):
-        return Box(x1=dictionary["x0"], y1=dictionary["y0"], x2=dictionary["x1"], y2=dictionary["y1"])
+        return Box(
+            x1=dictionary["x0"],
+            y1=dictionary["y0"],
+            x2=dictionary["x1"],
+            y2=dictionary["y1"],
+        )
 
     def __repr__(self):
         return f"({self.x1},{self.y1},{self.x2},{self.y2})"
@@ -92,10 +134,13 @@ class Parsed:
         bboxes = [e for e in self.bboxes if expression(e)]
         return Parsed(self.path, bboxes, self.properties)
 
-    def save(self, path: str,
-             formatter: Formatter,
-             delimiter: str = "\n\n",
-             image_quality: int = 10):
+    def save(
+        self,
+        path: str,
+        formatter: Formatter,
+        delimiter: str = "\n\n",
+        image_quality: int = 10,
+    ):
         write_file(path, self.render(formatter, delimiter))
 
         for box in self.bboxes:
@@ -123,4 +168,4 @@ FileFilter = Callable[[str], bool]
 
 
 def starts_with_filter(prefix: str) -> FileFilter:
-    return lambda file: file[file.rfind("/") + 1:].startswith(prefix)
+    return lambda file: file[file.rfind("/") + 1 :].startswith(prefix)
