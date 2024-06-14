@@ -79,7 +79,7 @@ class BBoxConfig:
 class PDFParserConfig:
     screenshot: bool = False
     ocr: bool = False
-    bbox_config: BBoxConfig = BBoxConfig()
+    bbox_config: BBoxConfig = field(default_factory=lambda: BBoxConfig())
 
 
 class ParsedPDF(Parsed):
