@@ -8,7 +8,6 @@ from datariot.parser.pdf.pdf_model import PDFTextBox
 
 
 class CoordinatesBoundingBoxSorter:
-
     def __init__(self, config: BBoxConfig):
         self._config = config
 

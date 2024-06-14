@@ -30,6 +30,7 @@ class PDFParser(Parser, PageMixin):
         bboxes = []
 
         with pdfplumber.open(path) as reader:
+            properties = reader.metadata
             for page in reader.pages:
                 boxes = self.get_boxes(reader.doc, page, self.config)
                 bboxes.extend(boxes)
@@ -37,7 +38,7 @@ class PDFParser(Parser, PageMixin):
                 if self.config.screenshot:
                     self.take_screenshot(page, boxes)
 
-        return ParsedPDF(path, bboxes)
+        return ParsedPDF(path, bboxes, properties=properties)
 
     @staticmethod
     def parse_folder(

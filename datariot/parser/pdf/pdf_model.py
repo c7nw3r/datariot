@@ -1,28 +1,28 @@
 from typing import List, Optional, Tuple
 
-from PIL.Image import Image
 from pdfplumber.page import Page
 from pdfplumber.table import Table
+from PIL.Image import Image
 
 from datariot.__spi__.type import Box, ColumnPosition, FontWeight, MediaAware
 from datariot.__util__.image_util import to_base64
+
 
 DEFAULT_IMAGE_RESOLUTION = 72
 IMAGE_RESOLUTION = 400
 
 
 class PDFTextBox(Box):
-
     def __init__(
-            self,
-            x1: int,
-            y1: int,
-            x2: int,
-            y2: int,
-            text: str,
-            font_size: int,
-            font_name: str,
-            page_number: int
+        self,
+        x1: float,
+        y1: float,
+        x2: float,
+        y2: float,
+        text: str,
+        font_size: int,
+        font_name: str,
+        page_number: int,
     ):
         super().__init__(x1, x2, y1, y2)
         self._text = text
@@ -43,7 +43,16 @@ class PDFTextBox(Box):
         return PDFTextBox(x1, y1, x2, y2, text, font_size, font_name, page_number)
 
     def with_text(self, text: str):
-        return PDFTextBox(self.x1, self.y1, self.x2, self.y2, text, self._font_size, self._font_name, self.page_number)
+        return PDFTextBox(
+            self.x1,
+            self.y1,
+            self.x2,
+            self.y2,
+            text,
+            self._font_size,
+            self._font_name,
+            self.page_number,
+        )
 
     @property
     def text(self) -> str:
@@ -82,7 +91,7 @@ class PDFTextBox(Box):
             self.text,
             self.font_size,
             self._font_name,
-            self.page_number
+            self.page_number,
         )
 
     def __repr__(self):
@@ -90,26 +99,27 @@ class PDFTextBox(Box):
 
 
 class PDFColumnTextBox(PDFTextBox):
-
     def __init__(
-            self,
-            x1: int,
-            y1: int,
-            x2: int,
-            y2: int,
-            text: str,
-            font_size: int,
-            font_name: str,
-            page_number: int,
-            num_columns: int,
-            column: ColumnPosition
+        self,
+        x1: float,
+        y1: float,
+        x2: float,
+        y2: float,
+        text: str,
+        font_size: int,
+        font_name: str,
+        page_number: int,
+        num_columns: int,
+        column: ColumnPosition,
     ):
         super().__init__(x1, y1, x2, y2, text, font_size, font_name, page_number)
         self.num_columns = num_columns
         self.column = column
 
     @staticmethod
-    def from_pdf_text_box(box: PDFTextBox, num_columns: int, column: ColumnPosition) -> "PDFColumnTextBox":
+    def from_pdf_text_box(
+        box: PDFTextBox, num_columns: int, column: ColumnPosition
+    ) -> "PDFColumnTextBox":
         return PDFColumnTextBox(
             box.x1,
             box.y1,
@@ -120,13 +130,14 @@ class PDFColumnTextBox(PDFTextBox):
             box.font_name,
             box.page_number,
             num_columns,
-            column
+            column,
         )
 
 
 class PDFOcrBox(PDFTextBox):
-
-    def __init__(self, x1: int, y1: int, x2: int, y2: int, text: str, page_number: int = -1):
+    def __init__(
+        self, x1: int, y1: int, x2: int, y2: int, text: str, page_number: int = -1
+    ):
         super().__init__(x1, y1, x2, y2, text, -1, "regular", page_number)
 
     @staticmethod
@@ -145,18 +156,9 @@ class PDFOcrBox(PDFTextBox):
 
 
 class PDFImageBox(Box, MediaAware):
-
     def __init__(self, page: Page, data: dict):
-        super().__init__(int(data["x0"]), int(data["x1"]), int(data["top"]), int(data["bottom"]))
+        super().__init__(data["x0"], data["x1"], data["top"], data["bottom"])
         self.page = page
-
-    @property
-    def width(self):
-        return self.x2 - self.x1
-
-    @property
-    def height(self):
-        return self.y2 - self.y1
 
     @property
     def page_number(self):
@@ -164,7 +166,9 @@ class PDFImageBox(Box, MediaAware):
 
     def crop(self, crop_box: Optional[Box] = None):
         crop_box = crop_box or (self.x1, self.y1, self.x2, self.y2)
-        return self.page.crop(crop_box, strict=False).to_image(resolution=IMAGE_RESOLUTION)
+        return self.page.crop(crop_box, strict=False).to_image(
+            resolution=IMAGE_RESOLUTION
+        )
 
     def save(self, crop_box: Optional[Box] = None):
         data = self.crop(crop_box)
@@ -175,6 +179,7 @@ class PDFImageBox(Box, MediaAware):
         return f"x1:{self.x1}, y1:{self.y1}, x2:{self.x2}, y2:{self.y2}"
 
     def get_file(self, crop_box: Optional[Box] = None) -> Tuple[str, Image]:
+        # TODO: get image data directly and don't take a screenshot (crop)
         data = self.crop(crop_box)
         x1, y1, x2, y2 = crop_box or (self.x1, self.y1, self.x2, self.y2)
 
@@ -195,18 +200,9 @@ class PDFImageBox(Box, MediaAware):
 
 
 class PDFLineCurveBox(Box):
-
     def __init__(self, page: Page, data: dict):
-        super().__init__(int(data["x0"]), int(data["x1"]), int(data["top"]), int(data["bottom"]))
+        super().__init__(data["x0"], data["x1"], data["top"], data["bottom"])
         self.page = page
-
-    @property
-    def width(self):
-        return self.x2 - self.x1
-
-    @property
-    def height(self):
-        return self.y2 - self.y1
 
     @property
     def page_number(self):
@@ -217,9 +213,10 @@ class PDFLineCurveBox(Box):
 
 
 class PDFTableBox(Box):
-
     def __init__(self, page: Page, data: Tuple[Table, List[List[str]]]):
-        super().__init__(data[0].bbox[0], data[0].bbox[2], data[0].bbox[1], data[0].bbox[3])
+        super().__init__(
+            data[0].bbox[0], data[0].bbox[2], data[0].bbox[1], data[0].bbox[3]
+        )
         self.rows = data[1]
         self.page_number = page.page_number
 

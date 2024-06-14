@@ -6,11 +6,19 @@ from datariot.parser.__spi__ import FontSpecification, RegexPattern
 from datariot.parser.pdf.pdf_formatter import JSONPDFFormatter
 
 
+@dataclass
+class BoxSizeConfig:
+    min_width: Optional[int] = None
+    max_width: Optional[int] = None
+    min_height: Optional[int] = None
+    max_height: Optional[int] = None
+
+
 # TODO: split into separate config classes
 @dataclass
 class BBoxConfig:
-    filter_min_y: Optional[int] = 50
-    filter_max_y: Optional[int] = 710
+    filter_min_y: Optional[int] = None
+    filter_max_y: Optional[int] = None
     filter_must_regexes: List[RegexPattern] = field(default_factory=list)
     filter_must_not_regexes: List[RegexPattern] = field(
         default_factory=lambda: [RegexPattern(r"^\s*$")]
@@ -48,17 +56,30 @@ class BBoxConfig:
     sorter_y_tolerance: int = 5
     parser_x_tolerance: int = 3
     parser_y_tolerance: int = 3
-    min_image_width: int = 30
-    min_image_height: int = 30
+    image_filter_box_size: BoxSizeConfig = field(
+        default_factory=lambda: BoxSizeConfig(min_width=30, min_height=30)
+    )
     table_vertical_strategy: str = "lines_strict"
     table_horizontal_strategy: str = "lines_strict"
+
+    ocr_tesseract_languages: list[str] = field(default_factory=lambda: ["deu", "eng"])
+    """Tesseract language abbreviations for ocr"""
+
+    ocr_tesseract_config: str = "--psm 3"
+    """String of Tesseract command line options, e.g. --oem, --psm, ..."""
+
+    ocr_filter_box_min_chars: int = 50
+    """Minimum number of characters in an ocr box to be included"""
+
+    ocr_keep_image_box: bool = True
+    """Whether to keep image boxes in addition to ocr boxes"""
 
 
 @dataclass
 class PDFParserConfig:
     screenshot: bool = False
     ocr: bool = False
-    bbox_config: BBoxConfig = BBoxConfig()
+    bbox_config: BBoxConfig = field(default_factory=lambda: BBoxConfig())
 
 
 class ParsedPDF(Parsed):

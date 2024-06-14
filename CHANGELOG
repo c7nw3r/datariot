@@ -1,0 +1,10 @@
+# CHANGELOG
+
+## v0.4.0
+
+* all `Box` coordinates are stored as integers (float -> int via `ceil` and `floor`)
+* config default `filter_min_y = 50` to `filter_min_y = None`
+* config default `filter_max_y = 710` to `filter_max_y = None`
+* config `min_image_width` and `min_image_height` to `image_filter_box_size` of type `BoxSizeConfig`
+* add `page.rects` to `PDFLineCurveBox`
+
