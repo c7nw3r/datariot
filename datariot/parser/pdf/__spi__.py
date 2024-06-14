@@ -56,7 +56,9 @@ class BBoxConfig:
     sorter_y_tolerance: int = 5
     parser_x_tolerance: int = 3
     parser_y_tolerance: int = 3
-    image_filter_box_size: BoxSizeConfig = BoxSizeConfig(min_width=30, min_height=30)
+    image_filter_box_size: BoxSizeConfig = field(
+        default_factory=lambda: BoxSizeConfig(min_width=30, min_height=30)
+    )
     table_vertical_strategy: str = "lines_strict"
     table_horizontal_strategy: str = "lines_strict"
 
