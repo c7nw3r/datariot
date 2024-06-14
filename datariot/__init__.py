@@ -1,4 +1,4 @@
-from .__spi__.type import Formatter, MediaAware, Parsed
+from .__spi__.type import Box, Formatter, MediaAware, Parsed
 
 
-__all__ = ["Formatter", "Parsed", "MediaAware"]
+__all__ = ["Box", "Formatter", "Parsed", "MediaAware"]
