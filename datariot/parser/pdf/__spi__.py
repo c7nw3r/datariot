@@ -62,7 +62,7 @@ class BBoxConfig:
     table_vertical_strategy: str = "lines_strict"
     table_horizontal_strategy: str = "lines_strict"
 
-    ocr_tesseract_languages: list[str] = ["deu", "eng"]
+    ocr_tesseract_languages: list[str] = field(default_factory=lambda: ["deu", "eng"])
     """Tesseract language abbreviations for ocr"""
 
     ocr_tesseract_config: str = "--psm 3"
