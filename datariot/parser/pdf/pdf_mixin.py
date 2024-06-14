@@ -36,7 +36,7 @@ class PageMixin:
         boxes.extend(self.get_table_boxes(document, page, config))
         boxes.extend(
             self.get_text_boxes(
-                document, page.filter(self.not_within_bboxes(boxes)), config.bbox_config
+                document, page.filter(self.not_within_bboxes(boxes)), config
             )
         )
         boxes.extend(self.get_image_boxes(document, page, config))
