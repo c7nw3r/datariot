@@ -126,13 +126,17 @@ class DocumentMixin:
 
         return []
 
-    def parse_custom_properties(self, path: str):
+    def parse_custom_properties(self, path: str) -> dict:
         import zipfile
 
         import lxml.etree
 
-        zipped_file = zipfile.ZipFile(path)
-        opened_file = zipped_file.open("docProps/custom.xml")
+        try:
+            zipped_file = zipfile.ZipFile(path)
+            opened_file = zipped_file.open("docProps/custom.xml")
+        except Exception:
+            return {}
+
         xml = lxml.etree.parse(opened_file)
         opened_file.close()
         zipped_file.close()
