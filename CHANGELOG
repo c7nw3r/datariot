@@ -3,7 +3,10 @@
 ## v0.5.0
 
 * PDFParserConfig BBoxConfig `table_vertical_strategy` and `table_horizontal_strategy` to `table_config` of type `TableBoxConfig` and change default values to `lines`
-* Exclude linecurves within table bounding boxes
+* exclude linecurves within table bounding boxes
+* add `BoundingBoxProcessor` base class
+* add `ReCropTextExtractionBBoxProcessor` to re extract text of merged bounding boxes, activated via `TextBoxConfig.extraction_strategy`
+* switch to pydantic models for config classes
 
 ## v0.4.0
 
