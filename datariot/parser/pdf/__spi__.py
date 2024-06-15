@@ -94,6 +94,10 @@ class PDFParserConfig(BaseModel):
 
 
 class ParsedPDF(Parsed):
+    @property
+    def is_paged(self) -> bool:
+        return True
+
     def to_json(self):
         formatter = JSONPDFFormatter()
         return {"path": self.path, "bboxes": [b.render(formatter) for b in self.bboxes]}
