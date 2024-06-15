@@ -16,6 +16,7 @@ from datariot.parser.pdf.bbox.bbox_filter import (
     TextContentBoundingBoxFilter,
 )
 from datariot.parser.pdf.bbox.bbox_merger import CoordinatesBoundingBoxMerger
+from datariot.parser.pdf.bbox.bbox_processor import ReCropTextExtractionBBoxProcessor
 from datariot.parser.pdf.bbox.bbox_slicer import ColumnStyleBoundingBoxSlicer
 from datariot.parser.pdf.bbox.bbox_sorter import CoordinatesBoundingBoxSorter
 from datariot.parser.pdf.pdf_model import (
@@ -73,6 +74,10 @@ class PageMixin:
         boxes = pos_filter(page, boxes)
         boxes = txt_filter(page, boxes)
         # boxes = geo_merger(page, boxes)
+
+        if config.bbox_config.text_box_config.extraction_strategy == "re_crop":
+            re_crop = ReCropTextExtractionBBoxProcessor()
+            boxes = re_crop(page, boxes)
 
         return boxes
 

@@ -13,3 +13,9 @@ class BoundingBoxFilter(ABC):
     @abstractmethod
     def __call__(self, page: Page, bboxes: List[B]) -> List[B]:
         pass
+
+
+class BoundingBoxProcessor(ABC):
+    @abstractmethod
+    def __call__(self, page: Page, bboxes: List[B]) -> List[B]:
+        pass

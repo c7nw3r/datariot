@@ -21,6 +21,18 @@ class TableBoxConfig:
     horizontal_strategy: str = "lines"
 
 
+@dataclass
+class TextBoxConfig:
+    extraction_strategy: Literal["default", "re_crop"] = "default"
+    """
+    Strategy to get the final text of a box
+
+    - `default`: final text is the concatenation of all merged text boxes
+    - `re_crop`: final bounding box of merged text is cropped from the page
+    and the native `.extract_text()` is called on the crop
+    """
+
+
 # TODO: split into separate config classes
 @dataclass
 class BBoxConfig:
@@ -68,6 +80,8 @@ class BBoxConfig:
     )
 
     table_box_config: TableBoxConfig = field(default_factory=lambda: TableBoxConfig())
+
+    text_box_config: TextBoxConfig = field(default_factory=lambda: TextBoxConfig())
 
     ocr_tesseract_languages: list[str] = field(default_factory=lambda: ["deu", "eng"])
     """Tesseract language abbreviations for ocr"""
