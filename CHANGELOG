@@ -7,6 +7,7 @@
 * add `BoundingBoxProcessor` base class
 * add `ReCropTextExtractionBBoxProcessor` to re extract text of merged bounding boxes, activated via `TextBoxConfig.extraction_strategy`
 * switch to pydantic models for config classes
+* add core metadata to parsed docx
 
 ## v0.4.0
 
