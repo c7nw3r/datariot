@@ -28,6 +28,13 @@ class DocumentMixin:
     def has_numbering(self, paragraph: Paragraph):
         return len(paragraph._element.xpath("w:pPr/w:numPr/w:ilvl/@w:val")) > 0
 
+    def has_rendered_page_breaks(self, doc: DocxDocument) -> bool:
+        for para in doc.paragraphs:
+            if para.rendered_page_breaks:
+                return True
+
+        return False
+
     def iter_block_items(self, parent):
         if isinstance(parent, DocxDocument):
             parent_elm = parent.element.body
@@ -50,18 +57,22 @@ class DocumentMixin:
         root_name = type(root).__name__.replace("_", "").lower()
 
         elements = []
+        curr_page_number = 1 if self.has_rendered_page_breaks(document) else None
         for block in self.iter_block_items(root):
             if isinstance(block, Paragraph):
                 w_t = block._element.xpath(".//w:sdt//w:t")
                 if len(block.text.strip()) > 0 or len(w_t) > 0:
                     if self.has_numbering(block):
-                        elements.append(DocxListBox(root_name, block))
+                        elements.append(DocxListBox(root_name, block, curr_page_number))
                     else:
-                        elements.append(DocxTextBox(root_name, block))
+                        elements.append(DocxTextBox(root_name, block, curr_page_number))
                     for run in block.runs:
                         # FIXME
                         if root_name != "header":
                             elements.extend(self.parse_images(root_name, document, run))
+
+                if curr_page_number:
+                    curr_page_number += len(block.rendered_page_breaks)
 
             elif isinstance(block, Table):
                 vf = io.StringIO()

@@ -8,6 +8,7 @@
 * add `ReCropTextExtractionBBoxProcessor` to re extract text of merged bounding boxes, activated via `TextBoxConfig.extraction_strategy`
 * switch to pydantic models for config classes
 * add core metadata to parsed docx
+* docx parser returns `ParsedDocx` with additional property `is_paged`
 
 ## v0.4.0
 

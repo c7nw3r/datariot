@@ -1,8 +1,8 @@
 from dataclasses import dataclass
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
-from PIL.Image import Image
 from docx.text.paragraph import Paragraph, Run
+from PIL.Image import Image
 
 from datariot.__spi__.type import Box, MediaAware
 from datariot.__util__.array_util import flatten
@@ -15,10 +15,16 @@ class DocxTextBox(Box):
     Box implementation for the plain text docx elements.
     """
 
-    def __init__(self, root_name: str, paragraph: Paragraph):
+    def __init__(
+        self,
+        root_name: str,
+        paragraph: Paragraph,
+        page_number: Optional[int] = None,
+    ):
         super().__init__(None, None, None, None)
-        self.p = paragraph
         self.root_name = root_name
+        self.p = paragraph
+        self.page_number = page_number
 
     @property
     def text(self):
@@ -61,7 +67,9 @@ class DocxTextBox(Box):
 
     def get_default_font_size(self, doc):
         try:
-            return doc.styles.element.xpath('w:docDefaults/w:rPrDefault/w:rPr/w:sz')[0].val.pt
+            return doc.styles.element.xpath("w:docDefaults/w:rPrDefault/w:rPr/w:sz")[
+                0
+            ].val.pt
         except:
             return -1
 
@@ -70,9 +78,13 @@ class DocxTextBox(Box):
 
 
 class DocxListBox(DocxTextBox):
-
-    def __init__(self, root_name: str, paragraph: Paragraph):
-        super().__init__(root_name, paragraph)
+    def __init__(
+        self,
+        root_name: str,
+        paragraph: Paragraph,
+        page_number: Optional[int] = None,
+    ):
+        super().__init__(root_name, paragraph, page_number)
 
         ilvl = self.p._element.xpath("w:pPr/w:numPr/w:ilvl/@w:val")
         self.numbering = int(ilvl[0])
@@ -114,7 +126,7 @@ class DocxTableBox(Box):
             for i, col in enumerate(row):
                 lenghts[-1].append(len(col))
 
-        cols = [e.replace(':', '').replace("\n", " ").strip() for e in self.rows[0]]
+        cols = [e.replace(":", "").replace("\n", " ").strip() for e in self.rows[0]]
         buffer = [" | ".join(cols), "-" * 10]
 
         for row in self.rows[1:]:

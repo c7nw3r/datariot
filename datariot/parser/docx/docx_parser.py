@@ -2,8 +2,9 @@ import logging
 from typing import Iterator
 
 from datariot.__spi__.error import DataRiotException, DataRiotImportException
-from datariot.__spi__.type import FileFilter, Parsed, Parser
+from datariot.__spi__.type import FileFilter, Parser
 from datariot.__util__.io_util import get_files
+from datariot.parser.docx.__spi__ import ParsedDocx
 from datariot.parser.docx.docx_mixin import DocumentMixin
 
 
@@ -29,12 +30,12 @@ class DocxParser(Parser, DocumentMixin):
 
         properties = self.parse_properties(path, document)
 
-        return Parsed(path, elements, properties)
+        return ParsedDocx(path, elements, properties)
 
     @staticmethod
     def parse_folder(
         path: str, file_filter: FileFilter = lambda _: True
-    ) -> Iterator[Parsed]:
+    ) -> Iterator[ParsedDocx]:
         for file in get_files(path, ".docx"):
             try:
                 if file_filter(file):
