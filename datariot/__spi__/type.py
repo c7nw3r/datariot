@@ -126,6 +126,10 @@ class Parsed:
     bboxes: List[Box]
     properties: dict = field(default_factory=lambda: {})
 
+    @property
+    def is_paged(self) -> bool:
+        return False
+
     def render(self, evaluator, delimiter: str = "\n\n", show_progress: bool = False):
         array = tqdm(self.bboxes, disable=not show_progress, desc="render")
         return delimiter.join(filter_none([e.render(evaluator) for e in array]))
