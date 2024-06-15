@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import List, Literal, Optional
 
 from datariot.__spi__.type import Parsed
 from datariot.parser.__spi__ import FontSpecification, RegexPattern
@@ -7,11 +7,18 @@ from datariot.parser.pdf.pdf_formatter import JSONPDFFormatter
 
 
 @dataclass
-class BoxSizeConfig:
+class BoxFilterSizeConfig:
     min_width: Optional[int] = None
     max_width: Optional[int] = None
     min_height: Optional[int] = None
     max_height: Optional[int] = None
+
+
+@dataclass
+class TableBoxConfig:
+    strategy: Literal["default", "camelot"] = "default"
+    vertical_strategy: str = "lines"
+    horizontal_strategy: str = "lines"
 
 
 # TODO: split into separate config classes
@@ -56,11 +63,11 @@ class BBoxConfig:
     sorter_y_tolerance: int = 5
     parser_x_tolerance: int = 3
     parser_y_tolerance: int = 3
-    image_filter_box_size: BoxSizeConfig = field(
-        default_factory=lambda: BoxSizeConfig(min_width=30, min_height=30)
+    image_filter_box_size: BoxFilterSizeConfig = field(
+        default_factory=lambda: BoxFilterSizeConfig(min_width=30, min_height=30)
     )
-    table_vertical_strategy: str = "lines_strict"
-    table_horizontal_strategy: str = "lines_strict"
+
+    table_box_config: TableBoxConfig = field(default_factory=lambda: TableBoxConfig())
 
     ocr_tesseract_languages: list[str] = field(default_factory=lambda: ["deu", "eng"])
     """Tesseract language abbreviations for ocr"""

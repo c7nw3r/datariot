@@ -32,15 +32,15 @@ class PageMixin:
     def get_boxes(self, document: PDFDocument, page: Page, config: PDFParserConfig):
         box_sorter = CoordinatesBoundingBoxSorter(config.bbox_config)
 
-        boxes = []
-        boxes.extend(self.get_table_boxes(document, page, config))
-        boxes.extend(
-            self.get_text_boxes(
-                document, page.filter(self.not_within_bboxes(boxes)), config
-            )
+        tables = self.get_table_boxes(document, page, config)
+        texts = self.get_text_boxes(
+            document, page.filter(self.not_within_bboxes(tables)), config
         )
-        boxes.extend(self.get_image_boxes(document, page, config))
-        boxes.extend(self.get_linecurve_boxes(document, page, config))
+        images = self.get_image_boxes(document, page, config)
+        linecurves = self.get_linecurve_boxes(
+            document, page.filter(self.not_within_bboxes(tables, margin=2)), config
+        )
+        boxes = tables + texts + images + linecurves
         boxes = box_sorter(page, boxes)
 
         return boxes
@@ -80,14 +80,14 @@ class PageMixin:
         self, _document: PDFDocument, page: Page, config: PDFParserConfig
     ):
         box_filter = NestedTableBoundingBoxFilter()
-
+        table_config = config.bbox_config.table_box_config
         ts = {
-            "vertical_strategy": config.bbox_config.table_vertical_strategy,
-            "horizontal_strategy": config.bbox_config.table_horizontal_strategy,
+            "vertical_strategy": table_config.vertical_strategy,
+            "horizontal_strategy": table_config.horizontal_strategy,
         }
         boxes = [
             PDFTableBox(page, e)
-            for e in zip(page.find_tables(ts), page.extract_tables(ts))
+            for e in zip(page.find_tables(ts), page.extract_tables(ts), strict=True)
         ]
         boxes = [e for e in boxes if len(e) > 1]
         boxes = box_filter(page, boxes)
@@ -195,16 +195,16 @@ class PageMixin:
         except ValueError as ex:
             logging.warning(ex)
 
-    def not_within_bboxes(self, bboxes: List[Box]):
+    def not_within_bboxes(self, bboxes: List[Box], margin: int = 0):
         def _not_within_bboxes(obj: dict):
             def obj_in_bbox(_bbox):
                 v_mid = (obj["top"] + obj["bottom"]) / 2
                 h_mid = (obj["x0"] + obj["x1"]) / 2
                 return (
-                    (h_mid >= _bbox.x1)
-                    and (h_mid < _bbox.x2)
-                    and (v_mid >= _bbox.y1)
-                    and (v_mid < _bbox.y2)
+                    (h_mid >= _bbox.x1 - margin)
+                    and (h_mid < _bbox.x2 + margin)
+                    and (v_mid >= _bbox.y1 - margin)
+                    and (v_mid < _bbox.y2 + margin)
                 )
 
             return not any(obj_in_bbox(__bbox) for __bbox in bboxes)

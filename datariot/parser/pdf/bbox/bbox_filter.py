@@ -5,7 +5,7 @@ from pdfminer.pdfdocument import PDFDocument, PDFNoOutlines
 from pdfplumber.page import Page
 
 from datariot.__spi__.type import Box
-from datariot.parser.pdf.__spi__ import BBoxConfig, BoxSizeConfig
+from datariot.parser.pdf.__spi__ import BBoxConfig, BoxFilterSizeConfig
 from datariot.parser.pdf.bbox.__spi__ import BoundingBoxFilter
 from datariot.parser.pdf.pdf_model import PDFTextBox
 
@@ -41,7 +41,7 @@ class CoordinatesBoundingBoxFilter(BoundingBoxFilter):
 
 
 class BoxSizeBoundingBoxFilter(BoundingBoxFilter):
-    def __init__(self, config: BoxSizeConfig):
+    def __init__(self, config: BoxFilterSizeConfig):
         self._config = config
 
     def __call__(self, page: Page, bboxes: List[B]) -> List[B]:
