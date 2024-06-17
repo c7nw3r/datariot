@@ -18,6 +18,8 @@ class DocxParser(Parser, DocumentMixin):
         except ImportError:
             raise DataRiotImportException("docx")
 
+        self._config = config
+
     def parse(self, path: str):
         from docx import Document
 
@@ -27,8 +29,8 @@ class DocxParser(Parser, DocumentMixin):
             raise DataRiotException("error while opening docx file " + path)
 
         elements = [
-            *self.parse_elements(document, document.sections[0].header),
-            *self.parse_elements(document, document),
+            *self.parse_elements(document, document.sections[0].header, self._config),
+            *self.parse_elements(document, document, self._config),
         ]
 
         properties = self.parse_properties(path, document)
