@@ -13,6 +13,7 @@
 * add `DocxParserConfig`
 * add `OcrConfig`
 * add `strategy` in `OcrConfig`
+* add `only_full_page` in `OcrConfig`
 
 ## v0.4.0
 

@@ -157,6 +157,13 @@ class PageMixin:
     ) -> list[PDFTextBox]:
         import pytesseract
 
+        if (
+            config.ocr_config.only_full_page
+            and box.size < page.width * page.height - 100
+        ):
+            # smaller than page size with 10 x 10 margin
+            return []
+
         if config.ocr_config.strategy == "text":
             text = pytesseract.image_to_string(
                 box.get_file()[1],
