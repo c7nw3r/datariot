@@ -31,6 +31,28 @@ class TextBoxConfig(BaseModel):
     """
 
 
+class OcrConfig(BaseModel):
+    strategy: Literal["text", "data"] = "text"
+    """
+    Strategy to extract text from images
+
+    * `text`: pytesseract.image_to_string()
+    * `data`: pytesseract.image_to_data() and use text bounding box logic
+    """
+
+    languages: list[str] = ["deu", "eng"]
+    """Tesseract language abbreviations for ocr"""
+
+    tesseract_config: str = "--psm 3"
+    """String of Tesseract command line options, e.g. --oem, --psm, ..."""
+
+    filter_box_min_chars: int = 50
+    """Minimum number of characters in an ocr box to be included"""
+
+    keep_image_box: bool = True
+    """Whether to keep image boxes in addition to ocr boxes"""
+
+
 # TODO: split into separate config classes
 class BBoxConfig(BaseModel):
     filter_min_y: Optional[int] = None
@@ -74,17 +96,7 @@ class BBoxConfig(BaseModel):
 
     text_box_config: TextBoxConfig = TextBoxConfig()
 
-    ocr_tesseract_languages: list[str] = ["deu", "eng"]
-    """Tesseract language abbreviations for ocr"""
-
-    ocr_tesseract_config: str = "--psm 3"
-    """String of Tesseract command line options, e.g. --oem, --psm, ..."""
-
-    ocr_filter_box_min_chars: int = 50
-    """Minimum number of characters in an ocr box to be included"""
-
-    ocr_keep_image_box: bool = True
-    """Whether to keep image boxes in addition to ocr boxes"""
+    ocr_config: OcrConfig = OcrConfig()
 
 
 class PDFParserConfig(BaseModel):

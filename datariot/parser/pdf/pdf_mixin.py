@@ -119,7 +119,7 @@ class PageMixin:
         if config.ocr:
             boxes = []
             for box in img_boxes:
-                if config.bbox_config.ocr_keep_image_box:
+                if config.bbox_config.ocr_config.keep_image_box:
                     boxes.append(box)
 
                 boxes.extend(
@@ -157,38 +157,66 @@ class PageMixin:
     ) -> list[PDFTextBox]:
         import pytesseract
 
-        box_merger = CoordinatesBoundingBoxMerger(config)
-        box_filter = CoordinatesBoundingBoxFilter(config)
-        box_sorter = CoordinatesBoundingBoxSorter(config)
-        toc_filter = PDFOutlinesBoundingBoxFilter(document)
+        if config.ocr_config.strategy == "text":
+            text = pytesseract.image_to_string(
+                box.get_file()[1],
+                lang="+".join(config.ocr_config.languages),
+                config=config.ocr_config.tesseract_config,
+            )
 
-        dicts = pytesseract.image_to_data(
-            box.get_file()[1],
-            output_type=pytesseract.Output.DICT,
-            lang="+".join(config.ocr_tesseract_languages),
-            config=config.ocr_tesseract_config,
-        )
-        ocr_boxes = zip(
-            dicts[LEFT],
-            dicts[TOP],
-            dicts[WIDTH],
-            dicts[HEIGHT],
-            dicts[TEXT],
-            [page.page_number] * len(dicts[LEFT]),
-            strict=True,
-        )
+            # FIXME: determine font size and name
+            return [
+                PDFTextBox(
+                    box.x1,
+                    box.y1,
+                    box.x2,
+                    box.y2,
+                    text,
+                    font_size=-1,
+                    font_name="",
+                    page_number=box.page_number,
+                )
+            ]
 
-        boxes = [PDFOcrBox.from_ocr(e) for e in ocr_boxes]
-        boxes = [e for e in boxes if len(e.text) > 0]
-        boxes = box_sorter(page, boxes)
-        boxes = box_merger(page, boxes)
-        boxes = toc_filter(page, boxes)
-        boxes = box_filter(page, boxes)
-        boxes = [
-            e for e in boxes if len(e.text.strip()) > config.ocr_filter_box_min_chars
-        ]
+        elif config.ocr_config.strategy == "data":
+            box_merger = CoordinatesBoundingBoxMerger(config)
+            box_filter = CoordinatesBoundingBoxFilter(config)
+            box_sorter = CoordinatesBoundingBoxSorter(config)
+            toc_filter = PDFOutlinesBoundingBoxFilter(document)
 
-        return boxes
+            dicts = pytesseract.image_to_data(
+                box.get_file()[1],
+                output_type=pytesseract.Output.DICT,
+                lang="+".join(config.ocr_config.languages),
+                config=config.ocr_config.tesseract_config,
+            )
+            ocr_boxes = zip(
+                dicts[LEFT],
+                dicts[TOP],
+                dicts[WIDTH],
+                dicts[HEIGHT],
+                dicts[TEXT],
+                [page.page_number] * len(dicts[LEFT]),
+                strict=True,
+            )
+
+            boxes = [PDFOcrBox.from_ocr(e) for e in ocr_boxes]
+            boxes = [e for e in boxes if len(e.text) > 0]
+            boxes = box_sorter(page, boxes)
+            boxes = box_merger(page, boxes)
+            boxes = toc_filter(page, boxes)
+            boxes = box_filter(page, boxes)
+            boxes = [
+                e
+                for e in boxes
+                if len(e.text.strip()) >= config.ocr_config.filter_box_min_chars
+            ]
+
+            return boxes
+        else:
+            raise ValueError(
+                f"OCR strategy {config.ocr_config.strategy} is not defined."
+            )
 
     def take_screenshot(self, page: Page, bboxes: List[Box]):
         try:
