@@ -90,6 +90,7 @@ class BBoxConfig(BaseModel):
 class PDFParserConfig(BaseModel):
     screenshot: bool = False
     ocr: bool = False
+    include_images: bool = True
     bbox_config: BBoxConfig = BBoxConfig()
 
 

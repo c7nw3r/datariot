@@ -4,12 +4,15 @@ from typing import Iterator
 from datariot.__spi__.error import DataRiotException, DataRiotImportException
 from datariot.__spi__.type import FileFilter, Parser
 from datariot.__util__.io_util import get_files
-from datariot.parser.docx.__spi__ import ParsedDocx
+from datariot.parser.docx.__spi__ import DocxParserConfig, ParsedDocx
 from datariot.parser.docx.docx_mixin import DocumentMixin
 
 
+_DEFAULT_PARSER_CONFIG = DocxParserConfig()
+
+
 class DocxParser(Parser, DocumentMixin):
-    def __init__(self):
+    def __init__(self, config: DocxParserConfig = _DEFAULT_PARSER_CONFIG):
         try:
             from docx import Document
         except ImportError:

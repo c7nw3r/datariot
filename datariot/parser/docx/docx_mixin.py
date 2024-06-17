@@ -15,6 +15,7 @@ from docx.text.paragraph import Paragraph, Run
 from datariot.__spi__.error import DataRiotException
 from datariot.__util__.array_util import flatten
 from datariot.__util__.image_util import from_base64
+from datariot.parser.docx.__spi__ import DocxParserConfig
 from datariot.parser.docx.docx_model import (
     DocxImageBox,
     DocxListBox,
@@ -53,7 +54,7 @@ class DocumentMixin:
             elif isinstance(child, CT_Tbl):
                 yield Table(child, parent)
 
-    def parse_elements(self, document, root):
+    def parse_elements(self, document, root, config: DocxParserConfig):
         root_name = type(root).__name__.replace("_", "").lower()
 
         elements = []
@@ -68,7 +69,7 @@ class DocumentMixin:
                         elements.append(DocxTextBox(root_name, block, curr_page_number))
                     for run in block.runs:
                         # FIXME
-                        if root_name != "header":
+                        if root_name != "header" and config.include_images:
                             elements.extend(self.parse_images(root_name, document, run))
 
                 if curr_page_number:

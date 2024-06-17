@@ -1,5 +1,11 @@
+from pydantic import BaseModel
+
 from datariot.__spi__.type import Parsed
 from datariot.parser.docx.docx_model import DocxTextBox
+
+
+class DocxParserConfig(BaseModel):
+    include_images: bool = True
 
 
 class ParsedDocx(Parsed):
