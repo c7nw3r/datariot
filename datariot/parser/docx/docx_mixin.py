@@ -133,6 +133,7 @@ class DocumentMixin:
                     logging.warning(ex)
                     return []
 
+                # TODO: implement as box filter
                 min_width = config.image_filter_box_size.min_width or image.width
                 max_width = config.image_filter_box_size.max_width or image.width
                 min_height = config.image_filter_box_size.min_height or image.height

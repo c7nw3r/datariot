@@ -21,7 +21,7 @@
 
 ## v0.4.0
 
-* Small refactorings in PDF parsing module
+* small refactorings in PDF parsing module
 * all `Box` coordinates are stored as integers (float -> int via `ceil` and `floor`)
 * `PDFParserConfig` `BBoxConfig` default `filter_min_y = 50` to `filter_min_y = None`
 * `PDFParserConfig` `BBoxConfig` default `filter_max_y = 710` to `filter_max_y = None`
