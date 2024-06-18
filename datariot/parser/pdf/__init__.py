@@ -1,4 +1,3 @@
-from ..__spi__ import BoxFilterSizeConfig
 from .__spi__ import (
     BBoxConfig,
     OcrConfig,
