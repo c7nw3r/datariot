@@ -6,6 +6,7 @@ from PIL.Image import Image
 
 from datariot.__spi__.type import Box, ColumnPosition, FontWeight, MediaAware
 from datariot.__util__.image_util import to_base64
+from datariot.__util__.text_util import create_uuid_from_string
 
 
 DEFAULT_IMAGE_RESOLUTION = 72
@@ -156,13 +157,18 @@ class PDFOcrBox(PDFTextBox):
 
 
 class PDFImageBox(Box, MediaAware):
-    def __init__(self, page: Page, data: dict):
+    def __init__(self, page: Page, data: dict, id: str | None = None):
         super().__init__(data["x0"], data["x1"], data["top"], data["bottom"])
         self.page = page
+        self._id = id
 
     @property
     def page_number(self):
         return self.page.page_number
+
+    @property
+    def id(self) -> str:
+        return self._id or create_uuid_from_string(self.to_hash(fast=True))
 
     def crop(self, crop_box: Optional[Box] = None):
         crop_box = crop_box or (self.x1, self.y1, self.x2, self.y2)

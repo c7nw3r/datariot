@@ -106,6 +106,11 @@ class MediaAware(ABC):
     tbd
     """
 
+    @property
+    @abstractmethod
+    def id(self) -> str:
+        pass
+
     @abstractmethod
     def get_file(self) -> Tuple[str, Image]:
         pass
@@ -125,6 +130,10 @@ class Parsed:
     path: str
     bboxes: List[Box]
     properties: dict = field(default_factory=lambda: {})
+
+    @property
+    def is_paged(self) -> bool:
+        return False
 
     def render(self, evaluator, delimiter: str = "\n\n", show_progress: bool = False):
         array = tqdm(self.bboxes, disable=not show_progress, desc="render")

@@ -3,7 +3,9 @@ from dataclasses import dataclass
 from functools import cached_property
 from typing import List, Literal, Optional, Union
 
-from datariot.parser.pdf.pdf_model import PDFTextBox
+from pydantic import BaseModel
+
+from datariot.__spi__.type import Box
 
 
 @dataclass
@@ -77,7 +79,7 @@ class DocumentFonts:
 
     # TODO: generalize to arbitrary text boxes
     @staticmethod
-    def from_bboxes(bboxes: List[PDFTextBox]) -> "DocumentFonts":
+    def from_bboxes(bboxes: List[Box]) -> "DocumentFonts":
         doc_fonts = DocumentFonts()
         doc_fonts.fonts = [
             Font(b.font_name, b.font_size, b.font_weight) for b in bboxes
@@ -87,3 +89,10 @@ class DocumentFonts:
 
 FontSizeSpecification = Literal["minimum_size", "maximum_size", "most_common_size"]
 FontSpecification = Union[Font, FontSizeSpecification]
+
+
+class BoxFilterSizeConfig(BaseModel):
+    min_width: Optional[int] = None
+    max_width: Optional[int] = None
+    min_height: Optional[int] = None
+    max_height: Optional[int] = None

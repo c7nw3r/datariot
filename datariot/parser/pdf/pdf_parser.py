@@ -8,11 +8,11 @@ from datariot.parser.pdf.__spi__ import ParsedPDF, PDFParserConfig
 from datariot.parser.pdf.pdf_mixin import PageMixin
 
 
-DEFAULT_PARSER_CONFIG = PDFParserConfig()
+_DEFAULT_PARSER_CONFIG = PDFParserConfig()
 
 
 class PDFParser(Parser, PageMixin):
-    def __init__(self, config: PDFParserConfig = DEFAULT_PARSER_CONFIG):
+    def __init__(self, config: PDFParserConfig = _DEFAULT_PARSER_CONFIG):
         self.config = config
         try:
             import pdfplumber
@@ -43,7 +43,7 @@ class PDFParser(Parser, PageMixin):
     @staticmethod
     def parse_folder(
         path: str,
-        config: PDFParserConfig = DEFAULT_PARSER_CONFIG,
+        config: PDFParserConfig = _DEFAULT_PARSER_CONFIG,
         file_filter: FileFilter = lambda _: True,
     ) -> Iterator[ParsedPDF]:
         parser = PDFParser(config)
