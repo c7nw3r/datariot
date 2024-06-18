@@ -9,7 +9,7 @@ from setuptools import find_packages, setup
 
 long_description = Path(__file__).with_name("README.md").read_text()
 
-version = "0.5.0"
+version = "0.5.1"
 setup(
     name="datariot",
     packages=find_packages(exclude=("test")),

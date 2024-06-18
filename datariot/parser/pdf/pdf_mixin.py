@@ -123,12 +123,13 @@ class PageMixin:
         if config.ocr:
             boxes = []
             for box in img_boxes:
-                if config.bbox_config.ocr_config.keep_image_box:
+                text_boxes = self.get_text_boxes_by_ocr(
+                    document, page, box, config.bbox_config
+                )
+                if not text_boxes or config.bbox_config.ocr_config.keep_image_box:
                     boxes.append(box)
 
-                boxes.extend(
-                    self.get_text_boxes_by_ocr(document, page, box, config.bbox_config)
-                )
+                boxes.extend(text_boxes)
 
         return boxes
 
