@@ -83,7 +83,7 @@ class PageMixin:
 
     def get_table_boxes(
         self, _document: PDFDocument, page: Page, config: PDFParserConfig
-    ) -> list[PDFTableBox]:
+    ) -> List[PDFTableBox]:
         box_filter = NestedTableBoundingBoxFilter()
         table_config = config.bbox_config.table_box_config
         ts = {
@@ -101,7 +101,7 @@ class PageMixin:
 
     def get_image_boxes(
         self, document: PDFDocument, page: Page, config: PDFParserConfig
-    ) -> list[PDFImageBox | PDFTextBox]:
+    ) -> List[PDFImageBox | PDFTextBox]:
         if not config.include_images:
             return []
 
@@ -130,7 +130,7 @@ class PageMixin:
 
     def get_linecurve_boxes(
         self, document: PDFDocument, page: Page, config: PDFParserConfig
-    ) -> list[PDFLineCurveBox]:
+    ) -> List[PDFLineCurveBox]:
         box_filter = BoxIdentityBoundingBoxFilter()
 
         elements = page.lines
@@ -154,7 +154,7 @@ class PageMixin:
         page: Page,
         box: PDFImageBox,
         config: BBoxConfig,
-    ) -> list[PDFTextBox]:
+    ) -> List[PDFTextBox]:
         import pytesseract
 
         if (

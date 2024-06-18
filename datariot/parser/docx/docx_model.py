@@ -95,7 +95,7 @@ class DocxTableBox(Box):
     Box implementation for the table docx elements.
     """
 
-    def __init__(self, root_name: str, rows: list, paragraphs: List[List[Paragraph]]):
+    def __init__(self, root_name: str, rows: List, paragraphs: List[List[Paragraph]]):
         super().__init__(None, None, None, None)
         self.rows = rows
         self.paragraphs = paragraphs

@@ -36,7 +36,7 @@ class OcrConfig(BaseModel):
     * `data`: pytesseract.image_to_data() and use text bounding box logic
     """
 
-    languages: list[str] = ["deu", "eng"]
+    languages: List[str] = ["deu", "eng"]
     """Tesseract language abbreviations for ocr"""
 
     tesseract_config: str = "--psm 3"
