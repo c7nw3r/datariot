@@ -87,12 +87,10 @@ class BBoxConfig(BaseModel):
     image_filter_box_size: BoxFilterSizeConfig = BoxFilterSizeConfig(
         min_width=30, min_height=30
     )
-
     table_box_config: TableBoxConfig = TableBoxConfig()
-
     text_box_config: TextBoxConfig = TextBoxConfig()
-
     ocr_config: OcrConfig = OcrConfig()
+    media_use_uuid: bool = True
 
 
 class PDFParserConfig(BaseModel):

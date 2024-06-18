@@ -7,6 +7,7 @@ from PIL.Image import Image
 from datariot.__spi__.type import Box, MediaAware
 from datariot.__util__.array_util import flatten
 from datariot.__util__.image_util import to_base64
+from datariot.__util__.text_util import create_uuid_from_string
 
 
 @dataclass
@@ -140,11 +141,16 @@ class DocxImageBox(Box, MediaAware):
     Box implementation for the image docx elements.
     """
 
-    def __init__(self, root_name: str, name: str, image):
+    def __init__(self, root_name: str, name: str, image, id: str | None = None):
         super().__init__(None, None, None, None)
         self.name = name
         self.image = image
         self.root_name = root_name
+        self._id = id
+
+    @property
+    def id(self) -> str:
+        return self._id or create_uuid_from_string(self.to_hash(fast=True))
 
     def get_file(self) -> Tuple[str, Image]:
         return self.name, self.image

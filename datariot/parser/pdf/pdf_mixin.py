@@ -1,5 +1,6 @@
 import logging
 from typing import List
+from uuid import uuid4
 
 from pdfminer.pdfdocument import PDFDocument
 from pdfplumber.page import Page
@@ -109,7 +110,10 @@ class PageMixin:
         size_filter = BoxSizeBoundingBoxFilter(config.bbox_config.image_filter_box_size)
 
         images = page.images
-        img_boxes = [PDFImageBox(page, e) for e in images]
+        img_boxes = []
+        for img in images:
+            id_ = str(uuid4()) if config.bbox_config.media_use_uuid else None
+            img_boxes.append(PDFImageBox(page, img, id_))
 
         img_boxes = size_filter(page, img_boxes)
         img_boxes = identity_filter(page, img_boxes)

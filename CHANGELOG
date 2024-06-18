@@ -1,5 +1,6 @@
 # CHANGELOG
 
+
 ## v0.5.0
 
 * PDFParserConfig BBoxConfig `table_vertical_strategy` and `table_horizontal_strategy` to `table_config` of type `TableBoxConfig` and change default values to `lines`
@@ -15,6 +16,8 @@
 * add `strategy` in `OcrConfig`
 * add `only_full_page` in `OcrConfig`
 * add `image_filter_box_size` in `DocxParserConfig`
+* add `media_use_uuid` in `BBoxConfig` and `DocxParserConfig`
+
 
 ## v0.4.0
 

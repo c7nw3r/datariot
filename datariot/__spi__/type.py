@@ -106,6 +106,11 @@ class MediaAware(ABC):
     tbd
     """
 
+    @property
+    @abstractmethod
+    def id(self) -> str:
+        pass
+
     @abstractmethod
     def get_file(self) -> Tuple[str, Image]:
         pass

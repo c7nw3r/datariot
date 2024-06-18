@@ -4,6 +4,7 @@ import io
 import logging
 import xml.etree.ElementTree as ET
 from typing import List
+from uuid import uuid4
 from xml.etree import ElementTree
 
 from docx.document import Document as DocxDocument
@@ -134,14 +135,14 @@ class DocumentMixin:
 
                 min_width = config.image_filter_box_size.min_width or image.width
                 max_width = config.image_filter_box_size.max_width or image.width
-
                 min_height = config.image_filter_box_size.min_height or image.height
                 max_height = config.image_filter_box_size.max_height or image.height
+                id_ = str(uuid4()) if config.media_use_uuid else None
 
                 if (min_width <= image.width <= max_width) and (
                     min_height <= image.height <= max_height
                 ):
-                    return [DocxImageBox(root_name, name_attr, image)]
+                    return [DocxImageBox(root_name, name_attr, image, id_)]
                 else:
                     return []
 

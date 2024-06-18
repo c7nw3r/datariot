@@ -10,6 +10,7 @@ class DocxParserConfig(BaseModel):
     image_filter_box_size: BoxFilterSizeConfig = BoxFilterSizeConfig(
         min_width=30, min_height=30
     )
+    media_use_uuid: bool = True
 
 
 class ParsedDocx(Parsed):
