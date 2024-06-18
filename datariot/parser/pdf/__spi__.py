@@ -3,15 +3,8 @@ from typing import List, Literal, Optional
 from pydantic import BaseModel
 
 from datariot.__spi__.type import Parsed
-from datariot.parser.__spi__ import FontSpecification, RegexPattern
+from datariot.parser.__spi__ import BoxFilterSizeConfig, FontSpecification, RegexPattern
 from datariot.parser.pdf.pdf_formatter import JSONPDFFormatter
-
-
-class BoxFilterSizeConfig(BaseModel):
-    min_width: Optional[int] = None
-    max_width: Optional[int] = None
-    min_height: Optional[int] = None
-    max_height: Optional[int] = None
 
 
 class TableBoxConfig(BaseModel):

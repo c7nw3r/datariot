@@ -1,11 +1,15 @@
 from pydantic import BaseModel
 
 from datariot.__spi__.type import Parsed
+from datariot.parser.__spi__ import BoxFilterSizeConfig
 from datariot.parser.docx.docx_model import DocxTextBox
 
 
 class DocxParserConfig(BaseModel):
     include_images: bool = True
+    image_filter_box_size: BoxFilterSizeConfig = BoxFilterSizeConfig(
+        min_width=30, min_height=30
+    )
 
 
 class ParsedDocx(Parsed):

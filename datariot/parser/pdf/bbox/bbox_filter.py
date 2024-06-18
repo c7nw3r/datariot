@@ -5,7 +5,8 @@ from pdfminer.pdfdocument import PDFDocument, PDFNoOutlines
 from pdfplumber.page import Page
 
 from datariot.__spi__.type import Box
-from datariot.parser.pdf.__spi__ import BBoxConfig, BoxFilterSizeConfig
+from datariot.parser.__spi__ import BoxFilterSizeConfig
+from datariot.parser.pdf.__spi__ import BBoxConfig
 from datariot.parser.pdf.bbox.__spi__ import BoundingBoxFilter
 from datariot.parser.pdf.pdf_model import PDFTextBox
 

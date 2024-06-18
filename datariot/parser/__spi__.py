@@ -3,6 +3,8 @@ from dataclasses import dataclass
 from functools import cached_property
 from typing import List, Literal, Optional, Union
 
+from pydantic import BaseModel
+
 from datariot.parser.pdf.pdf_model import PDFTextBox
 
 
@@ -87,3 +89,10 @@ class DocumentFonts:
 
 FontSizeSpecification = Literal["minimum_size", "maximum_size", "most_common_size"]
 FontSpecification = Union[Font, FontSizeSpecification]
+
+
+class BoxFilterSizeConfig(BaseModel):
+    min_width: Optional[int] = None
+    max_width: Optional[int] = None
+    min_height: Optional[int] = None
+    max_height: Optional[int] = None

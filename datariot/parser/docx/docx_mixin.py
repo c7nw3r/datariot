@@ -3,6 +3,7 @@ import csv
 import io
 import logging
 import xml.etree.ElementTree as ET
+from typing import List
 from xml.etree import ElementTree
 
 from docx.document import Document as DocxDocument
@@ -70,7 +71,9 @@ class DocumentMixin:
                     for run in block.runs:
                         # FIXME
                         if root_name != "header" and config.include_images:
-                            elements.extend(self.parse_images(root_name, document, run))
+                            elements.extend(
+                                self.parse_images(root_name, document, run, config)
+                            )
 
                 if curr_page_number:
                     curr_page_number += len(block.rendered_page_breaks)
@@ -89,7 +92,13 @@ class DocumentMixin:
 
         return elements
 
-    def parse_images(self, root_name: str, document, run: Run):
+    def parse_images(
+        self,
+        root_name: str,
+        document,
+        run: Run,
+        config: DocxParserConfig,
+    ) -> List[DocxImageBox]:
         xmlstr = str(run.element.xml)
         my_namespaces = dict(
             [
@@ -123,7 +132,18 @@ class DocumentMixin:
                     logging.warning(ex)
                     return []
 
-                return [DocxImageBox(root_name, name_attr, image)]
+                min_width = config.image_filter_box_size.min_width or image.width
+                max_width = config.image_filter_box_size.max_width or image.width
+
+                min_height = config.image_filter_box_size.min_height or image.height
+                max_height = config.image_filter_box_size.max_height or image.height
+
+                if (min_width <= image.width <= max_width) and (
+                    min_height <= image.height <= max_height
+                ):
+                    return [DocxImageBox(root_name, name_attr, image)]
+                else:
+                    return []
 
         return []
 
