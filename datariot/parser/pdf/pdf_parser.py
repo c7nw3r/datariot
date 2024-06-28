@@ -1,10 +1,10 @@
 import logging
-from typing import Iterator
+from typing import Generator, Iterator
 
 from datariot.__spi__.error import DataRiotException, DataRiotImportException
 from datariot.__spi__.type import FileFilter, Parser
 from datariot.__util__.io_util import get_files
-from datariot.parser.pdf.__spi__ import ParsedPDF, PDFParserConfig
+from datariot.parser.pdf.__spi__ import ParsedPDF, ParsedPDFPage, PDFParserConfig
 from datariot.parser.pdf.pdf_mixin import PageMixin
 
 
@@ -24,7 +24,9 @@ class PDFParser(Parser, PageMixin):
         except ImportError:
             raise DataRiotImportException("ocr")
 
-    def parse(self, path: str):
+    def parse(
+        self, path: str, paged: bool = False
+    ) -> ParsedPDF | Generator[ParsedPDFPage, None, ParsedPDF]:
         import pdfplumber
 
         bboxes = []
@@ -33,10 +35,14 @@ class PDFParser(Parser, PageMixin):
             properties = reader.metadata
             for page in reader.pages:
                 boxes = self.get_boxes(reader.doc, page, self.config)
-                bboxes.extend(boxes)
+                if not paged:
+                    bboxes.extend(boxes)
 
                 if self.config.screenshot:
                     self.take_screenshot(page, boxes)
+
+                if paged:
+                    yield ParsedPDFPage(path, boxes, properties=properties)
 
         return ParsedPDF(path, bboxes, properties=properties)
 
