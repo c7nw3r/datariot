@@ -52,6 +52,7 @@ class PDFParser(Parser, PageMixin):
                     self.take_screenshot(page, boxes)
 
                 yield ParsedPDFPage(path, boxes, properties=properties)
+                page.flush_cache()
 
     @staticmethod
     def parse_folder(
