@@ -53,6 +53,9 @@ class PDFParser(Parser, PageMixin):
 
                 yield ParsedPDFPage(path, boxes, properties=properties)
                 page.flush_cache()
+                # TODO: update pdfplumber where cache handling is improved by default
+                # https://github.com/jsvine/pdfplumber/issues/193
+                page.get_textmap.cache_clear()
                 page.close()
 
     @staticmethod
