@@ -2,7 +2,7 @@
 
 
 ## v0.6.0
-* add `paged` parameter to `PDFParser`
+* add `parse_paged` method to `PDFParser`
 
 
 ## v0.5.0
