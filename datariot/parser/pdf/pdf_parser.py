@@ -56,7 +56,6 @@ class PDFParser(Parser, PageMixin):
                 # TODO: update pdfplumber where cache handling is improved by default
                 # https://github.com/jsvine/pdfplumber/issues/193
                 page.get_textmap.cache_clear()
-                page.close()
 
     @staticmethod
     def parse_folder(
