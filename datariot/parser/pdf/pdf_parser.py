@@ -24,9 +24,7 @@ class PDFParser(Parser, PageMixin):
         except ImportError:
             raise DataRiotImportException("ocr")
 
-    def parse(
-        self, path: str, paged: bool = False
-    ) -> ParsedPDF | Generator[ParsedPDFPage, None, ParsedPDF]:
+    def parse(self, path: str) -> ParsedPDF:
         import pdfplumber
 
         bboxes = []
@@ -35,16 +33,25 @@ class PDFParser(Parser, PageMixin):
             properties = reader.metadata
             for page in reader.pages:
                 boxes = self.get_boxes(reader.doc, page, self.config)
-                if not paged:
-                    bboxes.extend(boxes)
+                bboxes.extend(boxes)
 
                 if self.config.screenshot:
                     self.take_screenshot(page, boxes)
 
-                if paged:
-                    yield ParsedPDFPage(path, boxes, properties=properties)
-
         return ParsedPDF(path, bboxes, properties=properties)
+
+    def parse_paged(self, path: str) -> Generator[ParsedPDFPage, None, None]:
+        import pdfplumber
+
+        with pdfplumber.open(path) as reader:
+            properties = reader.metadata
+            for page in reader.pages:
+                boxes = self.get_boxes(reader.doc, page, self.config)
+
+                if self.config.screenshot:
+                    self.take_screenshot(page, boxes)
+
+                yield ParsedPDFPage(path, boxes, properties=properties)
 
     @staticmethod
     def parse_folder(
