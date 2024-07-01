@@ -29,7 +29,7 @@ class PDFParser(Parser, PageMixin):
 
         bboxes = []
 
-        with pdfplumber.open(path, repair=True) as reader:
+        with pdfplumber.open(path) as reader:
             properties = reader.metadata
             for page in reader.pages:
                 boxes = self.get_boxes(reader.doc, page, self.config)
@@ -43,7 +43,7 @@ class PDFParser(Parser, PageMixin):
     def parse_paged(self, path: str) -> Generator[ParsedPDFPage, None, None]:
         import pdfplumber
 
-        with pdfplumber.open(path, repair=True) as reader:
+        with pdfplumber.open(path) as reader:
             properties = reader.metadata
             for page in reader.pages:
                 boxes = self.get_boxes(reader.doc, page, self.config)
