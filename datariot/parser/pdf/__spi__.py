@@ -108,3 +108,9 @@ class ParsedPDF(Parsed):
     def to_json(self):
         formatter = JSONPDFFormatter()
         return {"path": self.path, "bboxes": [b.render(formatter) for b in self.bboxes]}
+
+
+class ParsedPDFPage(ParsedPDF):
+    @property
+    def page_number(self) -> int:
+        return next(self.bboxes).page_number
