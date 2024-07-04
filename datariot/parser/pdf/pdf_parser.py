@@ -24,6 +24,12 @@ class PDFParser(Parser, PageMixin):
         except ImportError:
             raise DataRiotImportException("ocr")
 
+    def get_number_of_pages(self, path) -> int:
+        import pdfplumber
+
+        with pdfplumber.open(path) as reader:
+            return len(reader.pages)
+
     def parse(self, path: str) -> ParsedPDF:
         import pdfplumber
 
