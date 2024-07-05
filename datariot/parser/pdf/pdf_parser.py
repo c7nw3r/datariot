@@ -1,10 +1,10 @@
 import logging
-from typing import Iterator
+from typing import Generator, Iterator
 
 from datariot.__spi__.error import DataRiotException, DataRiotImportException
 from datariot.__spi__.type import FileFilter, Parser
 from datariot.__util__.io_util import get_files
-from datariot.parser.pdf.__spi__ import ParsedPDF, PDFParserConfig
+from datariot.parser.pdf.__spi__ import ParsedPDF, ParsedPDFPage, PDFParserConfig
 from datariot.parser.pdf.pdf_mixin import PageMixin
 
 
@@ -24,7 +24,13 @@ class PDFParser(Parser, PageMixin):
         except ImportError:
             raise DataRiotImportException("ocr")
 
-    def parse(self, path: str):
+    def get_number_of_pages(self, path) -> int:
+        import pdfplumber
+
+        with pdfplumber.open(path) as reader:
+            return len(reader.pages)
+
+    def parse(self, path: str) -> ParsedPDF:
         import pdfplumber
 
         bboxes = []
@@ -39,6 +45,23 @@ class PDFParser(Parser, PageMixin):
                     self.take_screenshot(page, boxes)
 
         return ParsedPDF(path, bboxes, properties=properties)
+
+    def parse_paged(self, path: str) -> Generator[ParsedPDFPage, None, None]:
+        import pdfplumber
+
+        with pdfplumber.open(path) as reader:
+            properties = reader.metadata
+            for page in reader.pages:
+                boxes = self.get_boxes(reader.doc, page, self.config)
+
+                if self.config.screenshot:
+                    self.take_screenshot(page, boxes)
+
+                yield ParsedPDFPage(path, boxes, properties=properties)
+                page.flush_cache()
+                # TODO: update pdfplumber where cache handling is improved by default
+                # https://github.com/jsvine/pdfplumber/issues/193
+                page.get_textmap.cache_clear()
 
     @staticmethod
     def parse_folder(

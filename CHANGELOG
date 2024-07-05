@@ -1,6 +1,10 @@
 # CHANGELOG
 
 
+## v0.6.0
+* add `parse_paged` method to `PDFParser`
+
+
 ## v0.5.0
 
 * PDFParserConfig BBoxConfig `table_vertical_strategy` and `table_horizontal_strategy` to `table_config` of type `TableBoxConfig` and change default values to `lines`
