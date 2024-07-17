@@ -1,6 +1,10 @@
 # CHANGELOG
 
 
+## v0.6.1
+* add `full_page_only_if_no_text` to `OcrConfig`
+
+
 ## v0.6.0
 * add `parse_paged` method to `PDFParser`
 
