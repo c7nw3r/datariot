@@ -162,11 +162,15 @@ class PageMixin:
     ) -> List[PDFTextBox]:
         import pytesseract
 
-        if config.ocr_config.only_full_page and (
-            (box.width < page.width - 20) and (box.height < page.height - 20)
-        ):
-            # smaller than either page width or height with 20 px margin
-            return []
+        if config.ocr_config.only_full_page:
+            if (box.width < page.width - 20) and (box.height < page.height - 20):
+                # smaller than either page width or height with 20 px margin
+                return []
+
+            if config.ocr_config.full_page_only_if_no_text:
+                text = page.crop(tuple(box), strict=False).extract_text().strip()
+                if text:
+                    return []
 
         if config.ocr_config.strategy == "text":
             text = pytesseract.image_to_string(

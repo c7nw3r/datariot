@@ -28,6 +28,9 @@ class OcrConfig(BaseModel):
     only_full_page: bool = False
     """Whether to perform ocr only on full page images, i.e., probably scans"""
 
+    full_page_only_if_no_text: bool = False
+    """Whether to perform ocr on a full page region containing extractable text"""
+
     strategy: Literal["text", "data"] = "text"
     """
     Strategy to extract text from images
