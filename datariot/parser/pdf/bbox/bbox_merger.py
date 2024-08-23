@@ -5,7 +5,7 @@ from pdfplumber.page import Page
 from datariot.__spi__.type import Box
 from datariot.parser.__spi__ import DocumentFonts
 from datariot.parser.pdf.__spi__ import BBoxConfig
-from datariot.parser.pdf.pdf_model import PDFTextBox
+from datariot.parser.pdf.pdf_model import PDFTextBox, PDFHyperlinkBox
 
 
 class CoordinatesBoundingBoxMerger:
@@ -18,6 +18,7 @@ class CoordinatesBoundingBoxMerger:
             return []
 
         doc_fonts = DocumentFonts.from_bboxes(bboxes)
+        hyperlinks = set([PDFHyperlinkBox.of_dict(e).uri for e in page.root_page.hyperlinks])
 
         results = []
         prev_bbox = bboxes[0].copy()
@@ -27,9 +28,13 @@ class CoordinatesBoundingBoxMerger:
             is_single_char = len(bbox.text.strip()) == 1
             is_prev_blank = prev_bbox.text.strip() == ""
             is_previous_most_common_font_size = (
-                not is_prev_blank
-                and prev_bbox.font_size == doc_fonts.most_common_size
+                    not is_prev_blank
+                    and prev_bbox.font_size == doc_fonts.most_common_size
             )
+            is_link_line = any([
+                e for e in hyperlinks
+                if any([(x in e) for x in bbox.text.split(" ")[0:1] if "/" in x])
+            ])
 
             # same font size
             expr1 = not self._config.merge_same_font_size or prev_bbox.font_size == bbox.font_size
@@ -39,30 +44,31 @@ class CoordinatesBoundingBoxMerger:
             expr3 = not self._config.merge_same_font_weight or prev_bbox.font_weight == bbox.font_weight
             # always merge blanks, single chars, same line most common or font based
             font_rule = (
-                (self._config.merge_blank_always and is_blank)
-                or (self._config.merge_single_char_always and is_single_char)
-                or (
-                    self._config.merge_same_line_always_after_most_common
-                    and is_previous_most_common_font_size
-                    and is_same_line
-                )
-                or (expr1 and expr2 and expr3)
+                    (self._config.merge_blank_always and is_blank)
+                    or (self._config.merge_single_char_always and is_single_char)
+                    or (
+                            self._config.merge_same_line_always_after_most_common
+                            and is_previous_most_common_font_size
+                            and is_same_line
+                    )
+                    or (expr1 and expr2 and expr3)
             )
             # same line
             same_line_rule = (
-                is_same_line
-                and prev_bbox.x2 < bbox.x1
-                and (bbox.x1 - prev_bbox.x2) < self._config.merge_x_tolerance
+                    is_same_line
+                    and prev_bbox.x2 < bbox.x1
+                    and (bbox.x1 - prev_bbox.x2) < self._config.merge_x_tolerance
             )
             # consecutive lines
             consecutive_line_rule = (
-                (self._config.merge_blank_consecutive_lines or not is_blank)
-                and (bbox.y1 - prev_bbox.y2) < self._config.merge_y_tolerance
+                    (self._config.merge_blank_consecutive_lines or not is_blank)
+                    and (bbox.y1 - prev_bbox.y2) < self._config.merge_y_tolerance
             )
 
             if font_rule and (same_line_rule or consecutive_line_rule):
                 prev_is_blank = prev_bbox.text.strip() == ""
-                prev_bbox = prev_bbox.with_text(prev_bbox.text + (" " if is_same_line else "\n") + bbox.text)
+                separator = "" if is_link_line else " " if is_same_line else "\n"
+                prev_bbox = prev_bbox.with_text(prev_bbox.text + separator + bbox.text)
                 if prev_is_blank:
                     prev_bbox.font_name = bbox.font_name
                     prev_bbox.font_size = bbox.font_size
