@@ -1,3 +1,2 @@
 tqdm
 Pillow
-pydantic = "2.7.4"
