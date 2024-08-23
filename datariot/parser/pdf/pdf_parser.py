@@ -1,4 +1,5 @@
 import logging
+import os
 from typing import Iterator
 
 from datariot.__spi__.error import DataRiotImportException, DataRiotException
@@ -35,7 +36,12 @@ class PDFParser(Parser, PageMixin):
                 if self.config.screenshot:
                     self.take_screenshot(page, boxes)
 
-        return ParsedPDF(path, bboxes)
+        properties = {
+            "size": os.stat(path).st_size,
+            "name": path[path.rfind("/") + 1:]
+        }
+
+        return ParsedPDF(path, bboxes, properties)
 
     @staticmethod
     def parse_folder(path: str,

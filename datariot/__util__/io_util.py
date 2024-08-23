@@ -88,3 +88,8 @@ def write_json_lines(path: str, data: List[dict]):
         for item in data:
             file.write(json.dumps(item))
             file.write("\n")
+
+
+def open_file(path: str):
+    with open(path, "r") as file:
+        return file
