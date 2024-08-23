@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "datariot"
-version = "0.6.4"
+version = "0.6.5"
 description = "Advanced document parsing library"
 authors = ["c7nw3r", ]
 
@@ -22,7 +22,7 @@ webdriver_manager = { version = "~4.0.1", optional = true }
 lxml = { version = "~5.1.0", optional = true }
 openpyxl = { version = "~3.1.2", optional = true }
 camelot-py = { version = "~0.11.0", optional = true }
-stopwords = { version = "~0.6.1", optional = true}
+stopwordsiso = { version = "~0.6.1", optional = true}
 
 [tool.poetry.extras]
 docx = ["python-docx"]
