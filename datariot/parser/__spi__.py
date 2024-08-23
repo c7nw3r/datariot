@@ -4,10 +4,6 @@ from dataclasses import dataclass
 from functools import cached_property
 from typing import List, Literal, Optional, Union
 
-from pydantic import BaseModel
-
-from datariot.__spi__.type import Box
-
 
 @dataclass
 class RegexPattern:
@@ -105,7 +101,8 @@ FontSizeSpecification = Literal["minimum_size", "maximum_size", "most_common_siz
 FontSpecification = Union[Font, FontSizeSpecification]
 
 
-class BoxFilterSizeConfig(BaseModel):
+@dataclass
+class BoxFilterSizeConfig:
     min_width: Optional[int] = None
     max_width: Optional[int] = None
     min_height: Optional[int] = None

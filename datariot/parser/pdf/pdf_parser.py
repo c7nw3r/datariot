@@ -1,6 +1,5 @@
 import logging
 import os
-from typing import Iterator
 from typing import Generator, Iterator
 
 from datariot.__spi__.error import DataRiotException, DataRiotImportException
@@ -8,7 +7,6 @@ from datariot.__spi__.type import FileFilter, Parser
 from datariot.__util__.io_util import get_files
 from datariot.parser.pdf.__spi__ import ParsedPDF, ParsedPDFPage, PDFParserConfig
 from datariot.parser.pdf.pdf_mixin import PageMixin
-
 
 _DEFAULT_PARSER_CONFIG = PDFParserConfig()
 
@@ -45,6 +43,11 @@ class PDFParser(Parser, PageMixin):
 
                 if self.config.screenshot:
                     self.take_screenshot(page, boxes)
+
+        if "size" not in properties:
+            properties["size"] = os.stat(path).st_size
+        if "name" not in properties:
+            properties["name"] = path[path.rfind("/") + 1:]
 
         return ParsedPDF(path, bboxes, properties=properties)
 

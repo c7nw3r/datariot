@@ -1,13 +1,12 @@
 from typing import List, Optional, Tuple
 
+from PIL.Image import Image
 from pdfplumber.page import Page
 from pdfplumber.table import Table
-from PIL.Image import Image
 
 from datariot.__spi__.type import Box, ColumnPosition, FontWeight, MediaAware
 from datariot.__util__.image_util import to_base64
 from datariot.__util__.text_util import create_uuid_from_string
-
 from datariot.parser.__spi__ import FontAware, Font, TextAware
 
 DEFAULT_IMAGE_RESOLUTION = 72
@@ -163,7 +162,7 @@ class PDFOcrBox(PDFTextBox):
 
 
 class PDFImageBox(Box, MediaAware):
-    def __init__(self, page: Page, data: dict, id: str | None = None):
+    def __init__(self, page: Page, data: dict, id: Optional[str] = None):
         super().__init__(data["x0"], data["x1"], data["top"], data["bottom"])
         self.page = page
         self._id = id

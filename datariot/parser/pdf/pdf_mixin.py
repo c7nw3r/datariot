@@ -1,5 +1,6 @@
 import logging
-from typing import List
+import sys
+from typing import List, Union
 from uuid import uuid4
 
 from pdfminer.pdfdocument import PDFDocument
@@ -48,7 +49,7 @@ class PageMixin:
         return boxes
 
     def get_text_boxes(
-        self, document: PDFDocument, page: Page, config: PDFParserConfig
+            self, document: PDFDocument, page: Page, config: PDFParserConfig
     ) -> List[PDFTextBox]:
         bbox_config = config.bbox_config
         box_merger = CoordinatesBoundingBoxMerger(bbox_config)
@@ -81,7 +82,7 @@ class PageMixin:
         return boxes
 
     def get_table_boxes(
-        self, _document: PDFDocument, page: Page, config: PDFParserConfig
+            self, _document: PDFDocument, page: Page, config: PDFParserConfig
     ) -> List[PDFTableBox]:
         box_filter = NestedTableBoundingBoxFilter()
         table_config = config.bbox_config.table_box_config
@@ -89,9 +90,12 @@ class PageMixin:
             "vertical_strategy": table_config.vertical_strategy,
             "horizontal_strategy": table_config.horizontal_strategy,
         }
+
+        kwargs = {"strict": True} if sys.version_info >= (3, 10) else {}
+
         boxes = [
             PDFTableBox(page, e)
-            for e in zip(page.find_tables(ts), page.extract_tables(ts), strict=True)
+            for e in zip(page.find_tables(ts), page.extract_tables(ts), **kwargs)
         ]
         boxes = [e for e in boxes if len(e) > 1]
         boxes = box_filter(page, boxes)
@@ -99,8 +103,8 @@ class PageMixin:
         return boxes
 
     def get_image_boxes(
-        self, document: PDFDocument, page: Page, config: PDFParserConfig
-    ) -> List[PDFImageBox | PDFTextBox]:
+            self, document: PDFDocument, page: Page, config: PDFParserConfig
+    ) -> List[Union[PDFImageBox, PDFTextBox]]:
         if not config.include_images:
             return []
 
@@ -132,7 +136,7 @@ class PageMixin:
         return boxes
 
     def get_linecurve_boxes(
-        self, document: PDFDocument, page: Page, config: PDFParserConfig
+            self, document: PDFDocument, page: Page, config: PDFParserConfig
     ) -> List[PDFLineCurveBox]:
         box_filter = BoxIdentityBoundingBoxFilter()
 
@@ -152,11 +156,11 @@ class PageMixin:
         return boxes
 
     def get_text_boxes_by_ocr(
-        self,
-        document: PDFDocument,
-        page: Page,
-        box: PDFImageBox,
-        config: BBoxConfig,
+            self,
+            document: PDFDocument,
+            page: Page,
+            box: PDFImageBox,
+            config: BBoxConfig,
     ) -> List[PDFTextBox]:
         import pytesseract
 
@@ -251,10 +255,10 @@ class PageMixin:
                 v_mid = (obj["top"] + obj["bottom"]) / 2
                 h_mid = (obj["x0"] + obj["x1"]) / 2
                 return (
-                    (h_mid >= _bbox.x1 - margin)
-                    and (h_mid < _bbox.x2 + margin)
-                    and (v_mid >= _bbox.y1 - margin)
-                    and (v_mid < _bbox.y2 + margin)
+                        (h_mid >= _bbox.x1 - margin)
+                        and (h_mid < _bbox.x2 + margin)
+                        and (v_mid >= _bbox.y1 - margin)
+                        and (v_mid < _bbox.y2 + margin)
                 )
 
             return not any(obj_in_bbox(__bbox) for __bbox in bboxes)
