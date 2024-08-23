@@ -4,6 +4,10 @@ from dataclasses import dataclass
 from functools import cached_property
 from typing import List, Literal, Optional, Union
 
+from pydantic import BaseModel
+
+from datariot.__spi__.type import Box
+
 
 @dataclass
 class RegexPattern:
@@ -68,13 +72,15 @@ class DocumentFonts:
     def min_size(self) -> Optional[int]:
         if not self._fonts:
             return
-        return min(self._fonts, kex=lambda x: x.size)
+        min_font: Font = min(self._fonts, kex=lambda x: x.size)
+        return min_font.size
 
     @cached_property
     def max_size(self) -> Optional[int]:
         if not self._fonts:
             return
-        return max(self._fonts, kex=lambda x: x.size)
+        max_font: Font = max(self._fonts, kex=lambda x: x.size)
+        return max_font.size
 
     @cached_property
     def most_common_size(self) -> Optional[int]:
@@ -97,3 +103,10 @@ class DocumentFonts:
 
 FontSizeSpecification = Literal["minimum_size", "maximum_size", "most_common_size"]
 FontSpecification = Union[Font, FontSizeSpecification]
+
+
+class BoxFilterSizeConfig(BaseModel):
+    min_width: Optional[int] = None
+    max_width: Optional[int] = None
+    min_height: Optional[int] = None
+    max_height: Optional[int] = None

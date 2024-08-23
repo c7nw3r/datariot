@@ -18,7 +18,7 @@ def get_local_dir(path: str, dir_name: str):
 
 
 def without_ext(path: str) -> str:
-    return path[:path.rfind(".")]
+    return path[: path.rfind(".")]
 
 
 def get_dir(path: str):
@@ -26,14 +26,15 @@ def get_dir(path: str):
 
 
 def get_files(path: str, ext: str, recursive: bool = True):
+    ext = ext.lower()
     if not recursive:
         for file in tqdm(os.listdir(path), desc="get files of " + path):
-            if file.endswith(ext):
+            if file.lower().endswith(ext):
                 yield f"{path}/{file}"
 
     for root, _, files in tqdm(os.walk(path), desc="get files of " + path):
         for file in files:
-            if file.endswith(ext):
+            if file.lower().endswith(ext):
                 yield f"{root}/{file}"
 
 
@@ -47,8 +48,8 @@ def write_file(path: str, content: str):
 
 
 def get_filename(path: str):
-    name = path[path.rfind("/") + 1:]
-    name = name[:name.rfind(".")]
+    name = path[path.rfind("/") + 1 :]
+    name = name[: name.rfind(".")]
     return name
 
 
@@ -64,7 +65,7 @@ def save_image(path: str, box, image_quality: int = 10):
         return
 
     try:
-        file.save(f"{path}/{name}.webp", 'webp', optimize=True, quality=image_quality)
+        file.save(f"{path}/{name}.webp", "webp", optimize=True, quality=image_quality)
     except OSError:
         try:
             import platform

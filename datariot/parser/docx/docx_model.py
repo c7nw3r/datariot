@@ -1,12 +1,13 @@
 from dataclasses import dataclass
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
-from PIL.Image import Image
 from docx.text.paragraph import Paragraph, Run
+from PIL.Image import Image
 
 from datariot.__spi__.type import Box, MediaAware
 from datariot.__util__.array_util import flatten
 from datariot.__util__.image_util import to_base64
+from datariot.__util__.text_util import create_uuid_from_string
 
 
 @dataclass
@@ -15,10 +16,16 @@ class DocxTextBox(Box):
     Box implementation for the plain text docx elements.
     """
 
-    def __init__(self, root_name: str, paragraph: Paragraph):
+    def __init__(
+        self,
+        root_name: str,
+        paragraph: Paragraph,
+        page_number: Optional[int] = None,
+    ):
         super().__init__(None, None, None, None)
-        self.p = paragraph
         self.root_name = root_name
+        self.p = paragraph
+        self.page_number = page_number
 
     @property
     def text(self):
@@ -61,7 +68,9 @@ class DocxTextBox(Box):
 
     def get_default_font_size(self, doc):
         try:
-            return doc.styles.element.xpath('w:docDefaults/w:rPrDefault/w:rPr/w:sz')[0].val.pt
+            return doc.styles.element.xpath("w:docDefaults/w:rPrDefault/w:rPr/w:sz")[
+                0
+            ].val.pt
         except:
             return -1
 
@@ -70,9 +79,13 @@ class DocxTextBox(Box):
 
 
 class DocxListBox(DocxTextBox):
-
-    def __init__(self, root_name: str, paragraph: Paragraph):
-        super().__init__(root_name, paragraph)
+    def __init__(
+        self,
+        root_name: str,
+        paragraph: Paragraph,
+        page_number: Optional[int] = None,
+    ):
+        super().__init__(root_name, paragraph, page_number)
 
         ilvl = self.p._element.xpath("w:pPr/w:numPr/w:ilvl/@w:val")
         self.numbering = int(ilvl[0])
@@ -83,7 +96,7 @@ class DocxTableBox(Box):
     Box implementation for the table docx elements.
     """
 
-    def __init__(self, root_name: str, rows: list, paragraphs: List[List[Paragraph]]):
+    def __init__(self, root_name: str, rows: List, paragraphs: List[List[Paragraph]]):
         super().__init__(None, None, None, None)
         self.rows = rows
         self.paragraphs = paragraphs
@@ -114,7 +127,7 @@ class DocxTableBox(Box):
             for i, col in enumerate(row):
                 lenghts[-1].append(len(col))
 
-        cols = [e.replace(':', '').replace("\n", " ").strip() for e in self.rows[0]]
+        cols = [e.replace(":", "").replace("\n", " ").strip() for e in self.rows[0]]
         buffer = [" | ".join(cols), "-" * 10]
 
         for row in self.rows[1:]:
@@ -128,11 +141,16 @@ class DocxImageBox(Box, MediaAware):
     Box implementation for the image docx elements.
     """
 
-    def __init__(self, root_name: str, name: str, image):
+    def __init__(self, root_name: str, name: str, image, id: str | None = None):
         super().__init__(None, None, None, None)
         self.name = name
         self.image = image
         self.root_name = root_name
+        self._id = id
+
+    @property
+    def id(self) -> str:
+        return self._id or create_uuid_from_string(self.to_hash(fast=True))
 
     def get_file(self) -> Tuple[str, Image]:
         return self.name, self.image
