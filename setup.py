@@ -54,6 +54,12 @@ setup(
         ],
         'camelot': [
             "camelot-py==0.11.0"
+        ],
+        'email': [
+            "extract-msg==0.48.5"
+        ],
+        'stopwords': [
+            "stopwordsiso",
         ]
     }
 )

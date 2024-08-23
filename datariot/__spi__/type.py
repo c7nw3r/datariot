@@ -124,3 +124,9 @@ FileFilter = Callable[[str], bool]
 
 def starts_with_filter(prefix: str) -> FileFilter:
     return lambda file: file[file.rfind("/") + 1:].startswith(prefix)
+
+
+class Extractor(ABC):
+    @abstractmethod
+    def extract(self, parsed: Parsed):
+        pass
