@@ -6,12 +6,13 @@ from pdfplumber.table import Table
 
 from datariot.__spi__.type import Box, ColumnPosition, FontWeight, MediaAware
 from datariot.__util__.image_util import to_base64
+from datariot.parser.__spi__ import FontAware, Font, TextAware
 
 DEFAULT_IMAGE_RESOLUTION = 72
 IMAGE_RESOLUTION = 400
 
 
-class PDFTextBox(Box):
+class PDFTextBox(Box, FontAware, TextAware):
 
     def __init__(
             self,
@@ -72,6 +73,10 @@ class PDFTextBox(Box):
         if "bold" in self._font_name.lower():
             return "bold"
         return "regular"
+
+    @property
+    def font(self) -> Font:
+        return Font(self.font_name, self.font_size, self.font_weight)
 
     def copy(self):
         return PDFTextBox(
@@ -231,3 +236,21 @@ class PDFTableBox(Box):
 
     def __len__(self):
         return len(str(self).strip())
+
+
+class PDFHyperlinkBox(Box):
+
+    def __init__(
+            self,
+            x1: int,
+            y1: int,
+            x2: int,
+            y2: int,
+            uri: str
+    ):
+        super().__init__(x1, x2, y1, y2)
+        self.uri = uri.replace("&amp;", "&")
+
+    @staticmethod
+    def of_dict(obj: dict):
+        return PDFHyperlinkBox(obj["x0"], obj["y0"], obj["x1"], obj["y1"], obj["uri"])

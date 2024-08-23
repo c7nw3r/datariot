@@ -1,9 +1,8 @@
 import re
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from functools import cached_property
 from typing import List, Literal, Optional, Union
-
-from datariot.parser.pdf.pdf_model import PDFTextBox
 
 
 @dataclass
@@ -25,6 +24,22 @@ class Font:
     @size.setter
     def size(self, value: float):
         self._size = round(value)
+
+
+class FontAware(ABC):
+
+    @property
+    @abstractmethod
+    def font(self) -> Font:
+        pass
+
+
+class TextAware(ABC):
+
+    @property
+    @abstractmethod
+    def text(self) -> str:
+        pass
 
 
 @dataclass
@@ -73,11 +88,10 @@ class DocumentFonts:
             return
         return self._sizes.index(value)
 
-    # TODO: generalize to arbitrary text boxes
     @staticmethod
-    def from_bboxes(bboxes: List[PDFTextBox]) -> "DocumentFonts":
+    def from_bboxes(bboxes: List[FontAware]) -> "DocumentFonts":
         doc_fonts = DocumentFonts()
-        doc_fonts.fonts = [Font(b.font_name, b.font_size, b.font_weight) for b in bboxes]
+        doc_fonts.fonts = [b.font for b in bboxes]
         return doc_fonts
 
 

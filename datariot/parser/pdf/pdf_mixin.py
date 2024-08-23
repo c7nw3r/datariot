@@ -42,7 +42,6 @@ class PageMixin:
         pos_filter = CoordinatesBoundingBoxFilter(config)
         txt_filter = TextContentBoundingBoxFilter(config)
         toc_filter = PDFOutlinesBoundingBoxFilter(document)
-        # geo_merger = GeometricImageSegmentsMerger(config)
 
         boxes = page.extract_words(
             extra_attrs=config.extract_words_extra_attrs,
@@ -57,7 +56,6 @@ class PageMixin:
         boxes = toc_filter(page, boxes)
         boxes = pos_filter(page, boxes)
         boxes = txt_filter(page, boxes)
-        # boxes = geo_merger(page, boxes)
 
         return boxes
 
