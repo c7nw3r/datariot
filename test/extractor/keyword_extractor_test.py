@@ -11,7 +11,7 @@ class KeywordExtractorTest(TestCase):
         parser = PDFParser()
         parsed = parser.parse(get_test_path("wikipedia_de.pdf"))
 
-        extractor = KeywordExtractor(langs=["de", "en"])
+        extractor = KeywordExtractor(langs=["de", "en"], min_occurrence=20)
         extracted = extractor.extract(parsed)
 
         keywords = [e.text for e in extracted]

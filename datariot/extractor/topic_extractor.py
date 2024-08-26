@@ -9,6 +9,9 @@ class Topic:
     order: int
     text: str
 
+    def __hash__(self):
+        return self.text.__hash__()
+
 
 class TopicExtractor(Extractor):
 
@@ -16,7 +19,7 @@ class TopicExtractor(Extractor):
         self.min_order = min_order
 
     def extract(self, parsed: Parsed):
-        topics = []
+        topics = set()
 
         bboxes = [e for e in parsed.bboxes if isinstance(e, FontAware) and isinstance(e, TextAware)]
         doc_fonts = DocumentFonts.from_bboxes(bboxes)
@@ -25,6 +28,6 @@ class TopicExtractor(Extractor):
             order = doc_fonts.get_size_rank(box.font.size)
 
             if order <= self.min_order:
-                topics.append(Topic(order, box.text))
+                topics.add(Topic(order, box.text))
 
-        return topics
+        return list(set(topics))

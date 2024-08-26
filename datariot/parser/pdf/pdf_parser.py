@@ -44,6 +44,8 @@ class PDFParser(Parser, PageMixin):
                 if self.config.screenshot:
                     self.take_screenshot(page, boxes)
 
+            properties["num_pages"] = len(reader.pages)
+
         if "size" not in properties:
             properties["size"] = os.stat(path).st_size
         if "name" not in properties:
