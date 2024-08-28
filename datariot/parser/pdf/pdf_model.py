@@ -1,20 +1,20 @@
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
-from PIL.Image import Image
 from pdfplumber.page import Page
 from pdfplumber.table import Table
+from PIL.Image import Image
 
 from datariot.__spi__.type import Box, ColumnPosition, FontWeight, MediaAware
 from datariot.__util__.image_util import to_base64
 from datariot.__util__.text_util import create_uuid_from_string
-from datariot.parser.__spi__ import FontAware, Font, TextAware
+from datariot.parser.__spi__ import Font, FontAware, TextAware
+
 
 DEFAULT_IMAGE_RESOLUTION = 72
 IMAGE_RESOLUTION = 400
 
 
 class PDFTextBox(Box, FontAware, TextAware):
-
     def __init__(
         self,
         x1: float,
@@ -25,12 +25,29 @@ class PDFTextBox(Box, FontAware, TextAware):
         font_size: int,
         font_name: str,
         page_number: int,
+        hyperlink: Union[str, None] = None,
     ):
         super().__init__(x1, x2, y1, y2)
         self._text = text
         self.font_size = font_size
         self.font_name = font_name
         self.page_number = page_number
+        self._contains_hyperlink = bool(hyperlink)
+        self.hyperlink = hyperlink
+
+    @property
+    def hyperlink(self) -> Union[str, None]:
+        return self._curr_hyperlink
+
+    @hyperlink.setter
+    def hyperlink(self, value: Union[str, None]) -> None:
+        self._curr_hyperlink = value
+        if value:
+            self._contains_hyperlink = True
+
+    @property
+    def contains_hyperlink(self) -> bool:
+        return self._contains_hyperlink
 
     @staticmethod
     def from_dict(data: dict):
@@ -54,6 +71,7 @@ class PDFTextBox(Box, FontAware, TextAware):
             self._font_size,
             self._font_name,
             self.page_number,
+            self.hyperlink,
         )
 
     @property
@@ -97,7 +115,7 @@ class PDFTextBox(Box, FontAware, TextAware):
             self.text,
             self.font_size,
             self._font_name,
-            self.page_number
+            self.page_number,
         )
 
     def __repr__(self):
@@ -136,7 +154,7 @@ class PDFColumnTextBox(PDFTextBox):
             box.font_name,
             box.page_number,
             num_columns,
-            column
+            column,
         )
 
 
@@ -242,18 +260,14 @@ class PDFTableBox(Box):
 
 
 class PDFHyperlinkBox(Box):
-
-    def __init__(
-            self,
-            x1: int,
-            y1: int,
-            x2: int,
-            y2: int,
-            uri: str
-    ):
+    def __init__(self, x1: int, y1: int, x2: int, y2: int, uri: str):
         super().__init__(x1, x2, y1, y2)
         self.uri = uri.replace("&amp;", "&")
 
     @staticmethod
-    def of_dict(obj: dict):
-        return PDFHyperlinkBox(obj["x0"], obj["y0"], obj["x1"], obj["y1"], obj["uri"])
+    def from_dict(data: dict):
+        x1 = data["x0"]
+        y1 = data["top"]
+        x2 = data["x1"]
+        y2 = data["bottom"]
+        return PDFHyperlinkBox(x1, y1, x2, y2, data["uri"])

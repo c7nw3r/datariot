@@ -94,6 +94,7 @@ class BBoxConfig(BaseModel):
     text_box_config: TextBoxConfig = TextBoxConfig()
     ocr_config: OcrConfig = OcrConfig()
     media_use_uuid: bool = True
+    handle_hyperlinks: bool = True
 
 
 class PDFParserConfig(BaseModel):

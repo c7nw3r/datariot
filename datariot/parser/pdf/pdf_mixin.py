@@ -18,7 +18,10 @@ from datariot.parser.pdf.bbox.bbox_filter import (
     TextContentBoundingBoxFilter,
 )
 from datariot.parser.pdf.bbox.bbox_merger import CoordinatesBoundingBoxMerger
-from datariot.parser.pdf.bbox.bbox_processor import ReCropTextExtractionBBoxProcessor
+from datariot.parser.pdf.bbox.bbox_processor import (
+    AnnotationBBoxProcessor,
+    ReCropTextExtractionBBoxProcessor,
+)
 from datariot.parser.pdf.bbox.bbox_slicer import ColumnStyleBoundingBoxSlicer
 from datariot.parser.pdf.bbox.bbox_sorter import CoordinatesBoundingBoxSorter
 from datariot.parser.pdf.pdf_model import (
@@ -49,7 +52,7 @@ class PageMixin:
         return boxes
 
     def get_text_boxes(
-            self, document: PDFDocument, page: Page, config: PDFParserConfig
+        self, document: PDFDocument, page: Page, config: PDFParserConfig
     ) -> List[PDFTextBox]:
         bbox_config = config.bbox_config
         box_merger = CoordinatesBoundingBoxMerger(bbox_config)
@@ -57,6 +60,7 @@ class PageMixin:
         pos_filter = CoordinatesBoundingBoxFilter(bbox_config)
         txt_filter = TextContentBoundingBoxFilter(bbox_config)
         toc_filter = PDFOutlinesBoundingBoxFilter(document)
+        annotation_processor = AnnotationBBoxProcessor(bbox_config)
 
         words = page.extract_words(
             extra_attrs=bbox_config.extract_words_extra_attrs,
@@ -69,6 +73,7 @@ class PageMixin:
             for word in words
         ]
         boxes = [e for e in boxes if len(e.text.strip()) > 0]
+        boxes = annotation_processor(page, boxes)
         boxes = box_merger(page, boxes)
         boxes = box_slicer(page, boxes)
         boxes = toc_filter(page, boxes)
@@ -82,7 +87,7 @@ class PageMixin:
         return boxes
 
     def get_table_boxes(
-            self, _document: PDFDocument, page: Page, config: PDFParserConfig
+        self, _document: PDFDocument, page: Page, config: PDFParserConfig
     ) -> List[PDFTableBox]:
         box_filter = NestedTableBoundingBoxFilter()
         table_config = config.bbox_config.table_box_config
@@ -103,7 +108,7 @@ class PageMixin:
         return boxes
 
     def get_image_boxes(
-            self, document: PDFDocument, page: Page, config: PDFParserConfig
+        self, document: PDFDocument, page: Page, config: PDFParserConfig
     ) -> List[Union[PDFImageBox, PDFTextBox]]:
         if not config.include_images:
             return []
@@ -136,7 +141,7 @@ class PageMixin:
         return boxes
 
     def get_linecurve_boxes(
-            self, document: PDFDocument, page: Page, config: PDFParserConfig
+        self, document: PDFDocument, page: Page, config: PDFParserConfig
     ) -> List[PDFLineCurveBox]:
         box_filter = BoxIdentityBoundingBoxFilter()
 
@@ -156,11 +161,11 @@ class PageMixin:
         return boxes
 
     def get_text_boxes_by_ocr(
-            self,
-            document: PDFDocument,
-            page: Page,
-            box: PDFImageBox,
-            config: BBoxConfig,
+        self,
+        document: PDFDocument,
+        page: Page,
+        box: PDFImageBox,
+        config: BBoxConfig,
     ) -> List[PDFTextBox]:
         import pytesseract
 
@@ -255,10 +260,10 @@ class PageMixin:
                 v_mid = (obj["top"] + obj["bottom"]) / 2
                 h_mid = (obj["x0"] + obj["x1"]) / 2
                 return (
-                        (h_mid >= _bbox.x1 - margin)
-                        and (h_mid < _bbox.x2 + margin)
-                        and (v_mid >= _bbox.y1 - margin)
-                        and (v_mid < _bbox.y2 + margin)
+                    (h_mid >= _bbox.x1 - margin)
+                    and (h_mid < _bbox.x2 + margin)
+                    and (v_mid >= _bbox.y1 - margin)
+                    and (v_mid < _bbox.y2 + margin)
                 )
 
             return not any(obj_in_bbox(__bbox) for __bbox in bboxes)

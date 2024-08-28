@@ -33,6 +33,10 @@ xlsx = ["openpyxl"]
 camelot = ["camelot-py"]
 stopwords = ["stopwordsiso"]
 
+[tool.poetry.group.dev.dependencies]
+pytest = "7.4.3"
+pytest-cov = "3.0.0"
+
 [tool.ruff]
 target-version = "py312"
 select = ["B", "E", "F", "I", "W"]
