@@ -1,13 +1,15 @@
 import os
+
 # read the contents of your README file
 from pathlib import Path
 
 import pkg_resources
 from setuptools import find_packages, setup
 
+
 long_description = Path(__file__).with_name("README.md").read_text()
 
-version = "0.6.7"
+version = "0.6.8"
 setup(
     name="datariot",
     packages=find_packages(exclude=("test")),
@@ -45,7 +47,7 @@ setup(
         ],
         "xlsx": ["openpyxl==3.1.2"],
         "camelot": ["camelot-py==0.11.0"],
-        'email': ["extract-msg==0.48.5"],
-        'stopwords': ["stopwordsiso"]
+        "email": ["extract-msg==0.48.5"],
+        "stopwords": ["stopwordsiso"],
     },
 )
