@@ -116,6 +116,7 @@ class PDFTextBox(Box, FontAware, TextAware):
             self.font_size,
             self._font_name,
             self.page_number,
+            self.hyperlink,
         )
 
     def __repr__(self):

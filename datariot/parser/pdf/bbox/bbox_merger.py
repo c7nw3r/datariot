@@ -81,7 +81,9 @@ class CoordinatesBoundingBoxMerger:
                 self._config.merge_blank_consecutive_lines or not is_blank
             ) and (bbox.y1 - prev_bbox.y2) < self._config.merge_y_tolerance
 
-            if font_rule and (same_line_rule or consecutive_line_rule):
+            if continue_link or (
+                font_rule and (same_line_rule or consecutive_line_rule)
+            ):
                 prev_is_blank = prev_bbox.text.strip() == ""
                 separator = "" if continue_link else " " if is_same_line else "\n"
                 prev_bbox = prev_bbox.with_text(prev_bbox.text + separator + bbox.text)
