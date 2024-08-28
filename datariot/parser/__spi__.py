@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from functools import cached_property
 from typing import List, Literal, Optional, Union
 
+from pydantic import BaseModel
+
 
 @dataclass
 class RegexPattern:
@@ -27,7 +29,6 @@ class Font:
 
 
 class FontAware(ABC):
-
     @property
     @abstractmethod
     def font(self) -> Font:
@@ -35,7 +36,6 @@ class FontAware(ABC):
 
 
 class TextAware(ABC):
-
     @property
     @abstractmethod
     def text(self) -> str:
@@ -101,8 +101,7 @@ FontSizeSpecification = Literal["minimum_size", "maximum_size", "most_common_siz
 FontSpecification = Union[Font, FontSizeSpecification]
 
 
-@dataclass
-class BoxFilterSizeConfig:
+class BoxFilterSizeConfig(BaseModel):
     min_width: Optional[int] = None
     max_width: Optional[int] = None
     min_height: Optional[int] = None
