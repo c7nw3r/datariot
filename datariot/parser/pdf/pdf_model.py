@@ -40,7 +40,7 @@ class PDFTextBox(Box, FontAware, TextAware):
         self.font_size = font_size
         self.font_name = font_name
         self.page_number = page_number
-        if hyperlinks:
+        if hyperlinks is not None:
             self.hyperlinks = hyperlinks
         else:
             self.set_hyperlink(None)
