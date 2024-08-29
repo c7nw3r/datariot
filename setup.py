@@ -1,15 +1,13 @@
 import os
-
 # read the contents of your README file
 from pathlib import Path
 
 import pkg_resources
 from setuptools import find_packages, setup
 
-
 long_description = Path(__file__).with_name("README.md").read_text()
 
-version = "0.6.11"
+version = "0.6.12"
 setup(
     name="datariot",
     packages=find_packages(exclude=("test")),
