@@ -7,7 +7,7 @@ from setuptools import find_packages, setup
 
 long_description = Path(__file__).with_name("README.md").read_text()
 
-version = "0.6.7"
+version = "0.6.8"
 setup(
     name="datariot",
     packages=find_packages(exclude=("test")),
