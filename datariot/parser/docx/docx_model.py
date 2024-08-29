@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from typing import List, Optional, Tuple
 
-from docx.text.paragraph import Paragraph, Run
 from PIL.Image import Image
+from docx.text.paragraph import Paragraph, Run
 
 from datariot.__spi__.type import Box, MediaAware
 from datariot.__util__.array_util import flatten
@@ -141,7 +141,7 @@ class DocxImageBox(Box, MediaAware):
     Box implementation for the image docx elements.
     """
 
-    def __init__(self, root_name: str, name: str, image, id: str | None = None):
+    def __init__(self, root_name: str, name: str, image, id: Optional[str] = None):
         super().__init__(None, None, None, None)
         self.name = name
         self.image = image
