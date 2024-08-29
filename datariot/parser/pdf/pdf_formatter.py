@@ -63,7 +63,7 @@ class HeuristicPDFFormatter(Formatter[str]):
         end_idx = link.end_idx + 1 + offset
         before = text[:start_idx]
         after = text[end_idx:]
-        replaced = f"[{text[start_idx: end_idx]}]({link.uri})"
+        replaced = f" [{text[start_idx: end_idx]}]({link.uri}) "
 
         return f"{before}{replaced}{after}", len(link.uri) + 4
 
