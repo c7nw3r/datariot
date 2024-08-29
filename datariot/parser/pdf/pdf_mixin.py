@@ -80,6 +80,9 @@ class PageMixin:
         boxes = pos_filter(page, boxes)
         boxes = txt_filter(page, boxes)
 
+        for box in boxes:
+            box.clean()
+
         if config.bbox_config.text_box_config.extraction_strategy == "re_crop":
             re_crop = ReCropTextExtractionBBoxProcessor()
             boxes = re_crop(page, boxes)

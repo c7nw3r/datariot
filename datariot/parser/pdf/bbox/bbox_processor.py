@@ -11,7 +11,7 @@ class ReCropTextExtractionBBoxProcessor(BoundingBoxProcessor):
     def __call__(self, page: Page, bboxes: List[PDFTextBox]) -> List[PDFTextBox]:
         processed = []
         for box in bboxes:
-            if box.contains_hyperlink:
+            if box.contains_hyperlinks:
                 new_box = box
             else:
                 crop = page.crop(tuple(box), strict=False)
@@ -35,7 +35,7 @@ class AnnotationBBoxProcessor(BoundingBoxProcessor):
             for box in bboxes:
                 for h in hyperlinks:
                     if box.is_contained_in(h):
-                        box.hyperlink = h.uri
+                        box.set_hyperlink(h.uri)
                         break
 
         return bboxes

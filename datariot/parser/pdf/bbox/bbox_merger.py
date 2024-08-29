@@ -18,7 +18,7 @@ class CoordinatesBoundingBoxMerger:
 
         doc_fonts = DocumentFonts.from_bboxes(bboxes)
 
-        results = []
+        results: List[PDFTextBox] = []
         prev_bbox = bboxes[0].copy()
         for bbox in bboxes[1:]:
             is_same_line = (
@@ -30,19 +30,9 @@ class CoordinatesBoundingBoxMerger:
             is_previous_most_common_font_size = (
                 not is_prev_blank and prev_bbox.font_size == doc_fonts.most_common_size
             )
-            prev_has_link = prev_bbox.hyperlink is not None
-            has_link = bbox.hyperlink is not None
-            is_same_link = prev_bbox.hyperlink == bbox.hyperlink
+            has_link = bbox.last_hyperlink is not None
+            is_same_link = prev_bbox.last_hyperlink == bbox.last_hyperlink
             continue_link = has_link and is_same_link
-            start_link = has_link and not is_same_link
-            end_link = (not has_link or start_link) and prev_has_link
-
-            if start_link:
-                bbox = bbox.with_text(f"[{bbox.text}")
-            if end_link:
-                prev_bbox = prev_bbox.with_text(
-                    f"{prev_bbox.text}]({prev_bbox.hyperlink})"
-                )
 
             # same font size
             expr1 = (
@@ -94,7 +84,7 @@ class CoordinatesBoundingBoxMerger:
                 prev_bbox.y1 = min(prev_bbox.y1, bbox.y1)
                 prev_bbox.x2 = max(prev_bbox.x2, bbox.x2)
                 prev_bbox.y2 = max(prev_bbox.y2, bbox.y2)
-                prev_bbox.hyperlink = bbox.hyperlink
+                prev_bbox.add_hyperlinks(bbox.hyperlinks)
             else:
                 results.append(prev_bbox)
                 prev_bbox = bbox.copy()

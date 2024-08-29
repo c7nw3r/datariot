@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import List, Optional, Tuple, Union
 
 from pdfplumber.page import Page
@@ -14,6 +15,13 @@ DEFAULT_IMAGE_RESOLUTION = 72
 IMAGE_RESOLUTION = 400
 
 
+@dataclass
+class PDFTextBoxAnnotation:
+    start_idx: int
+    end_idx: int
+    uri: str | None = None
+
+
 class PDFTextBox(Box, FontAware, TextAware):
     def __init__(
         self,
@@ -25,29 +33,63 @@ class PDFTextBox(Box, FontAware, TextAware):
         font_size: int,
         font_name: str,
         page_number: int,
-        hyperlink: Union[str, None] = None,
+        hyperlinks: Union[List[PDFTextBoxAnnotation], None] = None,
     ):
         super().__init__(x1, x2, y1, y2)
         self._text = text
         self.font_size = font_size
         self.font_name = font_name
         self.page_number = page_number
-        self._contains_hyperlink = bool(hyperlink)
-        self.hyperlink = hyperlink
+        if hyperlinks:
+            self.hyperlinks = hyperlinks
+        else:
+            self.set_hyperlink(None)
 
     @property
-    def hyperlink(self) -> Union[str, None]:
-        return self._curr_hyperlink
-
-    @hyperlink.setter
-    def hyperlink(self, value: Union[str, None]) -> None:
-        self._curr_hyperlink = value
-        if value:
-            self._contains_hyperlink = True
+    def contains_hyperlinks(self) -> bool:
+        return any(a.uri for a in self.hyperlinks)
 
     @property
-    def contains_hyperlink(self) -> bool:
-        return self._contains_hyperlink
+    def last_hyperlink(self) -> Union[str, None]:
+        return self.hyperlinks[-1].uri if self.hyperlinks else None
+
+    def set_hyperlink(self, uri: str | None) -> None:
+        self.hyperlinks = [
+            PDFTextBoxAnnotation(start_idx=0, end_idx=len(self.text), uri=uri)
+        ]
+
+    def add_hyperlinks(self, links: List[PDFTextBoxAnnotation]) -> None:
+        self.hyperlinks.extend(links)
+
+    def clean(self) -> None:
+        self._clean_hyperlinks()
+
+    def _clean_hyperlinks(self) -> None:
+        if not self.hyperlinks:
+            self.hyperlinks = []
+
+        links: List[PDFTextBoxAnnotation] = []
+        initial_link = self.hyperlinks[0]
+        merged_link = PDFTextBoxAnnotation(
+            start_idx=initial_link.start_idx,
+            end_idx=initial_link.end_idx,
+            uri=initial_link.uri,
+        )
+        absolute_idx = initial_link.end_idx
+        for idx, h in enumerate(self.hyperlinks[1:], 1):
+            if h.uri == self.hyperlinks[idx - 1].uri:
+                merged_link.end_idx = merged_link.end_idx + h.end_idx
+            else:
+                absolute_idx += 1
+                links.append(merged_link)
+                merged_link = PDFTextBoxAnnotation(
+                    start_idx=absolute_idx, end_idx=absolute_idx + h.end_idx, uri=h.uri
+                )
+
+            absolute_idx += h.end_idx
+        links.append(merged_link)
+
+        self.hyperlinks = [link for link in links if link.uri]
 
     @staticmethod
     def from_dict(data: dict):
@@ -71,7 +113,7 @@ class PDFTextBox(Box, FontAware, TextAware):
             self._font_size,
             self._font_name,
             self.page_number,
-            self.hyperlink,
+            self.hyperlinks,
         )
 
     @property
@@ -116,7 +158,7 @@ class PDFTextBox(Box, FontAware, TextAware):
             self.font_size,
             self._font_name,
             self.page_number,
-            self.hyperlink,
+            self.hyperlinks,
         )
 
     def __repr__(self):
