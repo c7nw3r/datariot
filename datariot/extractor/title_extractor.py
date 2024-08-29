@@ -5,7 +5,7 @@ from datariot.parser.__spi__ import DocumentFonts, FontAware, TextAware
 
 
 @dataclass
-class Topic:
+class Title:
     order: int
     text: str
 
@@ -13,7 +13,7 @@ class Topic:
         return self.text.__hash__()
 
 
-class TopicExtractor(Extractor):
+class TitleExtractor(Extractor):
 
     def __init__(self, min_order: int = 0):
         self.min_order = min_order
@@ -28,6 +28,6 @@ class TopicExtractor(Extractor):
             order = doc_fonts.get_size_rank(box.font.size)
 
             if order <= self.min_order:
-                topics.add(Topic(order, box.text))
+                topics.add(Title(order, box.text))
 
         return list(set(topics))

@@ -1,15 +1,14 @@
 from dataclasses import dataclass
 from typing import List, Optional, Tuple, Union
 
+from PIL.Image import Image
 from pdfplumber.page import Page
 from pdfplumber.table import Table
-from PIL.Image import Image
 
 from datariot.__spi__.type import Box, ColumnPosition, FontWeight, MediaAware
 from datariot.__util__.image_util import to_base64
 from datariot.__util__.text_util import create_uuid_from_string
 from datariot.parser.__spi__ import Font, FontAware, TextAware
-
 
 DEFAULT_IMAGE_RESOLUTION = 72
 IMAGE_RESOLUTION = 400
@@ -19,7 +18,7 @@ IMAGE_RESOLUTION = 400
 class PDFTextBoxAnnotation:
     start_idx: int
     end_idx: int
-    uri: str | None = None
+    uri: Optional[str] = None
 
 
 class PDFTextBox(Box, FontAware, TextAware):
@@ -53,7 +52,7 @@ class PDFTextBox(Box, FontAware, TextAware):
     def last_hyperlink(self) -> Union[str, None]:
         return self.hyperlinks[-1].uri if self.hyperlinks else None
 
-    def set_hyperlink(self, uri: str | None) -> None:
+    def set_hyperlink(self, uri: Optional[str]) -> None:
         self.hyperlinks = [
             PDFTextBoxAnnotation(start_idx=0, end_idx=len(self.text), uri=uri)
         ]
