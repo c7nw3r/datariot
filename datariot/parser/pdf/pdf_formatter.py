@@ -65,7 +65,7 @@ class HeuristicPDFFormatter(Formatter[str]):
         after = text[end_idx:]
         replaced = f" [{text[start_idx: end_idx]}]({link.uri}) "
 
-        return f"{before}{replaced}{after}", len(link.uri) + 4
+        return f"{before}{replaced}{after}", len(link.uri) + 6
 
     def _format_table(self, box: PDFTableBox):
         if len(box.rows) <= 5 or not self.enable_json:
