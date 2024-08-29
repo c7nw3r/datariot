@@ -1,20 +1,19 @@
-from dataclasses import dataclass, field
 from typing import List, Literal, Optional
+
+from pydantic import BaseModel
 
 from datariot.__spi__.type import Parsed
 from datariot.parser.__spi__ import BoxFilterSizeConfig, FontSpecification, RegexPattern
 from datariot.parser.pdf.pdf_formatter import JSONPDFFormatter
 
 
-@dataclass
-class TableBoxConfig:
+class TableBoxConfig(BaseModel):
     strategy: Literal["default", "camelot"] = "default"
     vertical_strategy: str = "lines"
     horizontal_strategy: str = "lines"
 
 
-@dataclass
-class TextBoxConfig:
+class TextBoxConfig(BaseModel):
     extraction_strategy: Literal["default", "re_crop"] = "default"
     """
     Strategy to get the final text of a box
@@ -25,8 +24,7 @@ class TextBoxConfig:
     """
 
 
-@dataclass
-class OcrConfig:
+class OcrConfig(BaseModel):
     only_full_page: bool = False
     """Whether to perform ocr only on full page images, i.e., probably scans"""
 
@@ -41,7 +39,7 @@ class OcrConfig:
     * `data`: pytesseract.image_to_data() and use text bounding box logic
     """
 
-    languages: List[str] = field(default_factory=lambda: ["deu", "eng"])
+    languages: List[str] = ["deu", "eng"]
     """Tesseract language abbreviations for ocr"""
 
     tesseract_config: str = "--psm 3"
@@ -54,14 +52,13 @@ class OcrConfig:
     """Whether to keep image boxes in addition to ocr boxes"""
 
 
-@dataclass
 # TODO: split into separate config classes
-class BBoxConfig:
+class BBoxConfig(BaseModel):
     filter_min_y: Optional[int] = None
     filter_max_y: Optional[int] = None
-    filter_must_regexes: List[RegexPattern] = field(default_factory=lambda: [])
-    filter_must_not_regexes: List[RegexPattern] = field(default_factory=lambda: [RegexPattern(r"^\s*$")])
-    extract_words_extra_attrs: List[str] = field(default_factory=lambda: ["fontname", "size"])
+    filter_must_regexes: List[RegexPattern] = []
+    filter_must_not_regexes: List[RegexPattern] = [RegexPattern(r"^\s*$")]
+    extract_words_extra_attrs: List[str] = ["fontname", "size"]
     extract_words_keep_blank_chars: bool = True
     merge_same_font_name: bool = True
     merge_same_font_size: bool = True
@@ -85,7 +82,7 @@ class BBoxConfig:
     columns_split: bool = True
     columns_gap: int = 2
     columns_min_lines: int = 2
-    columns_split_fonts: List[FontSpecification] = field(default_factory=lambda: ["most_common"])
+    columns_split_fonts: List[FontSpecification] = ["most_common_size"]
     sorter_fuzzy: bool = False
     sorter_y_tolerance: int = 5
     parser_x_tolerance: int = 3
@@ -97,10 +94,10 @@ class BBoxConfig:
     text_box_config: TextBoxConfig = TextBoxConfig()
     ocr_config: OcrConfig = OcrConfig()
     media_use_uuid: bool = True
+    handle_hyperlinks: bool = True
 
 
-@dataclass
-class PDFParserConfig:
+class PDFParserConfig(BaseModel):
     screenshot: bool = False
     ocr: bool = False
     include_images: bool = True

@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "datariot"
-version = "0.6.8"
+version = "0.6.11"
 description = "Advanced document parsing library"
 authors = ["c7nw3r", ]
 
@@ -32,6 +32,10 @@ web = ["selenium", "beautifulsoup4", "webdriver_manager", "lxml"]
 xlsx = ["openpyxl"]
 camelot = ["camelot-py"]
 stopwords = ["stopwordsiso"]
+
+[tool.poetry.group.dev.dependencies]
+pytest = "7.4.3"
+pytest-cov = "3.0.0"
 
 [tool.ruff]
 target-version = "py312"

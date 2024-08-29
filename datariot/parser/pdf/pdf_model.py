@@ -1,20 +1,28 @@
-from typing import List, Optional, Tuple
+from dataclasses import dataclass
+from typing import List, Optional, Tuple, Union
 
-from PIL.Image import Image
 from pdfplumber.page import Page
 from pdfplumber.table import Table
+from PIL.Image import Image
 
 from datariot.__spi__.type import Box, ColumnPosition, FontWeight, MediaAware
 from datariot.__util__.image_util import to_base64
 from datariot.__util__.text_util import create_uuid_from_string
-from datariot.parser.__spi__ import FontAware, Font, TextAware
+from datariot.parser.__spi__ import Font, FontAware, TextAware
+
 
 DEFAULT_IMAGE_RESOLUTION = 72
 IMAGE_RESOLUTION = 400
 
 
-class PDFTextBox(Box, FontAware, TextAware):
+@dataclass
+class PDFTextBoxAnnotation:
+    start_idx: int
+    end_idx: int
+    uri: str | None = None
 
+
+class PDFTextBox(Box, FontAware, TextAware):
     def __init__(
         self,
         x1: float,
@@ -25,12 +33,63 @@ class PDFTextBox(Box, FontAware, TextAware):
         font_size: int,
         font_name: str,
         page_number: int,
+        hyperlinks: Union[List[PDFTextBoxAnnotation], None] = None,
     ):
         super().__init__(x1, x2, y1, y2)
         self._text = text
         self.font_size = font_size
         self.font_name = font_name
         self.page_number = page_number
+        if hyperlinks:
+            self.hyperlinks = hyperlinks
+        else:
+            self.set_hyperlink(None)
+
+    @property
+    def contains_hyperlinks(self) -> bool:
+        return any(a.uri for a in self.hyperlinks)
+
+    @property
+    def last_hyperlink(self) -> Union[str, None]:
+        return self.hyperlinks[-1].uri if self.hyperlinks else None
+
+    def set_hyperlink(self, uri: str | None) -> None:
+        self.hyperlinks = [
+            PDFTextBoxAnnotation(start_idx=0, end_idx=len(self.text), uri=uri)
+        ]
+
+    def add_hyperlinks(self, links: List[PDFTextBoxAnnotation]) -> None:
+        self.hyperlinks.extend(links)
+
+    def clean(self) -> None:
+        self._clean_hyperlinks()
+
+    def _clean_hyperlinks(self) -> None:
+        if not self.hyperlinks:
+            self.hyperlinks = []
+
+        links: List[PDFTextBoxAnnotation] = []
+        initial_link = self.hyperlinks[0]
+        merged_link = PDFTextBoxAnnotation(
+            start_idx=initial_link.start_idx,
+            end_idx=initial_link.end_idx,
+            uri=initial_link.uri,
+        )
+        absolute_idx = initial_link.end_idx
+        for idx, h in enumerate(self.hyperlinks[1:], 1):
+            if h.uri == self.hyperlinks[idx - 1].uri:
+                merged_link.end_idx = merged_link.end_idx + h.end_idx
+            else:
+                absolute_idx += 1
+                links.append(merged_link)
+                merged_link = PDFTextBoxAnnotation(
+                    start_idx=absolute_idx, end_idx=absolute_idx + h.end_idx, uri=h.uri
+                )
+
+            absolute_idx += h.end_idx
+        links.append(merged_link)
+
+        self.hyperlinks = [link for link in links if link.uri]
 
     @staticmethod
     def from_dict(data: dict):
@@ -54,6 +113,7 @@ class PDFTextBox(Box, FontAware, TextAware):
             self._font_size,
             self._font_name,
             self.page_number,
+            self.hyperlinks,
         )
 
     @property
@@ -97,7 +157,8 @@ class PDFTextBox(Box, FontAware, TextAware):
             self.text,
             self.font_size,
             self._font_name,
-            self.page_number
+            self.page_number,
+            self.hyperlinks,
         )
 
     def __repr__(self):
@@ -136,7 +197,7 @@ class PDFColumnTextBox(PDFTextBox):
             box.font_name,
             box.page_number,
             num_columns,
-            column
+            column,
         )
 
 
@@ -242,18 +303,14 @@ class PDFTableBox(Box):
 
 
 class PDFHyperlinkBox(Box):
-
-    def __init__(
-            self,
-            x1: int,
-            y1: int,
-            x2: int,
-            y2: int,
-            uri: str
-    ):
+    def __init__(self, x1: int, y1: int, x2: int, y2: int, uri: str):
         super().__init__(x1, x2, y1, y2)
         self.uri = uri.replace("&amp;", "&")
 
     @staticmethod
-    def of_dict(obj: dict):
-        return PDFHyperlinkBox(obj["x0"], obj["y0"], obj["x1"], obj["y1"], obj["uri"])
+    def from_dict(data: dict):
+        x1 = data["x0"]
+        y1 = data["top"]
+        x2 = data["x1"]
+        y2 = data["bottom"]
+        return PDFHyperlinkBox(x1, y1, x2, y2, data["uri"])
