@@ -1,14 +1,15 @@
 from dataclasses import dataclass
 from typing import List, Optional, Tuple, Union
 
-from PIL.Image import Image
 from pdfplumber.page import Page
 from pdfplumber.table import Table
+from PIL.Image import Image
 
 from datariot.__spi__.type import Box, ColumnPosition, FontWeight, MediaAware
 from datariot.__util__.image_util import to_base64
 from datariot.__util__.text_util import create_uuid_from_string
 from datariot.parser.__spi__ import Font, FontAware, TextAware
+
 
 DEFAULT_IMAGE_RESOLUTION = 72
 IMAGE_RESOLUTION = 400
@@ -77,6 +78,8 @@ class PDFTextBox(Box, FontAware, TextAware):
         absolute_idx = initial_link.end_idx
         for idx, h in enumerate(self.hyperlinks[1:], 1):
             if h.uri == self.hyperlinks[idx - 1].uri:
+                if h.uri is None:
+                    absolute_idx += 1
                 merged_link.end_idx = merged_link.end_idx + h.end_idx
             else:
                 absolute_idx += 1

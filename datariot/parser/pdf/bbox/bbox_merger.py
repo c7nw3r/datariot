@@ -5,7 +5,7 @@ from pdfplumber.page import Page
 from datariot.__spi__.type import Box
 from datariot.parser.__spi__ import DocumentFonts
 from datariot.parser.pdf.__spi__ import BBoxConfig
-from datariot.parser.pdf.pdf_model import PDFHyperlinkBox, PDFTextBox
+from datariot.parser.pdf.pdf_model import PDFTextBox
 
 
 class CoordinatesBoundingBoxMerger:

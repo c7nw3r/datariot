@@ -34,7 +34,7 @@ class AnnotationBBoxProcessor(BoundingBoxProcessor):
 
             for box in bboxes:
                 for h in hyperlinks:
-                    if box.is_contained_in(h):
+                    if box.is_corner_contained_in(h):
                         box.set_hyperlink(h.uri)
                         break
 

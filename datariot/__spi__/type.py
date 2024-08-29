@@ -71,16 +71,32 @@ class Box:
 
         return False
 
+    def is_corner_contained_in(self, box: "Box", tolerance: int = 3) -> bool:
+        x = self.x1 + tolerance
+        y = self.y1 + tolerance
+        expr1 = x >= box.x1
+        expr2 = x <= box.x2
+        expr3 = y >= box.y1
+        expr4 = y <= box.y2
+
+        if all([expr1, expr2, expr3, expr4]):
+            return True
+
+        return False
+
     def render(self, formatter: Formatter):
         return formatter(self)
 
     def intersect(self, box: "Box", x_tolerance: int = 0, y_tolerance: int = 0):
-        expr1 = ((box.x1 or 0) - x_tolerance) <= (self.x1 or 0)
-        expr2 = ((box.x2 or 0) + x_tolerance) >= (self.x2 or 0)
-        expr3 = ((box.y1 or 0) - y_tolerance) <= (self.y1 or 0)
-        expr4 = ((box.y2 or 0) + y_tolerance) >= (self.y2 or 0)
+        x_overlap = not (
+            self.x2 + x_tolerance < box.x1 or self.x1 - x_tolerance > box.x2
+        )
 
-        return expr1 and expr2 and expr3 and expr4
+        y_overlap = not (
+            self.y2 + y_tolerance < box.y1 or self.y1 - y_tolerance > box.y2
+        )
+
+        return x_overlap and y_overlap
 
     @staticmethod
     def from_dict(dictionary: dict):
