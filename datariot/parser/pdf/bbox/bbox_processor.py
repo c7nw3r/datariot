@@ -1,3 +1,4 @@
+import re
 from typing import List
 
 from pdfplumber.page import Page
@@ -30,6 +31,15 @@ class AnnotationBBoxProcessor(BoundingBoxProcessor):
         if self._config.handle_hyperlinks:
             hyperlinks = [
                 PDFHyperlinkBox.from_dict(h) for h in page.root_page.hyperlinks
+            ]
+
+            hyperlinks = [
+                link
+                for link in hyperlinks
+                if not any(
+                    re.match(p, link.uri)
+                    for p in self._config.filter_hyperlink_patterns
+                )
             ]
 
             for box in bboxes:

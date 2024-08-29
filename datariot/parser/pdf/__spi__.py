@@ -95,6 +95,7 @@ class BBoxConfig(BaseModel):
     ocr_config: OcrConfig = OcrConfig()
     media_use_uuid: bool = True
     handle_hyperlinks: bool = True
+    filter_hyperlink_patterns: List[str] = [r"https?\:\/\/\d+\.\d+\.\d+\.\d+\/"]
 
 
 class PDFParserConfig(BaseModel):
