@@ -1,3 +1,4 @@
+import logging
 from typing import List
 
 from pdfplumber.page import Page
@@ -28,8 +29,14 @@ class AnnotationBBoxProcessor(BoundingBoxProcessor):
 
     def __call__(self, page: Page, bboxes: List[PDFTextBox]) -> List[PDFTextBox]:
         if self._config.handle_hyperlinks:
+            try:
+                hyperlinks = page.root_page.hyperlinks
+            except UnicodeDecodeError as ex:
+                logging.warning(f"error while resolving hyperlinks on page {page.page_number}: {ex}")
+                hyperlinks = []
+
             hyperlinks = [
-                PDFHyperlinkBox.from_dict(h) for h in page.root_page.hyperlinks
+                PDFHyperlinkBox.from_dict(h) for h in hyperlinks
             ]
 
             for box in bboxes:

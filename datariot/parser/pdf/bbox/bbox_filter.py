@@ -10,7 +10,6 @@ from datariot.parser.pdf.__spi__ import BBoxConfig
 from datariot.parser.pdf.bbox.__spi__ import BoundingBoxFilter
 from datariot.parser.pdf.pdf_model import PDFTextBox
 
-
 B = TypeVar("B", bound=Box)
 
 
@@ -65,6 +64,8 @@ class PDFOutlinesBoundingBoxFilter(BoundingBoxFilter):
         try:
             self.outlines = list(document.get_outlines())
         except PDFNoOutlines:
+            self.outlines = []
+        except RecursionError:
             self.outlines = []
 
     def __call__(self, page: Page, bboxes: List[PDFTextBox]) -> List[PDFTextBox]:

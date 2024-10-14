@@ -6,6 +6,7 @@ from datariot.__spi__.error import DataRiotException, DataRiotImportException
 from datariot.__spi__.type import FileFilter, Parser
 from datariot.__util__.io_util import get_files
 from datariot.parser.pdf.__spi__ import ParsedPDF, ParsedPDFPage, PDFParserConfig
+from datariot.parser.pdf.filter.metrics_collector import MetricsCollector
 from datariot.parser.pdf.pdf_mixin import PageMixin
 
 _DEFAULT_PARSER_CONFIG = PDFParserConfig()
@@ -37,9 +38,22 @@ class PDFParser(Parser, PageMixin):
 
         with pdfplumber.open(path) as reader:
             properties = reader.metadata
+            metrics = {}
             for page in reader.pages:
+                if self.config.object_filter:
+                    page = page.filter(self.config.object_filter)
+
+                metrics_collector = MetricsCollector(page)
+                page = page.filter(metrics_collector)
+
                 boxes = self.get_boxes(reader.doc, page, self.config)
                 bboxes.extend(boxes)
+
+                metrics[page.page_number - 1] = {
+                    "tags": metrics_collector.tags,
+                    "stroking_colors": metrics_collector.stroking_color,
+                    "overlapping_pixels": metrics_collector.overlapping_pixels
+                }
 
                 if self.config.screenshot:
                     self.take_screenshot(page, boxes)
@@ -51,7 +65,7 @@ class PDFParser(Parser, PageMixin):
         if "name" not in properties:
             properties["name"] = path[path.rfind("/") + 1:]
 
-        return ParsedPDF(path, bboxes, properties=properties)
+        return ParsedPDF(path, bboxes, properties=properties, metrics=metrics)
 
     def parse_paged(self, path: str) -> Generator[ParsedPDFPage, None, None]:
         import pdfplumber

@@ -1,4 +1,5 @@
-from typing import List, Literal, Optional
+from dataclasses import dataclass, field
+from typing import List, Literal, Optional, Callable
 
 from pydantic import BaseModel
 
@@ -102,9 +103,13 @@ class PDFParserConfig(BaseModel):
     ocr: bool = False
     include_images: bool = True
     bbox_config: BBoxConfig = BBoxConfig()
+    object_filter: Optional[Callable[[dict], bool]] = None
 
 
+@dataclass
 class ParsedPDF(Parsed):
+    metrics: dict = field(default_factory=lambda: {})
+
     @property
     def is_paged(self) -> bool:
         return True

@@ -66,7 +66,7 @@ class PageMixin:
             extra_attrs=bbox_config.extract_words_extra_attrs,
             keep_blank_chars=bbox_config.extract_words_keep_blank_chars,
             x_tolerance=bbox_config.parser_x_tolerance,
-            y_tolerance=bbox_config.parser_y_tolerance,
+            y_tolerance=bbox_config.parser_y_tolerance
         )
         boxes = [
             PDFTextBox.from_dict({**word, "page_number": page.page_number})
