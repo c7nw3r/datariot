@@ -18,8 +18,8 @@ class MetricsCollector:
         self.overlapping_pixels = 0
 
     def __call__(self, obj) -> bool:
-        tag = obj["tag"] or "None"
-        color = obj["stroking_color"] or "None"
+        tag = obj.get("tag", "None")
+        color = obj.get("stroking_color", "None")
 
         if tag not in self.tags:
             self.tags[tag] = 0
