@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "datariot"
-version = "0.6.14"
+version = "0.6.18"
 description = "Advanced document parsing library"
 authors = ["c7nw3r", ]
 

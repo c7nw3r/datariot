@@ -1,4 +1,5 @@
 import logging
+import re
 from typing import List
 
 from pdfplumber.page import Page
@@ -39,9 +40,18 @@ class AnnotationBBoxProcessor(BoundingBoxProcessor):
                 PDFHyperlinkBox.from_dict(h) for h in hyperlinks
             ]
 
+            hyperlinks = [
+                link
+                for link in hyperlinks
+                if not any(
+                    re.match(p, link.uri)
+                    for p in self._config.filter_hyperlink_patterns
+                )
+            ]
+
             for box in bboxes:
                 for h in hyperlinks:
-                    if box.is_contained_in(h):
+                    if box.is_corner_contained_in(h):
                         box.set_hyperlink(h.uri)
                         break
 

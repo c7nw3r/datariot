@@ -1,6 +1,6 @@
 from copy import copy
 from dataclasses import asdict
-from typing import Callable, List
+from typing import Callable, List, Tuple
 
 from datariot.__spi__ import Formatter, Parsed
 from datariot.__spi__.type import Box
@@ -38,8 +38,10 @@ class HeuristicPDFFormatter(Formatter[str]):
 
     def _format_text(self, box: PDFTextBox):
         text = box.text
+        offset = 0
         for link in box.hyperlinks:
-            text = self._insert_hyperlink(text, link)
+            text, curr_offset = self._insert_hyperlink(text, link, offset)
+            offset += curr_offset
 
         if (
             self._doc_fonts.most_common_size
@@ -51,11 +53,19 @@ class HeuristicPDFFormatter(Formatter[str]):
 
         return text
 
-    def _insert_hyperlink(self, text: str, link: PDFTextBoxAnnotation) -> str:
-        before = text[: link.start_idx]
-        after = text[link.end_idx + 1 :]
-        replaced = f"[{text[link.start_idx: link.end_idx+1]}]({link.uri})"
-        return f"{before}{replaced}{after}"
+    def _insert_hyperlink(
+        self, text: str, link: PDFTextBoxAnnotation, offset: int
+    ) -> Tuple[str, int]:
+        if link.uri is None:
+            return text, 0
+
+        start_idx = link.start_idx + offset
+        end_idx = link.end_idx + 1 + offset
+        before = text[:start_idx]
+        after = text[end_idx:]
+        replaced = f" [{text[start_idx: end_idx]}]({link.uri}) "
+
+        return f"{before}{replaced}{after}", len(link.uri) + 6
 
     def _format_table(self, box: PDFTableBox):
         if len(box.rows) <= 5 or not self.enable_json:
