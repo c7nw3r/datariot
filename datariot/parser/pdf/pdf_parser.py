@@ -5,7 +5,7 @@ from typing import Generator, Iterator
 from datariot.__spi__.error import DataRiotException, DataRiotImportException
 from datariot.__spi__.type import FileFilter, Parser
 from datariot.__util__.io_util import get_files
-from datariot.parser.pdf.__spi__ import ParsedPDF, ParsedPDFPage, PDFParserConfig
+from datariot.parser.pdf.__spi__ import ParsedPDF, ParsedPDFPage, PDFParserConfig, resilient
 from datariot.parser.pdf.filter.metrics_collector import MetricsCollector
 from datariot.parser.pdf.pdf_mixin import PageMixin
 
@@ -31,6 +31,7 @@ class PDFParser(Parser, PageMixin):
         with pdfplumber.open(path) as reader:
             return len(reader.pages)
 
+    @resilient
     def parse(self, path: str) -> ParsedPDF:
         import pdfplumber
 
@@ -67,6 +68,7 @@ class PDFParser(Parser, PageMixin):
 
         return ParsedPDF(path, bboxes, properties=properties, metrics=metrics)
 
+    @resilient
     def parse_paged(self, path: str) -> Generator[ParsedPDFPage, None, None]:
         import pdfplumber
 
@@ -86,9 +88,9 @@ class PDFParser(Parser, PageMixin):
 
     @staticmethod
     def parse_folder(
-        path: str,
-        config: PDFParserConfig = _DEFAULT_PARSER_CONFIG,
-        file_filter: FileFilter = lambda _: True,
+            path: str,
+            config: PDFParserConfig = _DEFAULT_PARSER_CONFIG,
+            file_filter: FileFilter = lambda _: True,
     ) -> Iterator[ParsedPDF]:
         parser = PDFParser(config)
         for file in get_files(path, ".pdf"):

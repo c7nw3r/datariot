@@ -1,6 +1,9 @@
+import tempfile
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import List, Literal, Optional, Callable
 
+from pdfminer.pdfparser import PDFSyntaxError
 from pydantic import BaseModel
 
 from datariot.__spi__.type import Parsed
@@ -124,3 +127,16 @@ class ParsedPDFPage(ParsedPDF):
     @property
     def page_number(self) -> int:
         return next(self.bboxes).page_number
+
+
+def resilient(func):
+    def _decorator(self, *args, **kwargs):
+        try:
+            return func(self, *args, **kwargs)
+        except PDFSyntaxError:
+            with tempfile.NamedTemporaryFile() as tmp:
+                import pdfplumber
+                pdfplumber.repair(Path(args[0]), tmp.name)
+                return func(self, tmp.name)
+
+    return _decorator
