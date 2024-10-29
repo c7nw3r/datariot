@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import List, Literal, Optional, Callable
 
 from pdfminer.pdfparser import PDFSyntaxError
+from pdfminer.psparser import PSEOF
 from pydantic import BaseModel
 
 from datariot.__spi__.type import Parsed
@@ -133,7 +134,7 @@ def resilient(func):
     def _decorator(self, *args, **kwargs):
         try:
             return func(self, *args, **kwargs)
-        except PDFSyntaxError:
+        except (PDFSyntaxError, PSEOF):
             with tempfile.NamedTemporaryFile() as tmp:
                 import pdfplumber
                 pdfplumber.repair(Path(args[0]), tmp.name)

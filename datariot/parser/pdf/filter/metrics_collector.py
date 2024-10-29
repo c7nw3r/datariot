@@ -1,12 +1,12 @@
 from math import ceil
 
-import numpy as np
 from pdfplumber.page import Page
 
 
 class MetricsCollector:
 
     def __init__(self, page: Page):
+        import numpy as np
         _, _, max_x, max_y = page.bbox
         self.array = np.zeros((ceil(max_x), ceil(max_y)), dtype=np.byte)
 
@@ -18,6 +18,7 @@ class MetricsCollector:
         self.overlapping_pixels = 0
 
     def __call__(self, obj) -> bool:
+        import numpy as np
         tag = obj.get("tag", "None")
         color = obj.get("stroking_color", "None")
 
