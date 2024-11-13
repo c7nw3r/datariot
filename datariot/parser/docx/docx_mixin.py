@@ -89,7 +89,7 @@ class DocumentMixin:
                 vf.seek(0)
 
                 rows = list(csv.reader(vf, delimiter=","))
-                elements.append(DocxTableBox(root_name, rows, paragraphs))
+                elements.append(DocxTableBox(root_name, rows, paragraphs, curr_page_number))
 
         return elements
 
@@ -200,4 +200,4 @@ class DocumentMixin:
         custom_properties = self.parse_custom_properties(path)
         core_properties = self.parse_core_properties(document)
 
-        return core_properties | custom_properties
+        return core_properties or custom_properties

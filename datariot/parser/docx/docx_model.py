@@ -96,11 +96,15 @@ class DocxTableBox(Box):
     Box implementation for the table docx elements.
     """
 
-    def __init__(self, root_name: str, rows: List, paragraphs: List[List[Paragraph]]):
+    def __init__(self,
+                 root_name: str,
+                 rows: List, paragraphs: List[List[Paragraph]],
+                 page_number: Optional[int] = None):
         super().__init__(None, None, None, None)
         self.rows = rows
         self.paragraphs = paragraphs
         self.root_name = root_name
+        self.page_number = page_number
 
     @property
     def font_sizes(self) -> List[int]:
