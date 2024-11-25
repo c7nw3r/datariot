@@ -32,7 +32,7 @@ class AnnotationBBoxProcessor(BoundingBoxProcessor):
         if self._config.handle_hyperlinks:
             try:
                 hyperlinks = page.root_page.hyperlinks
-            except (UnicodeDecodeError, KeyError) as ex:
+            except Exception as ex:
                 logging.warning(f"error while resolving hyperlinks on page {page.page_number}: {ex}")
                 hyperlinks = []
 
