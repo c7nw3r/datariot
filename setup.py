@@ -1,11 +1,9 @@
 import os
-
 # read the contents of your README file
 from pathlib import Path
 
 import pkg_resources
 from setuptools import find_packages, setup
-
 
 long_description = Path(__file__).with_name("README.md").read_text()
 
@@ -37,7 +35,7 @@ setup(
     ],
     extras_require={
         "docx": ["python-docx==1.1.0"],
-        "pdf": ["pdfplumber==0.10.3"],
+        "pdf": ["pdfplumber==0.11.5"],
         "ocr": ["pytesseract==0.3.10"],
         "web": [
             "selenium==4.17.2",

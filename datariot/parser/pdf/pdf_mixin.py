@@ -16,6 +16,7 @@ from datariot.parser.pdf.bbox.bbox_filter import (
     NestedTableBoundingBoxFilter,
     PDFOutlinesBoundingBoxFilter,
     TextContentBoundingBoxFilter,
+    WithAndSizeBoundingBoxFilter,
 )
 from datariot.parser.pdf.bbox.bbox_merger import CoordinatesBoundingBoxMerger
 from datariot.parser.pdf.bbox.bbox_processor import (
@@ -55,6 +56,7 @@ class PageMixin:
         self, document: PDFDocument, page: Page, config: PDFParserConfig
     ) -> List[PDFTextBox]:
         bbox_config = config.bbox_config
+        box_filter = WithAndSizeBoundingBoxFilter(bbox_config)
         box_merger = CoordinatesBoundingBoxMerger(bbox_config)
         box_slicer = ColumnStyleBoundingBoxSlicer(bbox_config)
         pos_filter = CoordinatesBoundingBoxFilter(bbox_config)
@@ -74,6 +76,7 @@ class PageMixin:
         ]
         boxes = [e for e in boxes if len(e.text.strip()) > 0]
         boxes = annotation_processor(page, boxes)
+        boxes = box_filter(page, boxes)
         boxes = box_merger(page, boxes)
         boxes = box_slicer(page, boxes)
         boxes = toc_filter(page, boxes)

@@ -125,7 +125,7 @@ class BoxIdentityBoundingBoxFilter(BoundingBoxFilter):
 
         for i, box1 in enumerate(bboxes):
             exclude = False
-            for box2 in bboxes[i + 1 :]:
+            for box2 in bboxes[i + 1:]:
                 # checking for boxes identity
                 expr1 = box1.x1 == box2.x1
                 expr2 = box1.x2 == box2.x2
@@ -181,5 +181,19 @@ class TextContentBoundingBoxFilter(BoundingBoxFilter):
                     return False
 
             return True
+
+        return [b for b in bboxes if _filter(b)]
+
+
+class WithAndSizeBoundingBoxFilter(BoundingBoxFilter):
+    def __init__(self, config: BBoxConfig) -> None:
+        self._config = config
+
+    def __call__(self, page: Page, bboxes: List[PDFTextBox]) -> List[PDFTextBox]:
+        def _filter(box: PDFTextBox):
+            expr1 = len(box.text) > 0
+            expr2 = box.size == 0
+            expr3 = box.width == 0
+            return not all([expr1, expr2, expr3])
 
         return [b for b in bboxes if _filter(b)]
