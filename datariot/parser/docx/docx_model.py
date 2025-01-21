@@ -145,12 +145,13 @@ class DocxImageBox(Box, MediaAware):
     Box implementation for the image docx elements.
     """
 
-    def __init__(self, root_name: str, name: str, image, id: Optional[str] = None):
+    def __init__(self, root_name: str, name: str, image, id: Optional[str] = None, page_number: Optional[int] = None,):
         super().__init__(None, None, None, None)
         self.name = name
         self.image = image
         self.root_name = root_name
         self._id = id
+        self.page_number = page_number
 
     @property
     def id(self) -> str:

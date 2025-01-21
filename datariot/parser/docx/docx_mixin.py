@@ -73,7 +73,7 @@ class DocumentMixin:
                         # FIXME
                         if root_name != "header" and config.include_images:
                             elements.extend(
-                                self.parse_images(root_name, document, run, config)
+                                self.parse_images(root_name, document, run, config, curr_page_number)
                             )
 
                 if curr_page_number:
@@ -94,19 +94,20 @@ class DocumentMixin:
         return elements
 
     def parse_images(
-        self,
-        root_name: str,
-        document,
-        run: Run,
-        config: DocxParserConfig,
+            self,
+            root_name: str,
+            document,
+            run: Run,
+            config: DocxParserConfig,
+            page_number: int
     ) -> List[DocxImageBox]:
         xmlstr = str(run.element.xml)
         my_namespaces = dict(
             [
                 node
                 for _, node in ElementTree.iterparse(
-                    io.StringIO(xmlstr), events=["start-ns"]
-                )
+                io.StringIO(xmlstr), events=["start-ns"]
+            )
             ]
         )
         root = ET.fromstring(xmlstr)
@@ -141,9 +142,9 @@ class DocumentMixin:
                 id_ = str(uuid4()) if config.media_use_uuid else None
 
                 if (min_width <= image.width <= max_width) and (
-                    min_height <= image.height <= max_height
+                        min_height <= image.height <= max_height
                 ):
-                    return [DocxImageBox(root_name, name_attr, image, id_)]
+                    return [DocxImageBox(root_name, name_attr, image, id_, page_number)]
                 else:
                     return []
 
