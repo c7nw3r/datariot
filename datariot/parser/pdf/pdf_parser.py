@@ -38,7 +38,13 @@ class PDFParser(Parser, PageMixin):
         bboxes = []
 
         with pdfplumber.open(path) as reader:
-            properties = reader.metadata
+            properties = {
+                k: v
+                for k, v
+                in reader.metadata.items()
+                if isinstance(v, str) or isinstance(v, int) or isinstance(v, float)
+            }
+
             metrics = {}
             for page in reader.pages:
                 if self.config.object_filter:
