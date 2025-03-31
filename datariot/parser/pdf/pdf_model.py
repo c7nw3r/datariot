@@ -1,15 +1,14 @@
 from dataclasses import dataclass
 from typing import List, Optional, Tuple, Union
 
+from PIL.Image import Image
 from pdfplumber.page import Page
 from pdfplumber.table import Table
-from PIL.Image import Image
 
 from datariot.__spi__.type import Box, ColumnPosition, FontWeight, MediaAware
 from datariot.__util__.image_util import to_base64
 from datariot.__util__.text_util import create_uuid_from_string
 from datariot.parser.__spi__ import Font, FontAware, TextAware
-
 
 DEFAULT_IMAGE_RESOLUTION = 72
 IMAGE_RESOLUTION = 400
@@ -282,8 +281,19 @@ class PDFLineCurveBox(Box):
     def page_number(self):
         return self.page.page_number
 
+    def crop(self, crop_box: Optional[Box] = None):
+        crop_box = crop_box or (self.x1, self.y1, self.x2, self.y2)
+        return self.page.crop(crop_box, strict=False).to_image(
+            resolution=IMAGE_RESOLUTION
+        )
+
     def __repr__(self):
         return f"x1:{self.x1}, y1:{self.y1}, x2:{self.x2}, y2:{self.y2}"
+
+    def save(self, crop_box: Optional[Box] = None):
+        data = self.crop(crop_box)
+        x1, y1, x2, y2 = crop_box or (self.x1, self.y1, self.x2, self.y2)
+        return data.save(f"./image_{self.page_number}_{x1}_{y1}_{x2}_{y2}.png")
 
 
 class PDFTableBox(Box):
@@ -305,9 +315,10 @@ class PDFTableBox(Box):
 
 
 class PDFHyperlinkBox(Box):
-    def __init__(self, x1: int, y1: int, x2: int, y2: int, uri: str):
+    def __init__(self, x1: int, y1: int, x2: int, y2: int, uri: str, page_number: int):
         super().__init__(x1, x2, y1, y2)
         self.uri = uri.replace("&amp;", "&")
+        self.page_number = page_number
 
     @staticmethod
     def from_dict(data: dict):
@@ -315,4 +326,4 @@ class PDFHyperlinkBox(Box):
         y1 = data["top"]
         x2 = data["x1"]
         y2 = data["bottom"]
-        return PDFHyperlinkBox(x1, y1, x2, y2, data["uri"])
+        return PDFHyperlinkBox(x1, y1, x2, y2, data["uri"], data["page_number"])

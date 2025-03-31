@@ -1,3 +1,4 @@
 tqdm
 Pillow
 pydantic
+opencv-python-headless

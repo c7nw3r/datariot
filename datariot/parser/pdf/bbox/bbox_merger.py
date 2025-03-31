@@ -1,11 +1,13 @@
-from typing import List
+from math import ceil
+from typing import List, Union
 
 from pdfplumber.page import Page
 
 from datariot.__spi__.type import Box
+from datariot.__util__.geometric_util import calculate_bounding_boxes
 from datariot.parser.__spi__ import DocumentFonts
 from datariot.parser.pdf.__spi__ import BBoxConfig
-from datariot.parser.pdf.pdf_model import PDFTextBox
+from datariot.parser.pdf.pdf_model import PDFTextBox, PDFImageBox, PDFLineCurveBox
 
 
 class CoordinatesBoundingBoxMerger:
@@ -97,24 +99,30 @@ class CoordinatesBoundingBoxMerger:
 
 class GeometricImageSegmentsMerger:
     def __init__(self, config: BBoxConfig):
-        self._config = config
+        self.config = config
 
-    def __call__(self, page: Page, bboxes: List[PDFTextBox]) -> List[PDFTextBox]:
+    def __call__(self, page: Page, bboxes: List[Union[PDFImageBox, PDFLineCurveBox]]) -> List[Box]:
         if len(bboxes) == 0:
             return []
 
-        c_boxes = [Box.from_dict(e) for e in page.curves]
-        l_boxes = [Box.from_dict(e) for e in page.lines]
+        import numpy as np
+        roi = np.zeros((ceil(page.height), ceil(page.width)))
 
-        # for text_box in bboxes:
-        #     for curve_box in c_boxes:
-        #         if curve_box.intersect(text_box):
-        #             print("intersect curve")
+        for i in range(self.config.merger_steps):
+            for bbox in bboxes:
+                y1 = bbox.y1 - self.config.merger_y_tolerance
+                y2 = bbox.y2 + self.config.merger_y_tolerance + 1
+                x1 = bbox.x1 - self.config.merger_x_tolerance
+                x2 = bbox.x2 + self.config.merger_x_tolerance + 1
 
-        # for text_box in bboxes:
-        #     for line_box in l_boxes:
-        #         if line_box.intersect(text_box):
-        #             print("intersect line")
-        #             text_box = self._extend(text_box, line_box)
+                roi[y1:y2, x1:x2] = 1
+
+            bboxes = calculate_bounding_boxes(roi)
+            bboxes = [PDFImageBox(page, {
+                "x0": e[0] + self.config.merger_x_tolerance,
+                "x1": e[1] - self.config.merger_x_tolerance,
+                "top": e[2] + self.config.merger_y_tolerance,
+                "bottom": e[3] - self.config.merger_y_tolerance,
+            }) for e in bboxes]
 
         return bboxes

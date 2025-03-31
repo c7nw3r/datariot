@@ -92,6 +92,9 @@ class BBoxConfig(BaseModel):
     sorter_y_tolerance: int = 5
     parser_x_tolerance: int = 3
     parser_y_tolerance: int = 3
+    merger_x_tolerance: int = 10
+    merger_y_tolerance: int = 10
+    merger_steps: int = 2
     image_filter_box_size: BoxFilterSizeConfig = BoxFilterSizeConfig(
         min_width=30, min_height=30
     )

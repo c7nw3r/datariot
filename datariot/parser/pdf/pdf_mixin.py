@@ -18,7 +18,7 @@ from datariot.parser.pdf.bbox.bbox_filter import (
     TextContentBoundingBoxFilter,
     WithAndSizeBoundingBoxFilter,
 )
-from datariot.parser.pdf.bbox.bbox_merger import CoordinatesBoundingBoxMerger
+from datariot.parser.pdf.bbox.bbox_merger import CoordinatesBoundingBoxMerger, GeometricImageSegmentsMerger
 from datariot.parser.pdf.bbox.bbox_processor import (
     AnnotationBBoxProcessor,
     ReCropTextExtractionBBoxProcessor,
@@ -47,7 +47,11 @@ class PageMixin:
         linecurves = self.get_linecurve_boxes(
             document, page.filter(self.not_within_bboxes(tables, margin=2)), config
         )
-        boxes = tables + texts + images + linecurves
+
+        geo_merger = GeometricImageSegmentsMerger(config.bbox_config)
+        images = geo_merger(page, images + linecurves)
+
+        boxes = tables + texts + images
         boxes = box_sorter(page, boxes)
 
         return boxes
@@ -149,8 +153,6 @@ class PageMixin:
     def get_linecurve_boxes(
         self, document: PDFDocument, page: Page, config: PDFParserConfig
     ) -> List[PDFLineCurveBox]:
-        box_filter = BoxIdentityBoundingBoxFilter()
-
         elements = page.lines
         elements.extend(page.rects)
         elements.extend(page.curves)
@@ -160,9 +162,6 @@ class PageMixin:
         boxes = [PDFLineCurveBox(page, e) for e in elements]
         boxes = [box for box in boxes if box.width >= 0]
         boxes = [box for box in boxes if box.height >= 0]
-        boxes = box_filter(page, boxes)
-
-        # TODO: merge linecurve boxes that are close
 
         return boxes
 

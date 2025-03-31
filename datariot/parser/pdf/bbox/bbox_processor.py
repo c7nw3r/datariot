@@ -37,7 +37,8 @@ class AnnotationBBoxProcessor(BoundingBoxProcessor):
                 hyperlinks = []
 
             hyperlinks = [
-                PDFHyperlinkBox.from_dict(h) for h in hyperlinks
+                PDFHyperlinkBox.from_dict({**h, "page_number": page.page_number})
+                for h in hyperlinks
             ]
 
             hyperlinks = [
