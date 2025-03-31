@@ -1,6 +1,6 @@
 import logging
 import sys
-from typing import List, Union
+from typing import List, Tuple, Union
 from uuid import uuid4
 
 from pdfminer.pdfdocument import PDFDocument
@@ -18,7 +18,10 @@ from datariot.parser.pdf.bbox.bbox_filter import (
     TextContentBoundingBoxFilter,
     WithAndSizeBoundingBoxFilter,
 )
-from datariot.parser.pdf.bbox.bbox_merger import CoordinatesBoundingBoxMerger, GeometricImageSegmentsMerger
+from datariot.parser.pdf.bbox.bbox_merger import (
+    CoordinatesBoundingBoxMerger,
+    GeometricImageSegmentsMerger,
+)
 from datariot.parser.pdf.bbox.bbox_processor import (
     AnnotationBBoxProcessor,
     ReCropTextExtractionBBoxProcessor,
@@ -43,7 +46,7 @@ class PageMixin:
         texts = self.get_text_boxes(
             document, page.filter(self.not_within_bboxes(tables)), config
         )
-        images = self.get_image_boxes(document, page, config)
+        images, ocr_texts = self.get_image_boxes(document, page, config)
         linecurves = self.get_linecurve_boxes(
             document, page.filter(self.not_within_bboxes(tables, margin=2)), config
         )
@@ -51,7 +54,7 @@ class PageMixin:
         geo_merger = GeometricImageSegmentsMerger(config.bbox_config)
         images = geo_merger(page, images + linecurves)
 
-        boxes = tables + texts + images
+        boxes = tables + texts + ocr_texts + images
         boxes = box_sorter(page, boxes)
 
         return boxes
@@ -72,7 +75,7 @@ class PageMixin:
             extra_attrs=bbox_config.extract_words_extra_attrs,
             keep_blank_chars=bbox_config.extract_words_keep_blank_chars,
             x_tolerance=bbox_config.parser_x_tolerance,
-            y_tolerance=bbox_config.parser_y_tolerance
+            y_tolerance=bbox_config.parser_y_tolerance,
         )
         boxes = [
             PDFTextBox.from_dict({**word, "page_number": page.page_number})
@@ -119,15 +122,15 @@ class PageMixin:
 
     def get_image_boxes(
         self, document: PDFDocument, page: Page, config: PDFParserConfig
-    ) -> List[Union[PDFImageBox, PDFTextBox]]:
+    ) -> Tuple[List[PDFImageBox], List[PDFTextBox]]:
         if not config.include_images:
-            return []
+            return [], []
 
         identity_filter = BoxIdentityBoundingBoxFilter()
         size_filter = BoxSizeBoundingBoxFilter(config.bbox_config.image_filter_box_size)
 
         images = page.images
-        img_boxes = []
+        img_boxes: List[PDFImageBox] = []
         for img in images:
             id_ = str(uuid4()) if config.bbox_config.media_use_uuid else None
             img_boxes.append(PDFImageBox(page, img, id_))
@@ -135,20 +138,22 @@ class PageMixin:
         img_boxes = size_filter(page, img_boxes)
         img_boxes = identity_filter(page, img_boxes)
 
-        boxes = img_boxes
         # TODO: only ocr full page images, i.e., scans
+        text_boxes: List[PDFTextBox] = []
         if config.ocr:
-            boxes = []
+            keep_img_boxes = []
             for box in img_boxes:
-                text_boxes = self.get_text_boxes_by_ocr(
+                ocr_boxes = self.get_text_boxes_by_ocr(
                     document, page, box, config.bbox_config
                 )
-                if not text_boxes or config.bbox_config.ocr_config.keep_image_box:
-                    boxes.append(box)
+                if not ocr_boxes or config.bbox_config.ocr_config.keep_image_box:
+                    keep_img_boxes.append(box)
 
-                boxes.extend(text_boxes)
+                text_boxes.extend(ocr_boxes)
 
-        return boxes
+            img_boxes = keep_img_boxes
+
+        return img_boxes, text_boxes
 
     def get_linecurve_boxes(
         self, document: PDFDocument, page: Page, config: PDFParserConfig
