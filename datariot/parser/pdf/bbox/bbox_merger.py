@@ -119,10 +119,10 @@ class GeometricImageSegmentsMerger:
 
             bboxes = calculate_bounding_boxes(roi)
             bboxes = [PDFImageBox(page, {
-                "x0": e[0] + self.config.merger_x_tolerance,
-                "x1": e[1] - self.config.merger_x_tolerance,
-                "top": e[2] + self.config.merger_y_tolerance,
-                "bottom": e[3] - self.config.merger_y_tolerance,
+                "x0": e[0] - self.config.merger_x_tolerance,
+                "x1": e[1] + self.config.merger_x_tolerance,
+                "top": e[2] - self.config.merger_y_tolerance,
+                "bottom": e[3] + self.config.merger_y_tolerance,
             }) for e in bboxes]
 
         return bboxes
