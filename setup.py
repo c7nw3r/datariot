@@ -36,7 +36,7 @@ setup(
         "Programming Language :: Python :: 3",
     ],
     extras_require={
-        "docx": ["python-docx==1.1.0"],
+        "docx": ["python-docx==1.*"],
         "pdf": ["pdfplumber==0.11.5"],
         "ocr": ["pytesseract==0.3.10"],
         "web": [
