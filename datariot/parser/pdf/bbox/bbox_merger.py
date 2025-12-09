@@ -1,4 +1,4 @@
-from math import ceil
+from math import ceil, floor
 from typing import List, Union
 
 from pdfplumber.page import Page
@@ -7,7 +7,7 @@ from datariot.__spi__.type import Box
 from datariot.__util__.geometric_util import calculate_bounding_boxes
 from datariot.parser.__spi__ import DocumentFonts
 from datariot.parser.pdf.__spi__ import BBoxConfig
-from datariot.parser.pdf.pdf_model import PDFTextBox, PDFImageBox, PDFLineCurveBox
+from datariot.parser.pdf.pdf_model import PDFImageBox, PDFLineCurveBox, PDFTextBox
 
 
 class CoordinatesBoundingBoxMerger:
@@ -101,23 +101,24 @@ class GeometricImageSegmentsMerger:
     def __init__(self, config: BBoxConfig):
         self.config = config
 
-    def __call__(self, page: Page, bboxes: List[Union[PDFImageBox, PDFLineCurveBox]]) -> List[Box]:
+    def __call__(
+        self, page: Page, bboxes: List[Union[PDFImageBox, PDFLineCurveBox]]
+    ) -> List[Box]:
         if len(bboxes) == 0:
             return []
 
         import numpy as np
+
         roi = np.zeros((ceil(page.height), ceil(page.width)))
 
         anchors = [
-            Box(e.x1, e.x2, e.y1, e.y2)
-            for e in bboxes
-            if isinstance(e, PDFImageBox)
+            self._get_anchor(e, page) for e in bboxes if isinstance(e, PDFImageBox)
         ]
 
         if len(anchors) == 0:
             return []
 
-        for i in range(self.config.merger_steps):
+        for _ in range(self.config.merger_steps):
             for bbox in bboxes:
                 y1 = bbox.y1 - self.config.merger_y_tolerance
                 y2 = bbox.y2 + self.config.merger_y_tolerance + 1
@@ -127,17 +128,30 @@ class GeometricImageSegmentsMerger:
                 roi[y1:y2, x1:x2] = 1
 
             bboxes = calculate_bounding_boxes(roi)
-            bboxes = [PDFImageBox(page, {
-                "x0": e[0] - self.config.merger_x_tolerance,
-                "x1": e[1] + self.config.merger_x_tolerance,
-                "top": e[2] - self.config.merger_y_tolerance,
-                "bottom": e[3] + self.config.merger_y_tolerance,
-            }) for e in bboxes]
+            bboxes = [
+                PDFImageBox(
+                    page,
+                    {
+                        "x0": e[0] - self.config.merger_x_tolerance,
+                        "x1": e[1] + self.config.merger_x_tolerance,
+                        "top": e[2] - self.config.merger_y_tolerance,
+                        "bottom": e[3] + self.config.merger_y_tolerance,
+                    },
+                )
+                for e in bboxes
+            ]
 
         return [
-            bbox for bbox in bboxes
-            if any([
-                anchor.is_contained_in(bbox)
-                for anchor in anchors
-            ])
+            bbox
+            for bbox in bboxes
+            if any([anchor.is_contained_in(bbox) for anchor in anchors])
         ]
+
+    @staticmethod
+    def _get_anchor(box: Box, page: Page) -> Box:
+        return Box(
+            floor(max(box.x1, 0)),
+            ceil(min(box.x2, page.width)),
+            floor(max(box.y1, 0)),
+            floor(min(box.y2, page.height)),
+        )
