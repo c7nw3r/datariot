@@ -52,7 +52,7 @@ class PageMixin:
         )
 
         images = self.get_merged_image_boxes(
-            page, images + linecurves, config.bbox_config
+            page, images, linecurves, config.bbox_config
         )
 
         boxes = tables + texts + ocr_texts + images
