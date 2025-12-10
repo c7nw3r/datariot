@@ -1,4 +1,4 @@
-from math import ceil, floor
+from math import ceil
 from typing import List, Union
 
 from pdfplumber.page import Page
@@ -110,20 +110,28 @@ class GeometricImageSegmentsMerger:
         import numpy as np
 
         roi = np.zeros((ceil(page.height), ceil(page.width)))
+        height, width = roi.shape
 
         anchors = [
-            self._get_anchor(e, page) for e in bboxes if isinstance(e, PDFImageBox)
+            Box(
+                max(0, b.x1),
+                min(width, b.x2),
+                max(0, b.y1),
+                min(height, b.y2),
+            )
+            for b in bboxes
+            if isinstance(b, PDFImageBox)
         ]
 
         if len(anchors) == 0:
             return []
 
         for _ in range(self.config.merger_steps):
-            for bbox in bboxes:
-                y1 = bbox.y1 - self.config.merger_y_tolerance
-                y2 = bbox.y2 + self.config.merger_y_tolerance + 1
-                x1 = bbox.x1 - self.config.merger_x_tolerance
-                x2 = bbox.x2 + self.config.merger_x_tolerance + 1
+            for box in bboxes:
+                y1 = max(0, box.y1 - self.config.merger_y_tolerance)
+                y2 = min(height, box.y2 + self.config.merger_y_tolerance + 1)
+                x1 = max(0, box.x1 - self.config.merger_x_tolerance)
+                x2 = min(width, box.x2 + self.config.merger_x_tolerance + 1)
 
                 roi[y1:y2, x1:x2] = 1
 
@@ -146,12 +154,3 @@ class GeometricImageSegmentsMerger:
             for bbox in bboxes
             if any([anchor.is_contained_in(bbox) for anchor in anchors])
         ]
-
-    @staticmethod
-    def _get_anchor(box: Box, page: Page) -> Box:
-        return Box(
-            floor(max(box.x1, 0)),
-            ceil(min(box.x2, page.width)),
-            floor(max(box.y1, 0)),
-            floor(min(box.y2, page.height)),
-        )
