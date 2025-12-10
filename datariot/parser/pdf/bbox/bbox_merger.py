@@ -112,20 +112,6 @@ class GeometricImageSegmentsMerger:
         roi = np.zeros((ceil(page.height), ceil(page.width)))
         height, width = roi.shape
 
-        anchors = [
-            Box(
-                max(0, b.x1),
-                min(width, b.x2),
-                max(0, b.y1),
-                min(height, b.y2),
-            )
-            for b in bboxes
-            if isinstance(b, PDFImageBox)
-        ]
-
-        if len(anchors) == 0:
-            return []
-
         for _ in range(self.config.merger_steps):
             for box in bboxes:
                 y1 = max(0, box.y1 - self.config.merger_y_tolerance)
@@ -149,8 +135,4 @@ class GeometricImageSegmentsMerger:
                 for e in bboxes
             ]
 
-        return [
-            bbox
-            for bbox in bboxes
-            if any([anchor.is_contained_in(bbox) for anchor in anchors])
-        ]
+        return bboxes

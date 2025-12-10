@@ -1,7 +1,7 @@
 import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Literal, Optional, Callable
+from typing import Callable, List, Literal, Optional
 
 from pdfminer.pdfparser import PDFSyntaxError
 from pdfminer.psparser import PSEOF
@@ -27,6 +27,11 @@ class TextBoxConfig(BaseModel):
     - `re_crop`: final bounding box of merged text is cropped from the page
     and the native `.extract_text()` is called on the crop
     """
+
+
+class LineCurveConfig(BaseModel):
+    include_as_image_boxes: bool = True
+    """Whether to include image boxes derived only from lines and curves."""
 
 
 class OcrConfig(BaseModel):
@@ -101,6 +106,7 @@ class BBoxConfig(BaseModel):
     table_box_config: TableBoxConfig = TableBoxConfig()
     text_box_config: TextBoxConfig = TextBoxConfig()
     ocr_config: OcrConfig = OcrConfig()
+    line_curve_config: LineCurveConfig = LineCurveConfig()
     media_use_uuid: bool = True
     handle_hyperlinks: bool = True
     filter_hyperlink_patterns: List[str] = [r"https?\:\/\/\d+\.\d+\.\d+\.\d+\/"]
@@ -140,6 +146,7 @@ def resilient(func):
         except (PDFSyntaxError, PSEOF):
             with tempfile.NamedTemporaryFile() as tmp:
                 import pdfplumber
+
                 pdfplumber.repair(Path(args[0]), tmp.name)
                 return func(self, tmp.name)
 

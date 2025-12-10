@@ -51,8 +51,9 @@ class PageMixin:
             document, page.filter(self.not_within_bboxes(tables, margin=2)), config
         )
 
-        geo_merger = GeometricImageSegmentsMerger(config.bbox_config)
-        images = geo_merger(page, images + linecurves)
+        images = self.get_merged_image_boxes(
+            page, images + linecurves, config.bbox_config
+        )
 
         boxes = tables + texts + ocr_texts + images
         boxes = box_sorter(page, boxes)
@@ -169,6 +170,44 @@ class PageMixin:
         boxes = [box for box in boxes if box.height >= 0]
 
         return boxes
+
+    def get_merged_image_boxes(
+        self,
+        page: Page,
+        images: List[PDFImageBox],
+        linecurves: List[PDFLineCurveBox],
+        config: BBoxConfig,
+    ) -> List[PDFImageBox]:
+        if not config.line_curve_config.include_as_image_boxes and not images:
+            return []
+
+        geo_merger = GeometricImageSegmentsMerger(config)
+        images = geo_merger(page, images + linecurves)
+
+        if not config.line_curve_config.include_as_image_boxes:
+            # Keep only merged images derived from image boxes
+            anchors = [
+                Box(
+                    max(0, b.x1),
+                    min(page.width, b.x2),
+                    max(0, b.y1),
+                    min(page.height, b.y2),
+                )
+                for b in images
+            ]
+
+            images = [
+                bbox
+                for bbox in images
+                if any([anchor.is_contained_in(bbox) for anchor in anchors])
+            ]
+
+        identity_filter = BoxIdentityBoundingBoxFilter()
+        size_filter = BoxSizeBoundingBoxFilter(config.image_filter_box_size)
+        images = size_filter(page, images)
+        images = identity_filter(page, images)
+
+        return images
 
     def get_text_boxes_by_ocr(
         self,
