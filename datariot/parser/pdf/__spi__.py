@@ -30,6 +30,8 @@ class TextBoxConfig(BaseModel):
 
 
 class LineCurveConfig(BaseModel):
+    filter_lines: bool = False
+    """Whether to filter single line elements (width=1)"""
     include_as_image_boxes: bool = True
     """Whether to include image boxes derived only from lines and curves."""
 

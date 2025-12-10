@@ -51,9 +51,7 @@ class PageMixin:
             document, page.filter(self.not_within_bboxes(tables, margin=2)), config
         )
 
-        images = self.get_merged_image_boxes(
-            page, images, linecurves, config.bbox_config
-        )
+        images = self.get_merged_image_boxes(page, images, linecurves, config)
 
         boxes = tables + texts + ocr_texts + images
         boxes = box_sorter(page, boxes)
@@ -162,8 +160,12 @@ class PageMixin:
         elements = page.lines
         elements.extend(page.rects)
         elements.extend(page.curves)
-        elements = [e for e in elements if abs(int(e["x0"]) - int(e["x1"])) > 0]
-        elements = [e for e in elements if abs(int(e["top"]) - int(e["bottom"])) > 0]
+
+        if config.bbox_config.line_curve_config.filter_lines:
+            elements = [e for e in elements if abs(int(e["x0"]) - int(e["x1"])) > 0]
+            elements = [
+                e for e in elements if abs(int(e["top"]) - int(e["bottom"])) > 0
+            ]
 
         boxes = [PDFLineCurveBox(page, e) for e in elements]
         boxes = [box for box in boxes if box.width >= 0]
@@ -176,15 +178,17 @@ class PageMixin:
         page: Page,
         images: List[PDFImageBox],
         linecurves: List[PDFLineCurveBox],
-        config: BBoxConfig,
+        config: PDFParserConfig,
     ) -> List[PDFImageBox]:
-        if not config.line_curve_config.include_as_image_boxes and not images:
+        bbox_config = config.bbox_config
+
+        if not bbox_config.line_curve_config.include_as_image_boxes and not images:
             return []
 
-        geo_merger = GeometricImageSegmentsMerger(config)
+        geo_merger = GeometricImageSegmentsMerger(bbox_config)
         images = geo_merger(page, images + linecurves)
 
-        if not config.line_curve_config.include_as_image_boxes:
+        if not bbox_config.line_curve_config.include_as_image_boxes:
             # Keep only merged images derived from image boxes
             anchors = [
                 Box(
@@ -203,7 +207,7 @@ class PageMixin:
             ]
 
         identity_filter = BoxIdentityBoundingBoxFilter()
-        size_filter = BoxSizeBoundingBoxFilter(config.image_filter_box_size)
+        size_filter = BoxSizeBoundingBoxFilter(bbox_config.image_filter_box_size)
         images = size_filter(page, images)
         images = identity_filter(page, images)
 
