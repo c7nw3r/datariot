@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 from typing import List, Optional, Tuple
 
+from docx.text.paragraph import Paragraph
+from docx.text.run import Run
 from PIL.Image import Image
-from docx.text.paragraph import Paragraph, Run
 
 from datariot.__spi__.type import Box, MediaAware
 from datariot.__util__.array_util import flatten
@@ -37,7 +38,9 @@ class DocxTextBox(Box):
 
     @property
     def style_name(self):
-        return self.p.style.name
+        if self.p.style is not None:
+            return self.p.style.name
+        return ""
 
     @property
     def style(self):
@@ -48,21 +51,21 @@ class DocxTextBox(Box):
         font_size = self.get_max_font_size(self.p.runs)
         if font_size >= 0:
             return font_size
-        if self.style.font.size is not None:
+        if self.style is not None and self.style.font.size is not None:
             return self.style.font.size.pt
         return self.get_default_font_size(self.p.__doc__)
 
     def get_max_font_size(self, runs: List[Run]) -> int:
-        max_size = -1
+        max_size: int = -1
         for run in runs:
             font_size = int(run.font.size.pt) if run.font.size is not None else -1
             if font_size > max_size:
-                max_size = run.font.size.pt
+                max_size = font_size
 
             if max_size == -1:
                 array = run.element.xpath("./w:rPr/w:szCs/@w:val")
                 if len(array) > 0:
-                    max_size = int(array[0]) / 2
+                    max_size = int(int(array[0]) / 2)
 
         return max_size
 
@@ -96,10 +99,13 @@ class DocxTableBox(Box):
     Box implementation for the table docx elements.
     """
 
-    def __init__(self,
-                 root_name: str,
-                 rows: List, paragraphs: List[List[Paragraph]],
-                 page_number: Optional[int] = None):
+    def __init__(
+        self,
+        root_name: str,
+        rows: List,
+        paragraphs: List[List[Paragraph]],
+        page_number: Optional[int] = None,
+    ):
         super().__init__(None, None, None, None)
         self.rows = rows
         self.paragraphs = paragraphs
@@ -109,16 +115,16 @@ class DocxTableBox(Box):
     @property
     def font_sizes(self) -> List[int]:
         def get_font_size(runs: List[Run]) -> int:
-            max_size = -1
+            max_size: int = -1
             for run in runs:
                 font_size = int(run.font.size.pt) if run.font.size is not None else -1
                 if font_size > max_size:
-                    max_size = run.font.size.pt
+                    max_size = font_size
 
                 if max_size == -1:
                     array = run.element.xpath("./w:rPr/w:szCs/@w:val")
                     if len(array) > 0:
-                        max_size = int(array[0]) / 2
+                        max_size = int(int(array[0]) / 2)
 
             return max_size
 
@@ -145,7 +151,14 @@ class DocxImageBox(Box, MediaAware):
     Box implementation for the image docx elements.
     """
 
-    def __init__(self, root_name: str, name: str, image, id: Optional[str] = None, page_number: Optional[int] = None,):
+    def __init__(
+        self,
+        root_name: str,
+        name: str,
+        image,
+        id: Optional[str] = None,
+        page_number: Optional[int] = None,
+    ):
         super().__init__(None, None, None, None)
         self.name = name
         self.image = image
