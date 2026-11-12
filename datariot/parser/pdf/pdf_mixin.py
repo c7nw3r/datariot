@@ -1,10 +1,10 @@
 import logging
-import sys
 from typing import List, Tuple, Union
 from uuid import uuid4
 
 from pdfminer.pdfdocument import PDFDocument
 from pdfplumber.page import Page
+from pdfplumber.table import TableSettings
 
 from datariot.__spi__.const import HEIGHT, LEFT, TEXT, TOP, WIDTH
 from datariot.__spi__.type import Box
@@ -108,11 +108,22 @@ class PageMixin:
             "horizontal_strategy": table_config.horizontal_strategy,
         }
 
-        kwargs = {"strict": True} if sys.version_info >= (3, 10) else {}
+        if table_config.max_edges is not None and (
+            len(page.edges) > table_config.max_edges
+        ):
+            logging.warning(
+                "Page %s has too many edges (> %s), skipping table detection.",
+                page.page_number,
+                table_config.max_edges,
+            )
+            return []
 
+        # find tables once and extract from them (extract_tables would redo it)
+        tset = TableSettings.resolve(ts)
+        text_settings = tset.text_settings or {}
         boxes = [
-            PDFTableBox(page, e)
-            for e in zip(page.find_tables(ts), page.extract_tables(ts), **kwargs)
+            PDFTableBox(page, (t, t.extract(**text_settings)))
+            for t in page.find_tables(tset)
         ]
         boxes = [e for e in boxes if len(e) > 1]
         boxes = box_filter(page, boxes)

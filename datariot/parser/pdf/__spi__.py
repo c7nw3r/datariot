@@ -16,6 +16,12 @@ class TableBoxConfig(BaseModel):
     strategy: Literal["default", "camelot"] = "default"
     vertical_strategy: str = "lines"
     horizontal_strategy: str = "lines"
+    max_edges: Optional[int] = 10_000
+    """
+    Skip table detection on pages with more line/rect/curve edges than this.
+    pdfplumber's table finder scales (super-)quadratically with the number of
+    edges, so large drawings (plans, maps) would otherwise hang. `None` disables.
+    """
 
 
 class TextBoxConfig(BaseModel):
